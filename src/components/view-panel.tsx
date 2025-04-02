@@ -4,18 +4,18 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import type { SvgData } from "@/components/svg-editor/types"
-import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 interface Props {
   currentSvg: SvgData[] | null
   pathColors?: Record<string, string>
   showBorders?: boolean
   rotations?: number[]
-  groutThickness : string;
-  setGroutThickness : (groutThickness : string) => void;
-  setGroutColor: (groutColor: string) => void;
-  groutColor: string;
+  groutThickness: string
+  setGroutThickness: (groutThickness: string) => void
+  setGroutColor: (groutColor: string) => void
+  groutColor: string
 }
 
 export default function ViewPanel({
@@ -29,7 +29,9 @@ export default function ViewPanel({
   groutColor,
 }: Props) {
   const [gridSize, setGridSize] = useState<"8x8" | "12x12">("8x8")
-  const [environment, setEnvironment] = useState<"bedroom" | "bathroom" | "kitchen" | "commercial" | "kitchen2" | "bathroom2">()
+  const [environment, setEnvironment] = useState<
+    "environment1" | "environment2" | "environment3" | "environment4" | "environment5" | "environment6"
+  >()
   // const [groutColor, setGroutColor] = useState<"white" | "gray" | "black">("white")
   // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
   const tileGridRef = useRef<HTMLDivElement>(null)
@@ -37,10 +39,33 @@ export default function ViewPanel({
   console.log(setShowTilePreview)
   console.log(setGridSize)
 
+  const router = useRouter()
 
   const handleTileEnvironmentClose = () => {
     setEnvironment(undefined)
   }
+
+  const handleSaveAndShare = () => {
+    // Prepare data to pass to the preview page
+    const tileData = {
+      svgData: currentSvg,
+      pathColors,
+      showBorders,
+      rotations,
+      groutColor,
+      groutThickness,
+      gridSize,
+      environment: environment || "none",
+    }
+
+    // Save to localStorage (as URL params would be too large)
+    localStorage.setItem("tilePreviewData", JSON.stringify(tileData))
+
+    // Navigate to the preview page
+    router.push("/preview-your-custom-tile")
+  }
+
+  console.log(handleSaveAndShare);
 
   console.log(setGroutColor, setGroutThickness)
 
@@ -149,53 +174,46 @@ export default function ViewPanel({
   return (
     <div className="p-4 space-y-6 h-full">
       <Tabs defaultValue="room-view" className="w-full">
-
-        <TabsContent value="room-view" >
-
-
+        <TabsContent value="room-view">
           <div className="flex gap-5">
             <div className="relative w-full h-[540px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
-              {
-                currentSvg?.length === 0 ? (
-                  <div className="flex items-center justify-center bg-black/20 w-full h-full">
-                    <h1 className="text-2xl">VIEW</h1>
-                  </div>
-                ) : (
-                  <div>
-                    {showTilePreview && (
+              {currentSvg?.length === 0 ? (
+                <div className="flex items-center justify-center bg-black/20 w-full h-full">
+                  <h1 className="text-2xl">VIEW</h1>
+                </div>
+              ) : (
+                <div>
+                  {showTilePreview && (
+                    <div
+                      className={`absolute ${groutColor}-grout z-0`}
+                      style={{
+                        top: "0",
+                        left: "0",
+                        width: "800%",
+                        height: "540px",
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
+                        gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                      }}
+                    >
                       <div
-                        className={`absolute ${groutColor}-grout z-0`}
+                        ref={tileGridRef}
+                        className={`grid gap-[${groutThickness === "none" ? "0" : groutThickness === "thin" ? "1px" : "2px"}]   bg-${groutColor}`}
                         style={{
-                          top: "0",
-                          left: "0",
-                          width: "800%",
-                          height: "540px",
-                          display: "grid",
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                          gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                          width: "100%",
+                          height: "100%",
                         }}
-                      >
-
-                        <div
-                          ref={tileGridRef}
-                          className={`grid gap-[${groutThickness === "none" ? "0" : groutThickness === "thin" ? "1px" : "2px"}]   bg-${groutColor}`}
-                          style={{
-                            gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )
-              }
-
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Environment Images - Placed AFTER tiles so they appear on top */}
-              {environment === "bedroom" && (
+              {environment === "environment1" && (
                 <Image
                   src="/assets/environment1.svg"
                   alt="Bedroom"
@@ -204,7 +222,7 @@ export default function ViewPanel({
                   style={{ pointerEvents: "none" }}
                 />
               )}
-              {environment === "bathroom" && (
+              {environment === "environment2" && (
                 <Image
                   src="/assets/environment2.svg"
                   alt="Bathroom"
@@ -213,7 +231,7 @@ export default function ViewPanel({
                   style={{ pointerEvents: "none" }}
                 />
               )}
-              {environment === "kitchen" && (
+              {environment === "environment3" && (
                 <Image
                   src="/assets/environment3.svg"
                   alt="Bathroom"
@@ -221,9 +239,8 @@ export default function ViewPanel({
                   className="object-cover z-10"
                   style={{ pointerEvents: "none" }}
                 />
-
               )}
-              {environment === "commercial" && (
+              {environment === "environment4" && (
                 <Image
                   src="/assets/environment4.svg"
                   alt="Commercial"
@@ -232,7 +249,7 @@ export default function ViewPanel({
                   style={{ pointerEvents: "none" }}
                 />
               )}
-              {environment === "kitchen2" && (
+              {environment === "environment5" && (
                 <Image
                   src="/assets/environment5.svg"
                   alt="Commercial"
@@ -241,7 +258,7 @@ export default function ViewPanel({
                   style={{ pointerEvents: "none" }}
                 />
               )}
-              {environment === "bathroom2" && (
+              {environment === "environment6" && (
                 <Image
                   src="/assets/environment6.svg"
                   alt="Commercial"
@@ -264,85 +281,53 @@ export default function ViewPanel({
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-2">
                 <Button
-                  variant={environment === "bedroom" ? "default" : "outline"}
-                  onClick={() => setEnvironment("bedroom")}
+                  variant={environment === "environment1" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment1")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_kitchen_icon.png"
-                    alt="Bedroom Hover Icon"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_kitchen_icon.png" alt="Bedroom Hover Icon" width={100} height={100} />
                 </Button>
                 <Button
-                  variant={environment === "bathroom" ? "default" : "outline"}
-                  onClick={() => setEnvironment("bathroom")}
+                  variant={environment === "environment2" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment2")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_bathroom_icon.png"
-                    alt="bathroom"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_bathroom_icon.png" alt="bathroom" width={100} height={100} />
                 </Button>
                 <Button
-                  variant={environment === "kitchen" ? "default" : "outline"}
-                  onClick={() => setEnvironment("kitchen")}
+                  variant={environment === "environment3" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment3")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_bathroom_icon.png"
-                    alt="ketchen"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_bathroom_icon.png" alt="ketchen" width={100} height={100} />
                 </Button>
                 <Button
-                  variant={environment === "commercial" ? "default" : "outline"}
-                  onClick={() => setEnvironment("commercial")}
+                  variant={environment === "environment4" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment4")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_living_room_icon.png"
-                    alt="Commercial"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_living_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
-                  variant={environment === "kitchen2" ? "default" : "outline"}
-                  onClick={() => setEnvironment("kitchen2")}
+                  variant={environment === "environment5" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment5")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_commercial_room_icon.png"
-                    alt="Commercial"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
-                  variant={environment === "bathroom2" ? "default" : "outline"}
-                  onClick={() => setEnvironment("bathroom2")}
+                  variant={environment === "environment6" ? "default" : "outline"}
+                  onClick={() => setEnvironment("environment6")}
                   className="h-[83px] w-[144px] py-1"
                 >
-                  <Image
-                    src="/assets/env_commercial_room_icon.png"
-                    alt="Commercial"
-                    width={100}
-                    height={100}
-                  />
+                  <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
               </div>
             </div>
           </div>
-
         </TabsContent>
 
         <TabsContent value="grid-view" className="space-y-4">
-
           {/* Tile Grid */}
           <div
             className={`grid gap-[${groutThickness === "none" ? "0" : groutThickness === "thin" ? "1px" : "2px"}] bg-${groutColor} aspect-square`}
@@ -364,7 +349,9 @@ export default function ViewPanel({
       </Tabs>
 
       <div className="py-10 flex items-center justify-center">
-        <Link href="/preview-your-custom-tile"><Button className="w-[288px] h-[51px]">Save & Share</Button></Link>
+        <Button className="w-[288px] h-[51px]" onClick={handleSaveAndShare}>
+          Save & Share
+        </Button>
       </div>
 
       <style jsx>{`

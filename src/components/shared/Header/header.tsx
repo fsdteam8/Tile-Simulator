@@ -14,9 +14,12 @@ async function Header() {
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-base fotn-medium bg-primary text-white leading-[120%] py-[12px] px-[38px] rounded-[8px] cursor-pointer">
-              Shop Now
-            </button>
+            <Link href="https://lilitile.com/pages/create-your-custom-tiles">
+              <button className="text-base fotn-medium bg-primary text-white leading-[120%] py-[12px] px-[38px] rounded-[8px] cursor-pointer">
+                Shop Now
+              </button>
+            </Link>
+
             <button className="text-base fotn-medium text-white leading-[120%] py-[12px] px-[35px] rounded-[8px] border border-white cursor-pointer">
               Contact Us
             </button>

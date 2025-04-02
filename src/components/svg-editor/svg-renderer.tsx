@@ -167,7 +167,7 @@ export function SvgRenderer({
         <p className="text-[#595959] text-[16px] mb-[24px]">Click on a section to change its color</p>
         <h1 className="text-black text-[16px]">Tile Preview</h1>
       </div>
-      <div className={`grid ${svgArray.length === 4 ? "grid-cols-2 w-[482px] h-[470px]" : "grid-cols-1"} gap-1`}>
+      <div className={`grid ${svgArray.length === 4 ? "grid-cols-2 w-[482px] h-[470px]" : "grid-cols-1 w-[482px] h-[470px]"} gap-1`}>
         {svgArray.map((svg, index) => (
           <div key={svg.id || `svg-${index}`} className="relative group">
             {/* Remove the rotation indicator */}

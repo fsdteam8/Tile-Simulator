@@ -30,8 +30,6 @@ export default function Tiles() {
     "none" | "thin" | "thick"
   >("thin");
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
-
   const setGroutColorWrapper = (groutColor: string) => {
     setGroutColor(groutColor as "orange" | "green" | "turquoise" | "blue");
   };
@@ -77,13 +75,6 @@ export default function Tiles() {
       );
     } else {
       setCurrentSvg(null);
-    }
-  };
-
-  //   color picker close
-  const handleColorPickerclose = () => {
-    if (showColorPicker) {
-      setShowColorPicker(false);
     }
   };
 
@@ -139,7 +130,6 @@ export default function Tiles() {
             </div>
 
             <div
-              onClick={handleColorPickerclose}
               className="py-[100px] container"
             >
               {currentSvg && (
@@ -157,8 +147,6 @@ export default function Tiles() {
                   setGroutThickness={setGroutThicknessWrapper}
                   groutColor={groutColor}
                   setGroutColor={setGroutColorWrapper}
-                  showColorPicker={showColorPicker}
-                  setShowColorPicker={setShowColorPicker}
                 />
               )}
             </div>

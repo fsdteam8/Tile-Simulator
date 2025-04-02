@@ -18,8 +18,6 @@ interface ColorEditorProps {
   setGroutThickness: (groutThickness: string) => void;
   groutColor: string;
   setGroutColor: (groutColor: string) => void;
-  showColorPicker : boolean;
-  setShowColorPicker : (showColorPicker: boolean) => void
 }
 
 export function ColorEditor({
@@ -32,8 +30,6 @@ export function ColorEditor({
   setGroutThickness,
   groutColor,
   setGroutColor,
-  showColorPicker,
-  setShowColorPicker,
 }: ColorEditorProps) {
   const [selectedColors, setSelectedColors] = useState<ColorData[]>([]);
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
@@ -227,8 +223,6 @@ export function ColorEditor({
             color={selectedPathColor || "#000000"}
             onChange={(color) => selectedPathId && handleColorSelect(color)}
             recentColors={Object.values(pathColors).filter(Boolean)}
-            showColorPicker={showColorPicker}
-            setShowColorPicker={setShowColorPicker}
           />
         </div>
         <div>

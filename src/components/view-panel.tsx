@@ -28,7 +28,7 @@ export default function ViewPanel({
   setGroutColor,
   groutColor,
 }: Props) {
-  const [gridSize, setGridSize] = useState<"8x8" | "12x12">("8x8")
+  const [gridSize, setGridSize] = useState<"16x16" | "20x20">("20x20")
   const [environment, setEnvironment] = useState<
     "environment1" | "environment2" | "environment3" | "environment4" | "environment5" | "environment6"
   >()
@@ -70,7 +70,7 @@ export default function ViewPanel({
   console.log(setGroutColor, setGroutThickness)
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = gridSize === "8x8" ? 8 : 12
+  const gridDimensions = gridSize === "16x16" ? 16 : 20
 
   // Define the tile area for each environment
   // const tileAreas = {
@@ -176,7 +176,7 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="flex gap-5">
-            <div className="relative w-full h-[540px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
@@ -191,9 +191,9 @@ export default function ViewPanel({
                       style={{
                         top: "0",
                         left: "0",
-                        width: "800%",
-                        height: "540px",
-                        display: "grid",
+                        width: "100%",
+                        height: "600px",
+                        display: "flex",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                         gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
                       }}
@@ -219,7 +219,7 @@ export default function ViewPanel({
                   alt="Bedroom"
                   fill
                   className="object-cover z-10"
-                  style={{ pointerEvents: "none" }}
+                  style={{ pointerEvents: "none" , width: "100%", height: "100%"}}
                 />
               )}
               {environment === "environment2" && (
@@ -279,46 +279,46 @@ export default function ViewPanel({
               )}
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-3">
                 <Button
                   variant={environment === "environment1" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment1")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_kitchen_icon.png" alt="Bedroom Hover Icon" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment2" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment2")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="bathroom" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment3" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment3")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="ketchen" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment4" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment4")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_living_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment5" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment5")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment6" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment6")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>

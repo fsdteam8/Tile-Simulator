@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Clock4, Download, Share2 } from "lucide-react"
+import { Clock4, Download, Share2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import type { PathData, SvgData } from "@/components/svg-editor/types"
 
@@ -47,11 +46,11 @@ export default function PreviewYourCustomTile() {
         // Render the grids after data is loaded
         setTimeout(() => {
           if (parsedData.svgData) {
-            renderTileGrid(tileGridRef.current, 8, 8, parsedData)
-            renderTileGrid(patternGridRef.current, 4, 4, parsedData)
+            renderTileGrid(tileGridRef.current, 1, 1, parsedData)
+            renderTileGrid(patternGridRef.current, 8, 8, parsedData)
 
             if (parsedData.environment !== "none") {
-              renderTileGrid(environmentPreviewRef.current, 4, 4, parsedData)
+              renderTileGrid(environmentPreviewRef.current, 16, 16, parsedData)
             }
           }
         }, 100)
@@ -61,7 +60,7 @@ export default function PreviewYourCustomTile() {
     }
   }, [])
 
-  const renderTileGrid = (container: HTMLDivElement | null, rows: number, cols: number, data: TileData ) => {
+  const renderTileGrid = (container: HTMLDivElement | null, rows: number, cols: number, data: TileData) => {
     console.log(data)
     if (!container || !data.svgData || !data.svgData.length) return
 
@@ -243,12 +242,11 @@ export default function PreviewYourCustomTile() {
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="flex justify-between items-center mb-6">
-        <Button className="bg-white text-primary border border-primary" asChild>
+        <button className="bg-white text-base font-medium leading-[120%] text-primary border border-primary px-8 py-2 rounded">
           <Link href="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
             GO BACK
           </Link>
-        </Button>
+        </button>
         <h1 className="text-[32px] font-normal text-center text-[#595959]">Preview Your Custom Tile</h1>
         <div className="flex space-x-2">
           <Button variant="outline" size="sm" onClick={handleShare}>
@@ -262,88 +260,95 @@ export default function PreviewYourCustomTile() {
         </div>
       </div>
 
-      <div>
-        <div>
-          <h2 className="text-lg font-medium mb-4">Pattern: #4456</h2>
-          <div className="mb-6">
-            <h3 className="text-md font-medium mb-2">Colors:</h3>
-            {uniqueColors.length > 0 ? (
-              <RadioGroup defaultValue={uniqueColors[0]} className="flex gap-4 flex-wrap">
-                {uniqueColors.map((color, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <RadioGroupItem value={color} id={`color-${index}`} />
-                    <Label htmlFor={`color-${index}`} className="flex items-center">
-                      <span className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: color }}></span>
-                      {color.toUpperCase()}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            ) : (
-              <p className="text-gray-500">No colors available</p>
-            )}
+      <div className="shadow-[0px_0px_8px_0px_rgba(0,0,0,0.16)] rounded-[8px] p-2">
+        <div className="flex items-center justify-between shadow-[0px_0px_8px_0px_rgba(0,0,0,0.16)] rounded-[8px] p-4 mb-6" >
+          <div>
+            <h2 className="text-lg font-medium mb-2">Pattern: rabbits</h2>
+            <div className="">
+              <h3 className="text-md font-medium mb-2">Colors:</h3>
+              {uniqueColors.length > 0 ? (
+                <div defaultValue={uniqueColors[0]} className="flex gap-4 flex-wrap">
+                  {uniqueColors.map((color, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      {/* <RadioGroupItem value={color} id={`color-${index}`} /> */}
+                      <Label htmlFor={`color-${index}`} className="flex items-center">
+                        <span className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: color }}></span>
+                        {color.toUpperCase()}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No colors available</p>
+              )}
+            </div>
           </div>
-        </div>
-        <div className="mb-6">
+          <div>
+            <Image src="/boxLogo.png" alt="Logo" width={48} height={48} />
+          </div>
+          {/* <div className="mb-6">
           <h3 className="text-md font-medium mb-2">Grout:</h3>
           <div className="flex items-center space-x-4">
             <span className="text-sm">Color: {tileData.groutColor}</span>
             <span className="text-sm">Thickness: {tileData.groutThickness}</span>
           </div>
+        </div> */}
         </div>
-      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="border rounded-lg overflow-hidden p-4">
-          <div
-            ref={tileGridRef}
-            className={`grid aspect-square ${tileData.groutColor}-grout`}
-            style={{
-              gridTemplateColumns: `repeat(8, 1fr)`,
-              gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-            }}
-          />
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="border rounded-lg overflow-hidden w-[550px] h-[550px]">
+            <div
+              ref={tileGridRef}
+              className={`grid aspect-square ${tileData.groutColor}-grout`}
+              style={{
+                gridTemplateColumns: `repeat(1, 1fr)`,
+                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
+                width: "562px",
+
+              }}
+            />
+          </div>
+          <div className="border rounded-lg overflow-hidden w-[550px] h-[550px]">
+            <div
+              ref={patternGridRef}
+              className={`grid aspect-square ${tileData.groutColor}-grout`}
+              style={{
+                gridTemplateColumns: `repeat(8, 1fr)`,
+                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
+              }}
+            />
+          </div>
         </div>
-        <div className="border rounded-lg overflow-hidden p-4">
-          <div
-            ref={patternGridRef}
-            className={`grid aspect-square ${tileData.groutColor}-grout`}
-            style={{
-              gridTemplateColumns: `repeat(4, 1fr)`,
-              gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-            }}
-          />
-        </div>
-      </div>
 
-      <div className="mt-8">
+        <div className="mt-8">
 
-        <div className="w-full ">
-          <div className="border rounded-lg overflow-hidden p-4">
-            {tileData.environment !== "none" ? (
-              <div className="relative aspect-video">
-                <div
-                  ref={environmentPreviewRef}
-                  className={`absolute inset-0 ${tileData.groutColor}-grout z-0`}
-                  style={{
-                    gridTemplateColumns: `repeat(4, 1fr)`,
-                    gap:
-                      tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-                    display: "grid",
-                  }}
-                />
-                <Image
-                  src={`/assets/${tileData.environment}.svg`}
-                  alt="Environment Preview"
-                  fill
-                  className="object-cover z-10"
-                />
-              </div>
-            ) : (
-              <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                <p className="text-gray-500">No environment selected</p>
-              </div>
-            )}
+          <div className="w-full ">
+            <div className="border rounded-lg overflow-hidden">
+              {tileData.environment !== "none" ? (
+                <div className="relative aspect-video">
+                  <div
+                    ref={environmentPreviewRef}
+                    className={`absolute inset-0 ${tileData.groutColor}-grout z-0`}
+                    style={{
+                      gridTemplateColumns: `repeat(16, 1fr)`,
+                      gap:
+                        tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
+                      display: "grid",
+                    }}
+                  />
+                  <Image
+                    src={`/assets/${tileData.environment}.svg`}
+                    alt="Environment Preview"
+                    fill
+                    className="object-cover z-10"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                  <p className="text-gray-500">No environment selected</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

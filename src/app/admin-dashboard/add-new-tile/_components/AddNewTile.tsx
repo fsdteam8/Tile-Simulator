@@ -1,26 +1,48 @@
-"use client"
+"use client";
 
-
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 // Add the missing imports
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Save, Check } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandInput, CommandList, CommandEmpty, CommandItem, CommandGroup } from "@/components/ui/command"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { useCallback, useState } from "react"
-import SVGUpload from "./SVGUpload"
-import { useSession } from "next-auth/react"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Save, Check } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandItem,
+  CommandGroup,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useCallback, useState } from "react";
+import SVGUpload from "./SVGUpload";
 
 // Form Schema with zod
 const formSchema = z.object({
@@ -33,18 +55,18 @@ const formSchema = z.object({
   categories: z.array(z.string()).min(1, {
     message: "Select at least one category.",
   }),
-  gridSelection: z.string().min(2, {
+  grid_category: z.string().min(2, {
     message: "Grid Selection must be at least 2 characters.",
   }),
-})
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
-const gridSelectionData = ["1x1", "2x2"]
+const gridSelectionData = ["1x1", "2x2"];
 
 const AddNewTile = () => {
-  const [svgData, setSvgData] = useState<string>("")
-  const [open, setOpen] = useState(false)
+  const [image, setSvgData] = useState<File | null>(null);
+  const [open, setOpen] = useState(false);
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -53,131 +75,97 @@ const AddNewTile = () => {
       name: "",
       description: "",
       categories: [],
-      gridSelection: "",
+      grid_category: "",
     },
-  })
-
-  const session = useSession()
-    const token = (session?.data?.user as { token: string })?.token
-
-    console.log(token);
+  });
 
   // Fetch categories from the API
   const { data: categoriesData, error } = useQuery({
     queryKey: ["allTilesCategories"],
     queryFn: async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`
+      );
       if (!response.ok) {
-        throw new Error("Failed to fetch categories")
+        throw new Error("Failed to fetch categories");
       }
-      return response.json()
-    },
-  })
-
-  // Handle mutation for submitting the form
-  const mutation = useMutation({
-    mutationFn: async (formData: {
-      tileName: string;
-      description: string;
-      categories: string[];
-      gridSelection: string;
-      svg: string; // Assuming this is the SVG file
-    }) => {
-  
-      if (!token) {
-        throw new Error("Authorization token is missing.");
-      }
-  
-      // Create FormData instance
-      const form = new FormData();
-      form.append("tileName", formData.tileName);
-      form.append("description", formData.description);
-      form.append("categories", JSON.stringify(formData.categories)); // You might need to send categories as a stringified array
-      form.append("gridSelection", formData.gridSelection);
-  
-      // Assuming the SVG is a base64 string or a file, append accordingly
-      if (formData.svg) {
-        // If SVG is a file:
-        // form.append("svg", formData.svg); // Assuming formData.svg is a file object
-        // If SVG is base64 string:
-        form.append("svg", formData.svg); // You may want to convert it to a Blob if required by the backend
-      }
-  
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        },
-        body: form,
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to create tile");
-      }
-  
       return response.json();
     },
-    onSuccess: () => {
-      toast.success("Tile created successfully", {
-        description: "Your new tile has been added.",
-      });
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["createTile"],
+    mutationFn: (formData: FormData) =>
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles`, {
+        method: "POST",
+        body: formData,
+      }).then((res) => res.json()),
+    onSuccess: (data) => {
+      console.log(data);
+      if (!data?.success) {
+        toast.error(data.message, {
+          position: "top-right",
+          richColors: true,
+        });
+        return;
+      }
       form.reset();
-      setSvgData(""); // Reset SVG and form state
-    },
-    onError: (error) => {
-      toast.error("Failed to create tile", {
-        description: error.message || "Please try again later.",
+      toast.success(data.message, {
+        position: "top-right",
+        richColors: true,
       });
     },
   });
 
-  const handleSvgChange = useCallback((newSvgData: string) => {
-    setSvgData(newSvgData)
-  }, [])
+  const handleSvgChange = useCallback((newSvgData: File | null) => {
+    setSvgData(newSvgData);
+  }, []);
 
   if (error) {
     toast.error("Failed to load categories", {
       description: error.message,
-    })
+    });
   }
 
-  const onSubmit = (data: FormValues) => {
-    if (!svgData) {
+  const onSubmit = async (data: FormValues) => {
+    if (!image) {
       toast.error("Missing SVG", {
         description: "Please upload an SVG file",
-      })
-      return
+      });
+      return;
     }
 
     // Find selected category IDs
     const selectedCategoryIds = data.categories
       .map((categoryName) => {
-        const category = categoriesData?.data?.find((item: { name: string }) => item.name === categoryName)
-        return category ? String(category.id) : null
+        const category = categoriesData?.data?.data?.find(
+          (item: { name: string }) => item.name === categoryName
+        );
+        return category ? String(category.id) : null;
       })
-      .filter(Boolean) as string[]
+      .filter(Boolean) as string[];
 
     if (selectedCategoryIds.length === 0) {
       toast.error("Invalid Categories", {
         description: "Please select at least one valid category",
-      })
-      return
+      });
+      return;
     }
 
-    const formData = {
-      tileName: data.name,
-      description: data.description,
-      categories: selectedCategoryIds,
-      gridSelection: data.gridSelection,
-      svg: svgData,
+    const formData: FormData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("grid_category", data.grid_category);
+    selectedCategoryIds.forEach((id) => {
+      formData.append("category_id[]", id.toString());
+    });
+
+    if (image) {
+      formData.append("image", image);
     }
 
-    // const loadingToast = toast.loading("Creating tile...", {
-    //   description: "Please wait while we save your tile",
-    // })
-
-    mutation.mutate(formData)
-  }
+    mutate(formData);
+  };
 
   return (
     <div className="pb-14">
@@ -191,7 +179,9 @@ const AddNewTile = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium text-secondary-200">Tile Name</FormLabel>
+                      <FormLabel className="text-base font-medium text-secondary-200">
+                        Tile Name
+                      </FormLabel>
                       <FormControl>
                         <Input
                           className="h-[40px] placeholder:text-secondary-100 focus-visible:ring-0"
@@ -211,7 +201,9 @@ const AddNewTile = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium text-secondary-200">Description</FormLabel>
+                      <FormLabel className="text-base font-medium text-secondary-200">
+                        Description
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           className="h-[156px] placeholder:text-secondary-100 focus-visible:ring-0"
@@ -232,7 +224,9 @@ const AddNewTile = () => {
                     name="categories"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel className="text-base font-medium text-secondary-200">Categories</FormLabel>
+                        <FormLabel className="text-base font-medium text-secondary-200">
+                          Categories
+                        </FormLabel>
                         <Popover open={open} onOpenChange={setOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -242,13 +236,18 @@ const AddNewTile = () => {
                                 aria-expanded={open}
                                 className={cn(
                                   "w-full h-[40px] justify-between",
-                                  !field.value.length && "text-muted-foreground",
+                                  !field.value.length && "text-muted-foreground"
                                 )}
                               >
-                                {field.value.length ? `${field.value.length} selected` : "Select categories"}
+                                {field.value.length
+                                  ? `${field.value.length} selected`
+                                  : "Select categories"}
                                 <div className="ml-2 flex gap-1 flex-wrap">
                                   {field.value.length > 0 && (
-                                    <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                                    <Badge
+                                      variant="secondary"
+                                      className="rounded-sm px-1 font-normal"
+                                    >
                                       {field.value.length}
                                     </Badge>
                                   )}
@@ -260,38 +259,53 @@ const AddNewTile = () => {
                             <Command>
                               <CommandInput placeholder="Search categories..." />
                               <CommandList>
-                                <CommandEmpty>No categories found.</CommandEmpty>
+                                <CommandEmpty>
+                                  No categories found.
+                                </CommandEmpty>
                                 <CommandGroup className="max-h-64 overflow-auto">
-                                {categoriesData?.data?.map((category: { id: number; name: string }) => {
-                                    const isSelected = field.value.includes(category.name)
-                                    return (
-                                      <CommandItem
-                                        key={category.id}
-                                        onSelect={() => {
-                                          if (isSelected) {
-                                            form.setValue(
-                                              "categories",
-                                              field.value.filter((value) => value !== category.name),
-                                            )
-                                          } else {
-                                            form.setValue("categories", [...field.value, category.name])
-                                          }
-                                        }}
-                                      >
-                                        <div
-                                          className={cn(
-                                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                            isSelected
-                                              ? "bg-primary text-primary-foreground"
-                                              : "opacity-50 [&_svg]:invisible",
-                                          )}
+                                  {categoriesData?.data?.data?.map(
+                                    (category: {
+                                      id: number;
+                                      name: string;
+                                    }) => {
+                                      const isSelected = field.value.includes(
+                                        category.name
+                                      );
+                                      return (
+                                        <CommandItem
+                                          key={category.id}
+                                          onSelect={() => {
+                                            if (isSelected) {
+                                              form.setValue(
+                                                "categories",
+                                                field.value.filter(
+                                                  (value) =>
+                                                    value !== category.name
+                                                )
+                                              );
+                                            } else {
+                                              form.setValue("categories", [
+                                                ...field.value,
+                                                category.name,
+                                              ]);
+                                            }
+                                          }}
                                         >
-                                          <Check className={cn("h-4 w-4")} />
-                                        </div>
-                                        <span>{category.name}</span>
-                                      </CommandItem>
-                                    )
-                                  })}
+                                          <div
+                                            className={cn(
+                                              "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                              isSelected
+                                                ? "bg-primary text-primary-foreground"
+                                                : "opacity-50 [&_svg]:invisible"
+                                            )}
+                                          >
+                                            <Check className={cn("h-4 w-4")} />
+                                          </div>
+                                          <span>{category.name}</span>
+                                        </CommandItem>
+                                      );
+                                    }
+                                  )}
                                 </CommandGroup>
                               </CommandList>
                             </Command>
@@ -306,18 +320,27 @@ const AddNewTile = () => {
                 <div className="pb-[14px]">
                   <FormField
                     control={form.control}
-                    name="gridSelection"
+                    name="grid_category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-medium text-secondary-200">Grid Selection</FormLabel>
+                        <FormLabel className="text-base font-medium text-secondary-200">
+                          Grid Selection
+                        </FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
                             <SelectTrigger className="w-full h-[40px] focus-visible:outline-none focus-visible:ring-0">
                               <SelectValue placeholder="Select a grid" />
                             </SelectTrigger>
                             <SelectContent className="focus:outline-none focus:ring-0">
                               {gridSelectionData.map((item) => (
-                                <SelectItem key={item} value={item} className="focus:outline-none focus:ring-0">
+                                <SelectItem
+                                  key={item}
+                                  value={item}
+                                  className="focus:outline-none focus:ring-0"
+                                >
                                   {item}
                                 </SelectItem>
                               ))}
@@ -333,9 +356,11 @@ const AddNewTile = () => {
             </div>
 
             <div className="md:grid-cols-1">
-              <h3 className="text-xl font-semibold text-[#1A1C21] leading-[120%] mb-[14px]">Add Photo</h3>
+              <h3 className="text-xl font-semibold text-[#1A1C21] leading-[120%] mb-[14px]">
+                Add Photo
+              </h3>
               <div className="pt-[14px]">
-                <SVGUpload onUpload={handleSvgChange} maxSizeKB={500} />
+                <SVGUpload onUpload={handleSvgChange} maxSizeKB={11500} />
               </div>
 
               {/* button  */}
@@ -343,9 +368,9 @@ const AddNewTile = () => {
                 <Button
                   type="submit"
                   className="flex items-center gap-2 text-white bg-primary py-3 px-8 text-base font-medium leading-[120%] rounded-[8px]"
-                  disabled={mutation.isPending}
+                  disabled={isPending}
                 >
-                  {mutation.isPending ? (
+                  {isPending ? (
                     <div className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Saving...
@@ -362,7 +387,7 @@ const AddNewTile = () => {
         </form>
       </Form>
     </div>
-  )
-}
+  );
+};
 
-export default AddNewTile
+export default AddNewTile;

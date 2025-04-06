@@ -7,6 +7,9 @@ import type { SvgData } from "@/components/svg-editor/types"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
+
+
+
 interface Props {
   currentSvg: SvgData[] | null
   pathColors?: Record<string, string>
@@ -17,6 +20,9 @@ interface Props {
   setGroutColor: (groutColor: string) => void
   groutColor: string
 }
+
+
+
 
 export default function ViewPanel({
   currentSvg,
@@ -36,10 +42,13 @@ export default function ViewPanel({
   // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
   const tileGridRef = useRef<HTMLDivElement>(null)
   const [showTilePreview, setShowTilePreview] = useState(true)
+
+  console.log(showTilePreview)
   console.log(setShowTilePreview)
   console.log(setGridSize)
 
   const router = useRouter()
+
 
   const handleTileEnvironmentClose = () => {
     setEnvironment(undefined)
@@ -79,6 +88,7 @@ export default function ViewPanel({
   //   kitchen: { top: "70%", left: "20%", width: "60%", height: "30%" },
   //   commercial: { top: "70%", left: "30%", width: "40%", height: "30%" },
   // }
+
 
   // Update grid when SVG or settings change
   useEffect(() => {
@@ -187,15 +197,16 @@ export default function ViewPanel({
                 <div>
                   {showTilePreview && (
                     <div
-                      className={`absolute ${groutColor}-grout z-0`}
+                      className={`absolute ${groutColor}-grout z-0 parrr`}
                       style={{
                         top: "0",
                         left: "0",
                         width: "100%",
-                        height: "600px",
-                        display: "flex",
+                        height: "100%",
+                        // display: "flex",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                         gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+
                       }}
                     >
                       <div
@@ -204,9 +215,13 @@ export default function ViewPanel({
                         style={{
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                           width: "100%",
-                          height: "100%",
+                          height: "70%",
+                          transform: 'rotateX(70deg)',
+                          margin: 'auto'
+
+
                         }}
-                      />
+                      ></div>
                     </div>
                   )}
                 </div>
@@ -216,12 +231,14 @@ export default function ViewPanel({
               {environment === "environment1" && (
                 <Image
                   src="/assets/environment1.svg"
-                  alt="Bedroom"
+                  alt="Bathroom"
                   fill
                   className="object-cover z-10"
-                  style={{ pointerEvents: "none" , width: "100%", height: "100%"}}
+                  style={{ pointerEvents: "none" }}
                 />
               )}
+
+
               {environment === "environment2" && (
                 <Image
                   src="/assets/environment2.svg"
@@ -354,6 +371,9 @@ export default function ViewPanel({
         </Button>
       </div>
 
+
+
+
       <style jsx>{`
         .tile-cell {
           aspect-ratio: 1;
@@ -372,7 +392,7 @@ export default function ViewPanel({
         .turquoise-grout { background-color: turquoise; }
         .blue-grout { background-color: blue; }
       `}</style>
-    </div>
+    </div >
   )
 }
 

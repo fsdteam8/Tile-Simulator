@@ -7,6 +7,9 @@ import type { SvgData } from "@/components/svg-editor/types"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
+
+
+
 interface Props {
   currentSvg: SvgData[] | null
   pathColors?: Record<string, string>
@@ -18,6 +21,9 @@ interface Props {
   groutColor: string
 }
 
+
+
+
 export default function ViewPanel({
   currentSvg,
   pathColors = {},
@@ -28,7 +34,7 @@ export default function ViewPanel({
   setGroutColor,
   groutColor,
 }: Props) {
-  const [gridSize, setGridSize] = useState<"8x8" | "12x12">("8x8")
+  const [gridSize, setGridSize] = useState<"16x16" | "20x20">("20x20")
   const [environment, setEnvironment] = useState<
     "environment1" | "environment2" | "environment3" | "environment4" | "environment5" | "environment6"
   >()
@@ -36,10 +42,13 @@ export default function ViewPanel({
   // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
   const tileGridRef = useRef<HTMLDivElement>(null)
   const [showTilePreview, setShowTilePreview] = useState(true)
+
+  console.log(showTilePreview)
   console.log(setShowTilePreview)
   console.log(setGridSize)
 
   const router = useRouter()
+
 
   const handleTileEnvironmentClose = () => {
     setEnvironment(undefined)
@@ -70,7 +79,7 @@ export default function ViewPanel({
   console.log(setGroutColor, setGroutThickness)
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = gridSize === "8x8" ? 8 : 12
+  const gridDimensions = gridSize === "16x16" ? 16 : 20
 
   // Define the tile area for each environment
   // const tileAreas = {
@@ -79,6 +88,7 @@ export default function ViewPanel({
   //   kitchen: { top: "70%", left: "20%", width: "60%", height: "30%" },
   //   commercial: { top: "70%", left: "30%", width: "40%", height: "30%" },
   // }
+
 
   // Update grid when SVG or settings change
   useEffect(() => {
@@ -176,7 +186,7 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="flex gap-5">
-            <div className="relative w-full h-[540px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
@@ -187,15 +197,16 @@ export default function ViewPanel({
                 <div>
                   {showTilePreview && (
                     <div
-                      className={`absolute ${groutColor}-grout z-0`}
+                      className={`absolute ${groutColor}-grout z-0 parrr`}
                       style={{
                         top: "0",
                         left: "0",
-                        width: "800%",
-                        height: "540px",
-                        display: "grid",
+                        width: "100%",
+                        height: "100%",
+                        // display: "flex",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                         gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+
                       }}
                     >
                       <div
@@ -204,9 +215,13 @@ export default function ViewPanel({
                         style={{
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                           width: "100%",
-                          height: "100%",
+                          height: "70%",
+                          transform: 'rotateX(70deg)',
+                          margin: 'auto'
+
+
                         }}
-                      />
+                      ></div>
                     </div>
                   )}
                 </div>
@@ -216,12 +231,14 @@ export default function ViewPanel({
               {environment === "environment1" && (
                 <Image
                   src="/assets/environment1.svg"
-                  alt="Bedroom"
+                  alt="Bathroom"
                   fill
                   className="object-cover z-10"
                   style={{ pointerEvents: "none" }}
                 />
               )}
+
+
               {environment === "environment2" && (
                 <Image
                   src="/assets/environment2.svg"
@@ -279,46 +296,46 @@ export default function ViewPanel({
               )}
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-3">
                 <Button
                   variant={environment === "environment1" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment1")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_kitchen_icon.png" alt="Bedroom Hover Icon" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment2" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment2")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="bathroom" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment3" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment3")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="ketchen" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment4" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment4")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_living_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment5" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment5")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment6" ? "default" : "outline"}
                   onClick={() => setEnvironment("environment6")}
-                  className="h-[83px] w-[144px] py-1"
+                  className="h-[90px] w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
@@ -354,6 +371,9 @@ export default function ViewPanel({
         </Button>
       </div>
 
+
+
+
       <style jsx>{`
         .tile-cell {
           aspect-ratio: 1;
@@ -372,7 +392,7 @@ export default function ViewPanel({
         .turquoise-grout { background-color: turquoise; }
         .blue-grout { background-color: blue; }
       `}</style>
-    </div>
+    </div >
   )
 }
 

@@ -7,7 +7,7 @@ import { useDropzone } from "react-dropzone"
 import { UploadCloud, X, FileImage, Check } from "lucide-react"
 
 interface SVGUploadProps {
-  onUpload: (data: string) => void
+  onUpload: (data: File | null) => void
   maxSizeKB?: number
 }
 
@@ -58,7 +58,7 @@ const SVGUpload = ({ onUpload, maxSizeKB = 500 }: SVGUploadProps) => {
               setUploadStatus("success")
 
               if (typeof onUpload === "function") {
-                onUpload(svgData)
+                onUpload(file)
               } else {
                 console.error("onUpload is not a function", onUpload)
                 setErrorMessage("Upload handler error. Please try again.")
@@ -95,7 +95,7 @@ const SVGUpload = ({ onUpload, maxSizeKB = 500 }: SVGUploadProps) => {
     setFileName(null)
     setUploadStatus("idle")
     setErrorMessage(null)
-    onUpload("")
+    onUpload(null)
   }
 
   return (

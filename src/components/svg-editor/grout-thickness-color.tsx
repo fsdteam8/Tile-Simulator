@@ -28,6 +28,7 @@ function GroutThicknessColor({
           <div className="flex gap-2">
             {["none", "thin", "thick"].map((thickness) => (
               <Button
+                className="h-7 lg:h-8"
                 key={thickness}
                 variant={groutThickness === thickness ? "default" : "outline"}
                 onClick={() =>
@@ -52,7 +53,7 @@ function GroutThicknessColor({
                 }`}
               >
                 <button
-                  className="w-8 h-8 rounded"
+                  className="w-6 h-6 lg:w-8 lg:h-8 rounded"
                   style={{ backgroundColor: color }}
                   onClick={() =>
                     setGroutColor(color as "orange" | "green" | "turquoise" | "blue")

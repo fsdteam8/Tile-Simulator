@@ -109,10 +109,10 @@ export function ColorPicker({
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-          r: Number.parseInt(result[1], 16),
-          g: Number.parseInt(result[2], 16),
-          b: Number.parseInt(result[3], 16),
-        }
+        r: Number.parseInt(result[1], 16),
+        g: Number.parseInt(result[2], 16),
+        b: Number.parseInt(result[3], 16),
+      }
       : null;
   };
 
@@ -337,9 +337,8 @@ export function ColorPicker({
                 .map((savedColor, index) => (
                   <button
                     key={index}
-                    className={`w-8 h-8 rounded-md border border-gray-300 ${
-                      savedColor === hexValue ? "ring-2 ring-black" : ""
-                    }`}
+                    className={`w-6 h-6 lg:w-8 lg:h-8 rounded-md border border-gray-300 ${savedColor === hexValue ? "ring-2 ring-black" : ""
+                      }`}
                     style={{ backgroundColor: savedColor }}
                     onClick={() => {
                       setHexValue(savedColor);
@@ -369,21 +368,21 @@ export function ColorPicker({
 
           <div className="flex gap-2 p-2">
 
-          <div className="p-2 rounded " style={{ boxShadow: "0px 0px 8px 0px #00000029" }}>
-            <div
-              ref={paletteRef}
-              className="w-full h-64 cursor-crosshair relative"
-              style={{ background: getPaletteBackground() }}
-              onClick={handlePaletteClick}
-            >
+            <div className="p-2  rounded w-[190px] lg:w-[250px] h-[300px] lg:h-[400px]" style={{ boxShadow: "0px 0px 8px 0px #00000029" }}>
               <div
-                className="w-4 h-4 rounded-full border-2 border-white absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                style={{
-                  left: `${saturation}%`,
-                  top: `${100 - lightness}%`,
-                }}
-              />
-            </div>
+                ref={paletteRef}
+                className="w-full h-44 lg:h-64 cursor-crosshair relative"
+                style={{ background: getPaletteBackground() }}
+                onClick={handlePaletteClick}
+              >
+                <div
+                  className="w-4 h-4 rounded-full border-2 border-white absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{
+                    left: `${saturation}%`,
+                    top: `${100 - lightness}%`,
+                  }}
+                />
+              </div>
 
               <div className="p-4 space-y-4">
                 <div className="flex items-center gap-2">
@@ -462,35 +461,34 @@ export function ColorPicker({
                 </div>
               </div>
             </div>
-            <div>
+            <div className=" w-[150px] lg:w-[200px]">
               <div ref={dropdownRef} className="relative w-[200px]">
                 <button
-                  className="flex items-center justify-between w-full px-4 py-2 text-left border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none"
+                  className="flex items-center justify-between  w-[150px] lg:w-[200px] px-4 py-2 text-left border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none"
                   onClick={() => setShowDropdown(!showDropdown)}
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className="w-5 h-5 rounded-sm border border-gray-300"
+                      className="w-4 h-4 lg:w-5 lg:h-5 rounded-sm border border-gray-300"
                       style={{ backgroundColor: hexValue }}
                     ></div>
-                    <span className="text-[18px] font-medium">
+                    <span className="text-[12px] lg:text-[18px] font-medium">
                       {selectedColorName}
                     </span>
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      showDropdown ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 transition-transform ${showDropdown ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
                 {/* Dropdown menu */}
                 {showDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md max-h-[348px] shadow-lg overflow-auto">
+                  <div className="absolute z-50 w-[150px] lg:w-[200px] mt-1 bg-white border border-gray-200 rounded-md max-h-[348px] shadow-lg overflow-auto">
                     {namedColors.map((namedColor, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-red-100 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2  hover:bg-red-100 cursor-pointer"
                         onClick={() =>
                           handleNamedColorSelect(
                             namedColor.name,
@@ -502,7 +500,7 @@ export function ColorPicker({
                           className="w-4 h-4 rounded-sm border border-gray-300"
                           style={{ backgroundColor: namedColor.color }}
                         ></div>
-                        <span className="text-[18px] font-medium">
+                        <span className="text-[12px] lg:text-[18px] font-medium">
                           {namedColor.name}
                         </span>
                       </div>
@@ -512,7 +510,7 @@ export function ColorPicker({
               </div>
             </div>
           </div>
-          </div>
+        </div>
       )}
     </div>
   );

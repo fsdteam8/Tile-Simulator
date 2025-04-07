@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TilesData } from "@/data/TilesData"
+import { useMediaQuery } from "@/hooks/use-mobile"
 
 interface Tile {
   id: string
@@ -23,17 +24,22 @@ interface TileSelectionProps {
 
 export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, pathColors }: TileSelectionProps) {
   const [selectedCollection, setSelectedCollection] = useState<string>("Geometric")
-  // const carouselRef = useRef<HTMLDivElement>(null)
   const [currentPage, setCurrentPage] = useState(0)
-  const tilesPerPage = 9 // 9 tiles per row
-  const rowsPerPage = 2 // 2 rows
 
-  console.log(setSelectedCollection)
+  console.log(setSelectedCollection);
+
+  // Media queries for responsive design
+  const isSmallScreen = useMediaQuery("(max-width: 767px)")
+  const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
+
+  // Calculate tiles per row based on screen size
+  const tilesPerRow = isSmallScreen ? 2 : isMediumScreen ? 4 : 9
+  const rowsPerPage = 2 // Always 2 rows max
 
   const filteredTiles = TilesData.filter((tile) => tile.collection === selectedCollection)
 
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredTiles.length / (tilesPerPage * rowsPerPage))
+  // Calculate total pages based on responsive grid
+  const totalPages = Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage))
 
   const handleTileSelect = (tile: Tile) => {
     onTileSelect(tile)
@@ -84,17 +90,17 @@ export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, 
     setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
   }
 
-  // Get tiles for current page
+  // Get tiles for current page with responsive grid
   const getCurrentPageTiles = () => {
-    const startIdx = currentPage * tilesPerPage * rowsPerPage
-    return filteredTiles.slice(startIdx, startIdx + tilesPerPage * rowsPerPage)
+    const startIdx = currentPage * tilesPerRow * rowsPerPage
+    return filteredTiles.slice(startIdx, startIdx + tilesPerRow * rowsPerPage)
   }
 
-  // Split tiles into rows
+  // Split tiles into rows based on responsive grid
   const getRowTiles = (rowIndex: number) => {
     const pageTiles = getCurrentPageTiles()
-    const startIdx = rowIndex * tilesPerPage
-    return pageTiles.slice(startIdx, startIdx + tilesPerPage)
+    const startIdx = rowIndex * tilesPerRow
+    return pageTiles.slice(startIdx, startIdx + tilesPerRow)
   }
 
   useEffect(() => {
@@ -107,25 +113,23 @@ export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, 
         {/* Left navigation arrow */}
         <button
           onClick={goToPrevPage}
-          className=" bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100"
+          className="bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100"
           aria-label="Previous page"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
 
         {/* Carousel container */}
-        <div className="container">
+        <div className="container px-2 md:px-4">
           {/* First row */}
-          <div className="grid grid-cols-9 gap-3 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3 mb-4">
             {getRowTiles(0).map((tile) => (
               <div key={tile.id} className="flex flex-col items-center border border-[#595959]/40">
                 <button
                   onClick={() => handleTileSelect(tile)}
                   className={cn(
-                    "relative w-[115px] h-[115px] overflow-hidden transition-all bg-white",
-                    selectedTile?.id === tile.id
-                      ? " scale-[0.98]"
-                      : "",
+                    "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                    selectedTile?.id === tile.id ? "scale-[0.98]" : "",
                   )}
                 >
                   <div
@@ -172,22 +176,20 @@ export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, 
                     })}
                   </div>
                 </button>
-                <p className="text-[12px] font-normal text-center truncate mt-1 w-[100px]">{tile.name}</p>
+                <p className="text-[12px] font-normal text-center truncate mt-1 w-full px-1">{tile.name}</p>
               </div>
             ))}
           </div>
 
           {/* Second row */}
-          <div className="grid grid-cols-9 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3">
             {getRowTiles(1).map((tile) => (
               <div key={`second-${tile.id}`} className="flex flex-col items-center border border-[#595959]/40">
                 <button
                   onClick={() => handleTileSelect(tile)}
                   className={cn(
-                    "relative w-[112px] h-[112px] overflow-hidden  transition-all bg-white",
-                    selectedTile?.id === tile.id
-                      ? " scale-[0.98]"
-                      : "",
+                    "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                    selectedTile?.id === tile.id ? "scale-[0.98]" : "",
                   )}
                 >
                   <div
@@ -233,7 +235,7 @@ export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, 
                     })}
                   </div>
                 </button>
-                <p className="text-xs font-medium text-center truncate mt-1 w-[100px]">{tile.name}</p>
+                <p className="text-xs font-medium text-center truncate mt-1 w-full px-1">{tile.name}</p>
               </div>
             ))}
           </div>
@@ -242,7 +244,7 @@ export function TileSelection({ onTileSelect, selectedTile, tileRotations = {}, 
         {/* Right navigation arrow */}
         <button
           onClick={goToNextPage}
-          className=" bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100"
+          className="bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100"
           aria-label="Next page"
         >
           <ChevronRight className="h-6 w-6" />

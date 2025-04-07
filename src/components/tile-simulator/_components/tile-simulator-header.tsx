@@ -41,7 +41,7 @@ const TileSimulatorHeader = () => {
   console.log(filterData);
 
   return (
-    <div className="w-full flex itmes-center gap-5">
+    <div className="w-full space-y-2 md:space-y-0 lg:space-y-0 md:flex lg:flex itmes-center gap-5">
       {/* searching  */}
       <div className="relative">
         <Search
@@ -74,7 +74,7 @@ const TileSimulatorHeader = () => {
       {/* categories  */}
       <div>
         <Select>
-          <SelectTrigger className="w-[268px] h-[52px]">
+          <SelectTrigger className="md:w-[220px] lg:w-[268px] h-[54px]">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -89,7 +89,7 @@ const TileSimulatorHeader = () => {
 
       {/* add border  */}
       <div>
-        <button className="flex items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] py-4 px-[70px]">
+        <button className="flex w-full p-4 items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] lg:py-4 md:px-[50px] lg:px-[70px] ">
           <FaPlus className="text-primary" /> Add Border
         </button>
       </div>

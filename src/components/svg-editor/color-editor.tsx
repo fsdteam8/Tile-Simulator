@@ -127,28 +127,30 @@ export function ColorEditor({
   const selectedPathColor = selectedPathId ? pathColors[selectedPathId] : null;
 
   return (
-    <div className="flex gap-[130px]">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-8">
       {/* SVG Preview (Click to select a path) */}
-      <div className="w-[482px] flex justify-center items-center">
-        {svgArray.length === 0 ? (
-          <div className="flex items-center justify-center bg-black/20 w-full h-full">
-            <p className="text-sm font-medium text-gray-500">
-              No SVG data available.
-            </p>
-          </div>
-        ) : (
-          <SvgRenderer
-            svgArray={svgArray}
-            selectedPathId={selectedPathId}
-            pathColors={pathColors}
-            onPathSelect={handlePathSelect}
-            onRotate={handleRotationChange}
-            rotations={rotations}
-          />
-        )}
+      <div className="col-span-2 lg:col-span-2">
+        <div className=" flex justify-center items-center">
+          {svgArray.length === 0 ? (
+            <div className="flex items-center justify-center bg-black/20 w-full h-[450px]">
+              <p className="text-sm font-medium text-gray-500">
+                No SVG data available.
+              </p>
+            </div>
+          ) : (
+            <SvgRenderer
+              svgArray={svgArray}
+              selectedPathId={selectedPathId}
+              pathColors={pathColors}
+              onPathSelect={handlePathSelect}
+              onRotate={handleRotationChange}
+              rotations={rotations}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="w-[558px]">
+      <div className="col-span-2 lg:col-span-3 mt-20 md:mt-[350px] lg:mt-0">
         {/* Colors List */}
         <div className="space-y-2">
           {svgArray.length !== 0 && (
@@ -163,10 +165,9 @@ export function ColorEditor({
             ).map((color, index) => (
               <div
                 key={index}
-                className={`w-8 h-8 rounded border border-gray-200 cursor-pointer transition-transform 
-                    hover:scale-110 ${
-                      selectedPathColor === color ? "ring-2 ring-black" : ""
-                    }`}
+                className={`w-6 h-6 md:w-8 md:h-8 lg:w-8 lg:h-8 rounded border border-gray-200 cursor-pointer transition-transform 
+                    hover:scale-110 ${selectedPathColor === color ? "ring-2 ring-black" : ""
+                  }`}
                 style={{ backgroundColor: color }}
                 onClick={() => {
                   if (selectedPathId && color !== undefined) {
@@ -201,15 +202,14 @@ export function ColorEditor({
 
         {/* Color Palette */}
         <div className="space-y-4 mt-[32px]">
-          <div className="grid grid-cols-10 gap-1">
+          <div className="grid grid-cols-12 gap-1">
             {colorPalette.map((color, index) => (
               <button
                 key={index}
-                className={`w-8 h-8 rounded-sm border transition-transform hover:scale-110 ${
-                  selectedPathColor === color
+                className={`w-6 h-6 md:w-8 md:h-8 lg:w-8 lg:h-8 rounded-sm border transition-transform hover:scale-110 ${selectedPathColor === color
                     ? "border-black ring-2 ring-black/20"
                     : "border-gray-200"
-                }`}
+                  }`}
                 style={{ backgroundColor: color }}
                 onClick={() => handleColorSelect(color)}
                 disabled={!selectedPathId}
@@ -235,9 +235,6 @@ export function ColorEditor({
         </div>
       </div>
 
-      {/* <Button className="w-full" onClick={handleSave}>
-          Save
-        </Button> */}
     </div>
   );
 }

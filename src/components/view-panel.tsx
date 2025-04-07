@@ -38,11 +38,19 @@ export default function ViewPanel({
   const [environment, setEnvironment] = useState<
     "environment1" | "environment2" | "environment3" | "environment4" | "environment5" | "environment6"
   >()
+
+
   // const [groutColor, setGroutColor] = useState<"white" | "gray" | "black">("white")
   // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
   const tileGridRef = useRef<HTMLDivElement>(null)
   const [showTilePreview, setShowTilePreview] = useState(true)
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  const [tileTransform, setTileTransform] = useState({
+    marginTop: isSmallScreen ? "18px" : "0px",
+    transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
+    height: "70%",
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -62,6 +70,11 @@ export default function ViewPanel({
 
   const handleTileEnvironmentClose = () => {
     setEnvironment(undefined)
+    setTileTransform({
+      marginTop: isSmallScreen ? "0px" : "0px",
+      transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
+      height: "0%",
+    })
   }
 
   const handleSaveAndShare = () => {
@@ -225,13 +238,9 @@ export default function ViewPanel({
                         style={{
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                           width: "100%",
-                          height: "70%",
-                          // margin: 'auto',
-                          // marginTop: '60px',
-                          marginTop: isSmallScreen ? '18px' : '0px', // Adjust marginTop based on screen size
-                          transform: isSmallScreen ? 'rotateX(65deg)' : 'rotateX(71deg)', // Apply transform conditionally
-
-
+                          height: tileTransform.height,
+                          marginTop: tileTransform.marginTop,
+                          transform: tileTransform.transform,
                         }}
                       ></div>
                     </div>
@@ -240,10 +249,10 @@ export default function ViewPanel({
               )}
 
               {/* Environment Images - Placed AFTER tiles so they appear on top */}
-              
+
               {environment === "environment1" && (
                 <Image
-                  src="/assets/environment1.svg"
+                  src="/assets/environment1.png"
                   alt="Bathroom"
                   fill
                   className=" object-cover z-10"
@@ -255,7 +264,7 @@ export default function ViewPanel({
 
               {environment === "environment2" && (
                 <Image
-                  src="/assets/environment2.svg"
+                  src="/assets/environment2.png"
                   alt="Bathroom"
                   fill
                   className="object-cover z-10"
@@ -264,7 +273,7 @@ export default function ViewPanel({
               )}
               {environment === "environment3" && (
                 <Image
-                  src="/assets/environment3.svg"
+                  src="/assets/environment3.png"
                   alt="Bathroom"
                   fill
                   className="object-cover z-10"
@@ -273,7 +282,7 @@ export default function ViewPanel({
               )}
               {environment === "environment4" && (
                 <Image
-                  src="/assets/environment4.svg"
+                  src="/assets/environment4.png"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"
@@ -282,7 +291,7 @@ export default function ViewPanel({
               )}
               {environment === "environment5" && (
                 <Image
-                  src="/assets/environment5.svg"
+                  src="/assets/environment5.png"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"
@@ -291,7 +300,7 @@ export default function ViewPanel({
               )}
               {environment === "environment6" && (
                 <Image
-                  src="/assets/environment6.svg"
+                  src="/assets/environment6.png"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"
@@ -313,7 +322,14 @@ export default function ViewPanel({
               <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                 <Button
                   variant={environment === "environment1" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment1")}
+                  onClick={() => {
+                    setEnvironment("environment1")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
 
                 >
@@ -321,35 +337,70 @@ export default function ViewPanel({
                 </Button>
                 <Button
                   variant={environment === "environment2" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment2")}
+                  onClick={() => {
+                    setEnvironment("environment2")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="bathroom" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment3" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment3")}
+                  onClick={() => {
+                    setEnvironment("environment3")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="ketchen" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment4" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment4")}
+                  onClick={() => {
+                    setEnvironment("environment4")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_living_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
                 <Button
                   variant={environment === "environment5" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment5")}
+                  onClick={() => {
+                    setEnvironment("environment5")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
                 >
-                  <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
+                  <Image src="/assets/waiting-room.svg" alt="Commercial" width={100} height={100} className="w-[120px] h-[80px]" />
                 </Button>
                 <Button
                   variant={environment === "environment6" ? "default" : "outline"}
-                  onClick={() => setEnvironment("environment6")}
+                  onClick={() => {
+                    setEnvironment("environment6")
+                    setTileTransform({
+                      marginTop: isSmallScreen ? "18px" : "0px",
+                      transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
+                      height: "70%",
+                    })
+                  }}
                   className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />

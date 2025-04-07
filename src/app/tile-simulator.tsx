@@ -130,7 +130,7 @@ export default function Tiles() {
             </div>
 
             <div
-              className="py-[100px] container"
+              className="container py-[40px] lg:py-[100px] "
             >
               {currentSvg && (
                 <ColorEditor

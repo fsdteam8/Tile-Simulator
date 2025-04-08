@@ -209,7 +209,7 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="lg:flex gap-5">
-            <div className="relative w-full h-[254px]  lg:h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
@@ -319,7 +319,7 @@ export default function ViewPanel({
               )}
             </div>
             <div className="space-y-4 mt-4 lg:mt-0">
-              <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
+              <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-1 gap-3">
                 <Button
                   variant={environment === "environment1" ? "default" : "outline"}
                   onClick={() => {
@@ -330,7 +330,7 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
 
                 >
                   <Image src="/assets/env_kitchen_icon.png" alt="Bedroom Hover Icon" width={100} height={100} />
@@ -345,7 +345,7 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="bathroom" width={100} height={100} />
                 </Button>
@@ -359,7 +359,7 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_bathroom_icon.png" alt="ketchen" width={100} height={100} />
                 </Button>
@@ -373,7 +373,7 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_living_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>
@@ -387,9 +387,9 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
                 >
-                  <Image src="/assets/waiting-room.svg" alt="Commercial" width={100} height={100} className="w-[120px] h-[80px]" />
+                  <Image src="/assets/waiting-room.svg" alt="Commercial" width={100} height={100} className="w-[120px] h-[80px] md:h-[60px]" />
                 </Button>
                 <Button
                   variant={environment === "environment6" ? "default" : "outline"}
@@ -401,7 +401,7 @@ export default function ViewPanel({
                       height: "70%",
                     })
                   }}
-                  className="h-[60px] w-[100px] lg:h-[90px] lg:w-[144px] py-1"
+                  className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[144px] py-1"
                 >
                   <Image src="/assets/env_commercial_room_icon.png" alt="Commercial" width={100} height={100} />
                 </Button>

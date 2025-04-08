@@ -10,7 +10,7 @@ async function Header() {
         <div className="container flex justify-between items-center py-4 px-8">
           <div>
             <Link href="/">
-              <Image src="/assets/logo.png" alt="logo" width={48} height={48} className="w-[32px] h-[32px]"/>
+              <Image src="/assets/logo.png" alt="logo" width={48} height={48} className="w-[32px] h-[32px] lg:w-[52px] lg:h-[52px]"/>
             </Link>
           </div>
           <div className="flex items-center gap-4">

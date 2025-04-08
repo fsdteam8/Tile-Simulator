@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SvgRenderer } from "./svg-renderer";
 import type { SvgData, ColorData } from "./types";
 import { ColorPicker } from "./color-picker";
@@ -31,27 +31,60 @@ export function ColorEditor({
   groutColor,
   setGroutColor,
 }: ColorEditorProps) {
-  const [selectedColors, setSelectedColors] = useState<ColorData[]>([]);
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   const [pathColors, setPathColors] = useState<Record<string, string>>({});
+  const [svgColors, setSvgColors] = useState<string[]>([])
+
+   // Extract all unique colors from the SVG on component mount
+   useEffect(() => {
+    // Get all current colors from SVG paths (including modified ones)
+    const allCurrentColors = svgArray
+      .flatMap((svg) =>
+        svg.paths.map((path) => {
+          // Use the modified color if it exists, otherwise use the original
+          return pathColors[path.id] || path.originalFill || path.fill
+        }),
+      )
+      .filter(Boolean) as string[]
+
+    // Remove duplicates
+    const uniqueColors = [...new Set(allCurrentColors)]
+    setSvgColors(uniqueColors)
+  }, [svgArray, pathColors])
+
+  // Update the display of colors when pathColors changes
+  useEffect(() => {
+    if (svgColors.length > 0 && Object.keys(pathColors).length > 0) {
+      // Don't add new colors, just update the display of existing ones
+      // This ensures we only show the original SVG colors (or their replacements)
+      setSvgColors((prevColors) => {
+        // Keep the same colors array, just force a re-render
+        return [...prevColors]
+      })
+    }
+  }, [pathColors, svgColors.length])
 
   const handlePathSelect = useCallback(
     (pathId: string) => {
-      setSelectedPathId(pathId);
+      setSelectedPathId(pathId)
 
-      // Assign color from path fill or default to red if not available
-      setPathColors((prev) => ({
-        ...prev,
-        [pathId]:
-          prev[pathId] ||
-          svgArray
-            .find((svg) => svg.paths.find((p) => p.id === pathId))
-            ?.paths.find((p) => p.id === pathId)?.fill ||
-          "red",
-      }));
+      // Highlight the selected path
+      const path = svgArray.flatMap((svg) => svg.paths).find((p) => p.id === pathId)
+      if (path) {
+        // Add a subtle animation or effect when selecting a path
+        const svgElement = document.getElementById(pathId)
+        if (svgElement) {
+          svgElement.classList.add("path-selected")
+          setTimeout(() => {
+            svgElement.classList.remove("path-selected")
+          }, 300)
+        }
+
+        console.log(`Selected path: ${pathId} with color: ${pathColors[pathId] || path.fill}`)
+      }
     },
-    [svgArray]
-  );
+    [svgArray, pathColors],
+  )
 
   // const handleSave = () => {
   //   console.log("Saved Path Colors:", pathColors)
@@ -60,47 +93,43 @@ export function ColorEditor({
 
   const handleColorSelect = useCallback(
     (color: string) => {
-      if (!selectedPathId) return;
+      if (!selectedPathId) return
 
       // Extract the base identifier from the path ID
-      const pathIdParts = selectedPathId.split("-");
-      const baseIdentifier = pathIdParts[pathIdParts.length - 1];
+      const pathIdParts = selectedPathId.split("-")
+      const baseIdentifier = pathIdParts[pathIdParts.length - 1]
 
       // Find all paths with matching identifiers across all SVGs
       const relatedPaths = svgArray.flatMap((svg) =>
         svg.paths
           .filter((path) => {
-            const parts = path.id.split("-");
-            const pathIdentifier = parts[parts.length - 1];
-            return pathIdentifier === baseIdentifier;
+            const parts = path.id.split("-")
+            const pathIdentifier = parts[parts.length - 1]
+            return pathIdentifier === baseIdentifier
           })
-          .map((path) => path.id)
-      );
+          .map((path) => path.id),
+      )
 
-      // Create a new color object for each related path
+      // Update color for each related path
       relatedPaths.forEach((pathId) => {
         const newColor: ColorData = {
           id: `${pathId}-${color}`,
           color,
           name: `Color ${color}`,
-        };
+        }
 
         setPathColors((prev) => ({
           ...prev,
           [pathId]: color,
-        }));
-
-        if (!selectedColors.some((c) => c.color === color)) {
-          setSelectedColors((prev) => [...prev, newColor]);
-        }
+        }))
 
         if (onColorSelect) {
-          onColorSelect(pathId, newColor);
+          onColorSelect(pathId, newColor)
         }
-      });
+      })
     },
-    [selectedPathId, onColorSelect, selectedColors, svgArray]
-  );
+    [selectedPathId, onColorSelect, svgArray],
+  )
 
   // const handleRemoveColor = useCallback(
   //   (colorToRemove: string) => {
@@ -124,15 +153,17 @@ export function ColorEditor({
     onRotate(tileId, index, newRotation);
   };
 
-  const selectedPathColor = selectedPathId ? pathColors[selectedPathId] : null;
+  const selectedPathColor = selectedPathId
+    ? pathColors[selectedPathId] || svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)?.fill
+    : null;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-8">
       {/* SVG Preview (Click to select a path) */}
-      <div className="col-span-2 lg:col-span-2">
-        <div className=" flex justify-center items-center">
+      <div className="col-span-2 lg:col-span-2 md:h-[650px]">
+        <div className="flex justify-center items-center">
           {svgArray.length === 0 ? (
-            <div className="flex items-center justify-center bg-black/20 w-full h-[450px]">
+            <div className="flex items-center justify-center bg-black/20 w-full md:h-[700px] lg:h-[450px]">
               <p className="text-sm font-medium text-gray-500">
                 No SVG data available.
               </p>
@@ -150,32 +181,52 @@ export function ColorEditor({
         </div>
       </div>
 
-      <div className="col-span-2 lg:col-span-3 mt-20 md:mt-[350px] lg:mt-0">
+      <div className="col-span-2 lg:col-span-3 mt-20  lg:mt-0">
         {/* Colors List */}
         <div className="space-y-2">
           {svgArray.length !== 0 && (
             <h3 className="text-sm font-medium">Colors Used:</h3>
           )}
           <div className="flex flex-wrap gap-2">
-            {Array.from(
-              new Set([
-                ...Object.values(pathColors),
-                ...svgArray.flatMap((svg) => svg.paths.map((p) => p.fill)),
-              ])
-            ).map((color, index) => (
-              <div
-                key={index}
-                className={`w-6 h-6 md:w-8 md:h-8 lg:w-8 lg:h-8 rounded border border-gray-200 cursor-pointer transition-transform 
-                    hover:scale-110 ${selectedPathColor === color ? "ring-2 ring-black" : ""
-                  }`}
-                style={{ backgroundColor: color }}
-                onClick={() => {
-                  if (selectedPathId && color !== undefined) {
-                    handleColorSelect(color);
-                  }
-                }}
-              />
-            ))}
+          {svgColors.map((color, index) => {
+              // Check if this color is currently used by any path
+              const pathsWithColor = svgArray.flatMap((svg) =>
+                svg.paths.filter(
+                  (p) =>
+                    pathColors[p.id] === color || // Check custom colors first
+                    (!pathColors[p.id] && (p.originalFill || p.fill) === color), // Then check original colors
+                ),
+              )
+
+              const isUsedByPath = pathsWithColor.length > 0
+              const isSelectedColor =
+                selectedPathId &&
+                (pathColors[selectedPathId] === color ||
+                  (!pathColors[selectedPathId] &&
+                    svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)?.originalFill === color))
+
+              return (
+                <div
+                  key={index}
+                  className={`w-8 h-8 rounded border cursor-pointer transition-transform relative
+                    hover:scale-110 ${isSelectedColor ? "ring-2 ring-black" : ""} 
+                    ${isUsedByPath ? "border-primary" : "border-gray-200"}`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => {
+                    // Find paths with this color and select the first one
+                    if (pathsWithColor.length > 0) {
+                      handlePathSelect(pathsWithColor[0].id)
+                      // No color change here, just path selection
+                    }
+                  }}
+                >
+                  {/* Add indicator dot for selected color */}
+                  {isSelectedColor && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border border-white"></div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 

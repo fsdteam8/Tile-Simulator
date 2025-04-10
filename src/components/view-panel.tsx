@@ -34,7 +34,7 @@ export default function ViewPanel({
   setGroutColor,
   groutColor,
 }: Props) {
-  const [gridSize, setGridSize] = useState<"16x16" | "20x20">("20x20")
+  const [gridSize, setGridSize] = useState<"20x20" | "45x20">("45x20")
   const [environment, setEnvironment] = useState<
     "environment1" | "environment2" | "environment3" | "environment4" | "environment5" | "environment6"
   >()
@@ -71,7 +71,7 @@ export default function ViewPanel({
   const handleTileEnvironmentClose = () => {
     setEnvironment(undefined)
     setTileTransform({
-      marginTop: isSmallScreen ? "0px" : "0px",
+      marginTop: isSmallScreen ? "0px" : "-30px",
       transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
       height: "0%",
     })
@@ -102,7 +102,7 @@ export default function ViewPanel({
   console.log(setGroutColor, setGroutThickness)
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = gridSize === "16x16" ? 16 : 20
+  const gridDimensions = gridSize === "20x20" ? 20 : 45
 
   // Define the tile area for each environment
   // const tileAreas = {
@@ -122,6 +122,14 @@ export default function ViewPanel({
     // Clear existing grid
     const container = tileGridRef.current
     container.innerHTML = ""
+
+     // Define this function outside the loop or at the top of the useEffect
+     function style(i: number) {
+      return {
+        marginLeft: i % 2 !== 0 ? "31.5px" : "0px",     // Apply marginLeft if i is odd
+        marginTop: i >= 1 && i <= 45 ? "-32px" : "0px", // Apply marginTop if i is between 1 and 30
+      };
+    }
 
     // Determine if we should use a 2x2 pattern (for 4 SVGs)
     const useQuadPattern = currentSvg.length === 4
@@ -169,7 +177,9 @@ export default function ViewPanel({
 
           cell.appendChild(innerGrid)
         } else {
-          // Original single SVG per cell logic
+          console.log("row", i)
+          console.log("coll", j)
+
           const svgIndex = (i * gridDimensions + j) % currentSvg.length
           const svg = currentSvg[svgIndex]
           const rotation = rotations[svgIndex]
@@ -178,9 +188,15 @@ export default function ViewPanel({
           const wrapper = document.createElement("div")
           wrapper.className = "relative w-full h-full"
 
+          // Apply styled margins based on i and j
+          Object.assign(wrapper.style, style(i))
+
           const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg")
           svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100")
           svgElement.style.transform = `rotate(${rotation}deg)`
+          
+          
+          svgElement.style.padding = `2px` // Add padding to all SVG elements
           svgElement.setAttribute("data-rotation", rotation.toString())
 
           // Add paths
@@ -209,7 +225,7 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="lg:flex gap-5">
-            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] aspect-[4/3] rounded-lg overflow-hidden  border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
@@ -228,7 +244,7 @@ export default function ViewPanel({
                         height: "100%",
                         // display: "flex",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                        gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                        // gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
 
                       }}
                     >
@@ -237,7 +253,9 @@ export default function ViewPanel({
                         className={`grid  gap-[${groutThickness === "none" ? "0" : groutThickness === "thin" ? "1px" : "2px"}]   bg-${groutColor}`}
                         style={{
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                          width: "100%",
+                          width: "2800px",
+                          marginLeft: "-50px",
+                          // marginTop: "-30px",
                           height: tileTransform.height,
                           marginTop: tileTransform.marginTop,
                           transform: tileTransform.transform,

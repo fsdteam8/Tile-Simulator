@@ -163,7 +163,7 @@ export function ColorEditor({
       <div className="col-span-2 lg:col-span-2 md:h-[650px]">
         <div className="flex justify-center items-center">
           {svgArray.length === 0 ? (
-            <div className="flex items-center justify-center bg-black/20 w-full md:h-[700px] lg:h-[450px]">
+            <div className="flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[700px] lg:h-[450px]">
               <p className="text-sm font-medium text-gray-500">
                 No SVG data available.
               </p>
@@ -181,7 +181,7 @@ export function ColorEditor({
         </div>
       </div>
 
-      <div className="col-span-2 lg:col-span-3 mt-20  lg:mt-0">
+      <div className="col-span-2 lg:col-span-3 ">
         {/* Colors List */}
         <div className="space-y-2">
           {svgArray.length !== 0 && (

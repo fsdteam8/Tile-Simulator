@@ -54,9 +54,9 @@ const TileSimulatorHeader = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={cn(
-            "pl-10 pr-10 py-[25px]", // Added pr-10 to make room for the clear icon
+            "pl-10 pr-10 py-[14px] 2xl:py-[25px]", // Added pr-10 to make room for the clear icon
             "border-primary",
-            "placeholder:text-sm placeholder:text-primary placeholder:leading-[120%] placeholder:font-normal",
+            "placeholder:text-sm placeholder:text-[#F0C1C1] placeholder:leading-[120%] placeholder:font-normal",
             "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none"
           )}
         />
@@ -74,7 +74,7 @@ const TileSimulatorHeader = () => {
       {/* categories  */}
       <div>
         <Select>
-          <SelectTrigger className="md:w-[220px] lg:w-[268px] h-[54px]">
+          <SelectTrigger className="w-full md:w-[268px] xl:h-[44px] 2xl:h-[52px] py-2 xl:py-[10px] 2xl:py-4 px-[12px] xl:px-[16px] 2xl:px-[20px]">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -89,7 +89,7 @@ const TileSimulatorHeader = () => {
 
       {/* add border  */}
       <div>
-        <button className="flex w-full p-4 items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] lg:py-4 md:px-[50px] lg:px-[70px] ">
+        <button className="flex w-full p-4 items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] py-2 xl:py-[10px] 2xl:py-4 px-[30px] md:px-[40px] lg:px-[50px] xl:px-[60px] 2xl:px-[70px] ">
           <FaPlus className="text-primary" /> Add Border
         </button>
       </div>

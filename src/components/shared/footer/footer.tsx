@@ -6,16 +6,16 @@ import Hideon from "../../../../provider/Hideon"
 export default function Footer() {
   return (
     <Hideon routes={["/admin-dashboard"]}>
-    <footer className="bg-black text-white py-16">
+    <footer className="bg-black text-white pt-10 md:pt-12 lg:pt-14 xl:pt-16 2xl:pt-20 pb-[60px] md:pb-[90px] lg:pb-[120px] xl:pb-[150px] 2xl:pb-[175px]">
       <div className="container px-4 md:px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-[80px] lg:gap-[120px] xl:gap-[160px] 2xl:gap-[200px]">
           {/* Left Column */}
           <div className="col-span-2 lg:col-span-2 space-y-6">
             <div className="">
               <Image src="/assets/logo.png" alt="logo" width={48} height={48} />
             </div>
             <p className=" text-gray-300">
-              We&apos;re a cement tile company with a passion for color, stocking hundreds of cement tiles at our warehouse <br/>
+              We&apos;re a cement tile company with a passion for color, stocking hundreds of cement tiles at our warehouse 
               in New Jersey with fast shipping nationwide! Let&apos;s help you create a space you&apos;ll love!
             </p>
             <div className="flex space-x-4">

@@ -22,13 +22,13 @@ function GroutThicknessColor({
   };
   return (
     <div>
-      <div className="flex justify-between ">
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Grout Thickness:</h3>
+      <div className="flex justify-between gap-2">
+        <div className="space-y-2">
+          <h3 className="text-base leading-[120%] text-black font-medium">Grout Thickness:</h3>
           <div className="flex gap-2">
             {["none", "thin", "thick"].map((thickness) => (
               <Button
-                className="h-7 lg:h-8"
+                className={`py-[10px] px-10 text-sm font-medium leading-[120%] ${groutThickness === thickness ? " text-white bg-[#CE3837]" : "text-[#CE3837] hover:text-[#CE3837] border border-[#CE3837]"} `}
                 key={thickness}
                 variant={groutThickness === thickness ? "default" : "outline"}
                 onClick={() =>
@@ -40,9 +40,9 @@ function GroutThicknessColor({
             ))}
           </div>
         </div>
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Grout Color:</h3>
-          <div className="flex gap-2">
+        <div className="space-y-2">
+          <h3 className="text-base leading-[120%] text-black font-medium">Grout Color:</h3>
+          <div className="flex items-center gap-2">
             {["orange", "green", "turquoise", "blue"].map((color) => (
               <div
                 key={color}
@@ -53,7 +53,7 @@ function GroutThicknessColor({
                 }`}
               >
                 <button
-                  className="w-6 h-6 lg:w-8 lg:h-8 rounded"
+                  className="w-6 h-6 rounded"
                   style={{ backgroundColor: color }}
                   onClick={() =>
                     setGroutColor(color as "orange" | "green" | "turquoise" | "blue")

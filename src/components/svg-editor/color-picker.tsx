@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, X } from "lucide-react";
+import { TbColorPicker } from "react-icons/tb";
 
 interface ColorPickerProps {
   color: string;
@@ -109,10 +110,10 @@ export function ColorPicker({
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result
       ? {
-        r: Number.parseInt(result[1], 16),
-        g: Number.parseInt(result[2], 16),
-        b: Number.parseInt(result[3], 16),
-      }
+          r: Number.parseInt(result[1], 16),
+          g: Number.parseInt(result[2], 16),
+          b: Number.parseInt(result[3], 16),
+        }
       : null;
   };
 
@@ -278,25 +279,10 @@ export function ColorPicker({
             style={{ boxShadow: "0px 0px 8px 0px #00000029" }}
           >
             <button
-              className="w-7 h-7 bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center"
+              className="w-7 h-7 bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center"
               onClick={() => setShowColorPicker(true)}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                <path d="M2 2l7.586 7.586"></path>
-                <circle cx="11" cy="11" r="2"></circle>
-              </svg>
+              <TbColorPicker />
             </button>
 
             <div className="flex-1">
@@ -330,15 +316,18 @@ export function ColorPicker({
 
           {/* My Pantone Colors */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">My Pantone Colors</h3>
+            <h3 className="text-base leading-[120%] text-black font-medium">
+              My Pantone Colors
+            </h3>
             <div className="flex gap-2">
               {[...new Set([...savedColors, ...recentColors])]
                 .slice(0, 5)
                 .map((savedColor, index) => (
                   <button
                     key={index}
-                    className={`w-6 h-6 lg:w-8 lg:h-8 rounded-md border border-gray-300 ${savedColor === hexValue ? "ring-2 ring-black" : ""
-                      }`}
+                    className={`w-6 h-6 rounded-md border border-gray-300 ${
+                      savedColor === hexValue ? "ring-2 ring-black" : ""
+                    }`}
                     style={{ backgroundColor: savedColor }}
                     onClick={() => {
                       setHexValue(savedColor);
@@ -367,8 +356,10 @@ export function ColorPicker({
           {/* Color gradient square */}
 
           <div className="flex gap-2 p-2">
-
-            <div className="p-2  rounded w-[190px] lg:w-[250px] h-[300px] lg:h-[400px]" style={{ boxShadow: "0px 0px 8px 0px #00000029" }}>
+            <div
+              className="p-2  rounded w-[190px] lg:w-[250px] h-[300px] lg:h-[400px]"
+              style={{ boxShadow: "0px 0px 8px 0px #00000029" }}
+            >
               <div
                 ref={paletteRef}
                 className="w-full h-44 lg:h-64 cursor-crosshair relative"
@@ -477,8 +468,9 @@ export function ColorPicker({
                     </span>
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform ${showDropdown ? "rotate-180" : ""
-                      }`}
+                    className={`h-4 w-4 transition-transform ${
+                      showDropdown ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 

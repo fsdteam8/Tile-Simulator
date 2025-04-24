@@ -7,16 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { Palette, ImageIcon, AlertCircle, CheckCircle, X } from "lucide-react"
-import type { AllTilesColorDataType } from "../AllTilesColorData"
 import { FormHeader } from "./form-header"
 import { ColorPicker } from "./color-picker"
 import { ImageUploader } from "./image-uploader"
 import { FormFooter } from "./form-footer"
+import { Color } from "../AllTilesColorData"
 
 interface ColorFormProps {
-  color: AllTilesColorDataType | null
+  color: Color | null
   onCancel: () => void
-  onSave: (color: AllTilesColorDataType) => void
+  onSave: (color: Color) => void
 }
 
 type SelectionMode = "color" | "image"
@@ -26,6 +26,7 @@ type MessageType = "success" | "error" | null
 const MOCK_API_RESPONSE = false
 
 export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
+  console.log("color", color)
   const [title, setTitle] = useState(color?.name || "")
   const [selectedColor, setSelectedColor] = useState(color?.code || "")
   const [selectedImage, setSelectedImage] = useState<string | null>(color?.image || null)
@@ -80,7 +81,7 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
     setIsSubmitting(true)
 
     try {
-      const colorData: Partial<AllTilesColorDataType> = {
+      const colorData: Partial<Color> = {
         name: title,
         code: selectionMode === "color" ? selectedColor : null,
         image: selectionMode === "image" ? selectedImage : null,
@@ -104,12 +105,13 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
       if (MOCK_API_RESPONSE) {
         console.log("Using mock API response")
         // Create a mock response
-        const mockResponse: AllTilesColorDataType = {
+        
+        const mockResponse: Color = {
           id: isEditing ? color?.id || "mock-id" : `mock-id-${Date.now()}`,
           name: title,
           code: selectionMode === "color" ? selectedColor : null,
           image: selectionMode === "image" ? selectedImage : null,
-          createdAt: isEditing ? color?.createdAt || new Date().toISOString() : new Date().toISOString(),
+          created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }
 
@@ -156,7 +158,7 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
             name: title,
             code: selectionMode === "color" ? selectedColor : null,
             image: selectionMode === "image" ? selectedImage : null,
-            createdAt: isEditing ? color?.createdAt || new Date().toISOString() : new Date().toISOString(),
+            createdAt: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }
         }
@@ -176,12 +178,12 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
         // If we're in development, create a fallback response for testing
         if (process.env.NODE_ENV === "development") {
           console.log("Using fallback response for development")
-          const fallbackData: AllTilesColorDataType = {
+          const fallbackData: Color = {
             id: isEditing ? color?.id || "fallback-id" : `fallback-id-${Date.now()}`,
             name: title,
             code: selectionMode === "color" ? selectedColor : null,
             image: selectionMode === "image" ? selectedImage : null,
-            createdAt: isEditing ? color?.createdAt || new Date().toISOString() : new Date().toISOString(),
+            created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
             updated_at: new Date().toISOString(),
           }
 
@@ -196,12 +198,12 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
       // If we're in development, create a fallback response for testing
       if (process.env.NODE_ENV === "development") {
         console.log("Using fallback response for development after error")
-        const fallbackData: AllTilesColorDataType = {
+        const fallbackData: Color = {
           id: isEditing ? color?.id || "fallback-id" : `fallback-id-${Date.now()}`,
           name: title,
           code: selectionMode === "color" ? selectedColor : null,
           image: selectionMode === "image" ? selectedImage : null,
-          createdAt: isEditing ? color?.createdAt || new Date().toISOString() : new Date().toISOString(),
+          created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }
 

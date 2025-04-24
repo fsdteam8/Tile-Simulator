@@ -5,11 +5,11 @@ import { type ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-
 import { DataTable } from "@/components/ui/data-table"
 import TilePagination from "@/components/ui/TilePagination"
 import { createAllTilesCategoriesColumn } from "./AllTilesCategoriesColumn"
-import { AllTilesCategory } from "./AllTilesCategoriesData"
+import { Category } from "@/components/types/all-tiles-categories"
 
 interface TableContainerProps {
-  data: AllTilesCategory[]
-  columns: ColumnDef<AllTilesCategory>[]
+  data: Category[]
+  columns: ColumnDef<Category>[]
 }
 
 const TableContainer = ({ data, columns }: TableContainerProps) => {
@@ -28,8 +28,8 @@ const TableContainer = ({ data, columns }: TableContainerProps) => {
 
 
 interface AllTilesCategoriesCotainerProps {
-  onEdit: (category: AllTilesCategory) => void
-  data: AllTilesCategory[] | undefined
+  onEdit: (category: Category) => void
+  data?: Category[] | undefined
   isLoading: boolean
   isError: boolean
   error: unknown

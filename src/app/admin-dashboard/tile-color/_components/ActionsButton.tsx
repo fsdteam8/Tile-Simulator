@@ -4,15 +4,15 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
 import { FiEdit } from "react-icons/fi"
-import type { AllTilesColorDataType } from "./AllTilesColorData"
 import { DeleteConfirmationColorModal } from "./DeleteConfirmationModal"
 import { useSession } from "next-auth/react"
+import { Color } from "./AllTilesColorData"
 
 interface ActionsButtonProps {
   row: {
-    original: AllTilesColorDataType
+    original: Color
   }
-  onEdit: (color: AllTilesColorDataType) => void
+  onEdit: (color: Color) => void
 }
 
 function ActionsButton({ row, onEdit }: ActionsButtonProps) {

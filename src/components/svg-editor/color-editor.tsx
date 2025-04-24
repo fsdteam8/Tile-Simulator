@@ -279,7 +279,7 @@ export function ColorEditor({
               {colorPalette.map((color, index) => (
                 <button
                   key={index}
-                  className={`w-6 h-6 rounded-sm transition-transform hover:scale-110 ${
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
                     selectedPathColor === color
                       ? "border-black ring-2 ring-black/20"
                       : "border-gray-200"
@@ -294,7 +294,7 @@ export function ColorEditor({
               {colorPalette1.map((color, index) => (
                 <button
                   key={index}
-                  className={`w-6 h-6 rounded-sm transition-transform hover:scale-110 ${
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
                     selectedPathColor === color
                       ? "border-black ring-2 ring-black/20"
                       : "border-gray-200"

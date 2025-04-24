@@ -4,14 +4,15 @@ import { Trash2 } from "lucide-react"
 import { FiEdit } from "react-icons/fi"
 import { DeleteConfirmationCategoriesModal } from "./DeleteConfirmationCategoriesModal"
 import { useState } from "react"
-import {  AllTilesCategory } from "./AllTilesCategoriesData"
+import { Category } from "@/components/types/all-tiles-categories"
+// import AllTilesCategory from "./AllTilesCategoriesData";
 
 interface ActionsButtonProps {
   row: {
-    original: AllTilesCategory
+    original: Category
   }
-  onEdit: (category: AllTilesCategory) => void
-  onDelete?: (color: AllTilesCategory) => void
+  onEdit: (category: Category) => void
+  onDelete?: (color: Category) => void
 }
 
 function ActionsButton({ row, onEdit, onDelete }: ActionsButtonProps) {

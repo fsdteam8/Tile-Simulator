@@ -2,16 +2,16 @@
 
 import { Checkbox } from "@/components/ui/checkbox"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { AllTilesColorDataType } from "./AllTilesColorData"
 import ActionsButton from "./ActionsButton"
 import Image from "next/image"
+import { Color } from "./AllTilesColorData"
 
 interface ColumnProps {
-  onEdit: (color: AllTilesColorDataType) => void
-  onDelete: (color: AllTilesColorDataType) => void
+  onEdit: (color: Color) => void
+  onDelete: (color: Color) => void
 }
 
-export const createAllTilesColorColumn = ({ onEdit}: ColumnProps): ColumnDef<AllTilesColorDataType>[] => [
+export const createAllTilesColorColumn = ({ onEdit}: ColumnProps): ColumnDef<Color>[] => [
   {
     id: "select",
     header: ({ table }) => (

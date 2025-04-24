@@ -22,7 +22,7 @@ function GroutThicknessColor({
   };
   return (
     <div>
-      <div className="flex justify-between gap-2">
+      <div className="flex flex-col md:flex-row justify-between gap-2">
         <div className="space-y-2">
           <h3 className="text-base leading-[120%] text-black font-medium">Grout Thickness:</h3>
           <div className="flex gap-2">

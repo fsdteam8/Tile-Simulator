@@ -177,7 +177,7 @@ export function ColorEditor({
         </h3>
         <div className="w-full h-full flex justify-center items-start">
           {svgArray.length === 0 ? (
-            <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[700px] lg:h-[470px]">
+            <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[500px] lg:h-[400px]">
               <p className="text-sm font-medium text-gray-500">
                 No SVG data available.
               </p>

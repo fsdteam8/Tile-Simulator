@@ -56,7 +56,7 @@ export const createAllTilesColorColumn = ({ onEdit}: ColumnProps): ColumnDef<Col
           ) : (
             <div className="w-12 h-12 rounded-md overflow-hidden">
               <Image
-                src={row.original.image ? `/${row.original.image}`: "/placeholder.svg"}
+                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${row.original.image}`}
                 alt={row.original.name}
                 width={48}
                 height={48}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+// import { useSession } from "next-auth/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,8 +39,8 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>(initialMode)
 
   const isEditing = !!color
-  const session = useSession()
-  const token = (session?.data?.user as { token: string })?.token
+  // const session = useSession()
+  // const token = (session?.data?.user as { token: string })?.token
 
   const handleModeChange = (mode: SelectionMode) => {
     setSelectionMode(mode)
@@ -131,9 +131,9 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
         method: method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          // Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(colorData),
+        body: JSON.stringify(colorData)
       })
 
       // Log the raw response for debugging

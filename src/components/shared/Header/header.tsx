@@ -6,7 +6,7 @@ import Hideon from "../../../../provider/Hideon";
 async function Header() {
   return (
     <Hideon routes={["/admin-dashboard"]}>
-      <div className="bg-[#000000]/50 ">
+      <div className="bg-[#000000]/50">
         <div className="container flex justify-between items-center py-2 2xl:py-4 px-8 ">
           <div>
             <Link href="/">

@@ -5,6 +5,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import AuctionButton from "./AuctionButton";
 import { Tile } from "./AllTilesData";
+import moment from 'moment';
+
 
 export const AllTilesColumn: ColumnDef<Tile>[] = [
   {
@@ -73,7 +75,7 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
       return (
         <div className="w-full flex justify-center items-center">
           <span className="text-base font-normal text-black leading-[120%] text-center">
-            {row.original.created_at}
+            {moment(row.original.created_at).format("DD-MM-YYYY")}
           </span>
         </div>
       );

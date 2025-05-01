@@ -39,6 +39,8 @@ export function SvgRenderer({
   const [internalRotations, setInternalRotations] = useState<number[]>(svgArray.map(() => 0))
   const [relatedPaths, setRelatedPaths] = useState<string[]>([])
 
+  console.log("SVG kongkon:", pathColors)
+
   // Determine which rotations to use - external or internal
   const rotations = externalRotations || internalRotations
 

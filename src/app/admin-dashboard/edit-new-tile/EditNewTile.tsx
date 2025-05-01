@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // Add the missing imports
@@ -41,9 +41,20 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useCallback, useState } from "react";
-import SVGUpload from "./SVGUpload";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import SVGUpload from "../add-new-tile/_components/SVGUpload";
+
+interface TileResponse {
+  data: Tile;
+}
+
+interface Tile {
+  name: string;
+  description: string;
+  grid_category: string;
+  categories: { name: string }[];
+}
 
 // Form Schema with zod
 const formSchema = z.object({
@@ -65,12 +76,14 @@ type FormValues = z.infer<typeof formSchema>;
 
 const gridSelectionData = ["1x1", "2x2"];
 
-const AddNewTile = () => {
+const EditNewTile = ({ id }: { id: number | string }) => {
   const [image, setSvgData] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
   console.log(token);
+
+  const queryClient = useQueryClient();
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -97,33 +110,64 @@ const AddNewTile = () => {
     },
   });
 
+  const { data: tileSingleData } = useQuery<TileResponse>({
+    queryKey: ["single-tile"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`
+      );
+      return response.json();
+    },
+  });
+
+  //   console.log(tileSingleData?.data?.image);
+
+  useEffect(() => {
+    if (tileSingleData) {
+      form.reset({
+        name: tileSingleData?.data?.name,
+        description: tileSingleData?.data?.description,
+        grid_category: tileSingleData?.data?.grid_category,
+        categories: tileSingleData?.data?.categories.map((c) => c?.name),
+      });
+    }
+  }, [tileSingleData, form]);
+
   const { mutate, isPending } = useMutation({
-    mutationKey: ["createTile"],
-    mutationFn: (formData: FormData) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles`, {
+    mutationKey: ["updateTile", id],
+    mutationFn: (formData: FormData) => {
+      formData.append("_method", "PUT");
+
+      return fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`, {
         method: "POST",
-        headers:{
+        headers: {
           Authorization: `Bearer ${token}`,
-          // "Content-Type": "multipart/form-data",
         },
         body: formData,
-      }).then((res) => res.json()),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to update tile");
+        }
+        return data;
+      });
+    },
     onSuccess: (data) => {
-      console.log(data);
-      if (!data?.success) {
-        toast.error(data.message, {
-          position: "top-right",
-          richColors: true,
-        });
-        return;
-      }
-      form.reset();
-      toast.success(data.message, {
+      toast.success(data.message || "Tile updated successfully", {
+        position: "top-right",
+        richColors: true,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["all tiles"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update tile", {
         position: "top-right",
         richColors: true,
       });
     },
   });
+
 
   const handleSvgChange = useCallback((newSvgData: File | null) => {
     setSvgData(newSvgData);
@@ -398,4 +442,4 @@ const AddNewTile = () => {
   );
 };
 
-export default AddNewTile;
+export default EditNewTile;

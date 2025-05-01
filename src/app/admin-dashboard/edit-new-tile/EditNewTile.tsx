@@ -54,6 +54,7 @@ interface Tile {
   description: string;
   grid_category: string;
   categories: { name: string }[];
+  image: string;
 }
 
 // Form Schema with zod
@@ -111,7 +112,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   });
 
   const { data: tileSingleData } = useQuery<TileResponse>({
-    queryKey: ["single-tile"],
+    queryKey: ["single-tile", id],
     queryFn: async () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`
@@ -157,7 +158,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
         position: "top-right",
         richColors: true,
       });
-      
+
       queryClient.invalidateQueries({ queryKey: ["all tiles"] });
     },
     onError: (error: Error) => {
@@ -167,7 +168,6 @@ const EditNewTile = ({ id }: { id: number | string }) => {
       });
     },
   });
-
 
   const handleSvgChange = useCallback((newSvgData: File | null) => {
     setSvgData(newSvgData);
@@ -180,12 +180,12 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   }
 
   const onSubmit = async (data: FormValues) => {
-    if (!image) {
-      toast.error("Missing SVG", {
-        description: "Please upload an SVG file",
-      });
-      return;
-    }
+    // if (!image) {
+    //   toast.error("Missing SVG", {
+    //     description: "Please upload an SVG file",
+    //   });
+    //   return;
+    // }
 
     // Find selected category IDs
     const selectedCategoryIds = data.categories
@@ -412,7 +412,11 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                 Add Photo
               </h3>
               <div className="pt-[14px]">
-                <SVGUpload onUpload={handleSvgChange} maxSizeKB={11500} />
+                <SVGUpload
+                  onUpload={handleSvgChange}
+                  maxSizeKB={11500}
+                  initialImage={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${tileSingleData?.data?.image}`}
+                />
               </div>
 
               {/* button  */}

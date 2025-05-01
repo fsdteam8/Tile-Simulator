@@ -38,6 +38,7 @@ const AuctionButton = ({ row }: any) => {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
+            //  "Content-Type": "multipart/form-data",
           },
         }
       ).then((res) => res.json()),
@@ -47,6 +48,7 @@ const AuctionButton = ({ row }: any) => {
         return;
       }
       toast.success(data?.message || "Tile deleted successfully");
+      setDeleteModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["all tiles"] });
     },
   });

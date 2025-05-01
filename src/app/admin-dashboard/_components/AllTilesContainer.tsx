@@ -27,9 +27,9 @@ const AllTilesContainer = () => {
           columns={AllTilesColumn}
         />
       </div>
-      <div>
+      <div className="pb-[208px]">
         {data && data?.total_pages > 1 && (
-          <div className="mt-[30px]  w-full pb-[208px]  flex justify-between">
+          <div className="mt-[30px]  w-full   flex justify-between">
             <p className="font-normal text-base leading-[120%] text-secondary-100">
               Showing {data?.current_page} from {data?.total_pages}
             </p>

@@ -10,6 +10,7 @@ import { AllTilesCategoriesResponse } from "./_components/AllTilesCategoriesData
 import { Category } from "@/components/types/all-tiles-categories";
 
 const TileCategories = () => {
+  const [currectPage, setCurrentPage] = useState(1);
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
@@ -36,9 +37,9 @@ const TileCategories = () => {
 
   const { data, isLoading, isError, error } =
     useQuery<AllTilesCategoriesResponse>({
-      queryKey: ["allTilesCategories"],
+      queryKey: ["allTilesCategories", currectPage],
       queryFn: () =>
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`).then(
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?page=${currectPage}`).then(
           (res) => res.json()
         ),
     });
@@ -63,6 +64,9 @@ const TileCategories = () => {
           isLoading={isLoading}
           isError={isError}
           error={error}
+          currentPage={currectPage}
+          setCurrentPage={setCurrentPage}
+          paginationData={data}
         />
       )}
     </div>

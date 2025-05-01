@@ -18,7 +18,7 @@ const DeleteModal = ({ isOpen, onClose, onConfirm }: logoutModalProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[450px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-black leading-normal">Are you sure you want to delete this Image Gallry ?</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-black leading-normal">Are you sure you want to delete this Item ?</DialogTitle>
         </DialogHeader>
         <DialogFooter className="w-full flex items-center !justify-center gap-7 mt-5">
           <button

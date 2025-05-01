@@ -121,7 +121,7 @@ export default function AddTileEditAndAddCategories({
             </span>
           </nav>
         </div>
-        <Button size="icon" onClick={onCancel} className="h-11 w-20">
+        <Button  size="icon" onClick={onCancel} className="h-11 w-20 text-white">
           <ArrowLeft className="h-5 w-5" /> Back
         </Button>
       </div>
@@ -171,7 +171,7 @@ export default function AddTileEditAndAddCategories({
                 )}
               />
               <div className="flex gap-4">
-                <Button type="submit" disabled={mutation.isPending}>
+                <Button className="text-white" type="submit" disabled={mutation.isPending}>
                   {mutation.isPending
                     ? "Saving..."
                     : isEditing

@@ -180,12 +180,12 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   }
 
   const onSubmit = async (data: FormValues) => {
-    if (!image) {
-      toast.error("Missing SVG", {
-        description: "Please upload an SVG file",
-      });
-      return;
-    }
+    // if (!image) {
+    //   toast.error("Missing SVG", {
+    //     description: "Please upload an SVG file",
+    //   });
+    //   return;
+    // }
 
     // Find selected category IDs
     const selectedCategoryIds = data.categories

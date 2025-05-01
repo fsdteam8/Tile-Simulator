@@ -9,13 +9,12 @@ import { useSession } from "next-auth/react"
 import { Color } from "./AllTilesColorData"
 
 interface ActionsButtonProps {
-  row: {
-    original: Color
-  }
+  color: Color
   onEdit: (color: Color) => void
+  onDelete?: (colorId: number) => void
 }
 
-function ActionsButton({ row, onEdit }: ActionsButtonProps) {
+function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const queryClient = useQueryClient()
   const { data: session } = useSession()
@@ -33,47 +32,40 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
           },
         }
       )
-  
-      console.log("Delete Response Status:", response.status)
-  
+
       if (!response.ok) {
-        const errorMessage = await response.text() // Get error details
-        throw new Error(`Failed to delete color: ${errorMessage}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          errorData.message || `Failed to delete color: ${response.status}`
+        )
       }
-  
-      // If response is 204 No Content, exit early
-      if (response.status === 204) {
-        console.log("Delete successful, no response body.")
-        return
-      }
-  
-      // Attempt to parse JSON only if content exists
-      const contentType = response.headers.get("content-type")
-      if (contentType && contentType.includes("application/json")) {
-        const responseData = await response.json()
-        console.log("Delete Response Data:", responseData)
-      }
+
+      return true
     } catch (error) {
       console.error("Error in deleteColor:", error)
       throw error
     }
   }
-  
-  
 
   const mutation = useMutation({
-    mutationFn: () => deleteColor(Number(row.original.id)),
+    mutationFn: () => deleteColor(Number(color.id)),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["colors"] }) // Refresh the color list
+      queryClient.invalidateQueries({ queryKey: ["allTilesColor"] })
       setShowDeleteModal(false)
+      onDelete?.(Number(color.id))
     },
-    onError: (error) => {
-      console.error("Error deleting color:", error)
+    onError: (error: Error) => {
+      console.error("Error deleting color:", error.message)
     },
   })
 
+  // Move the null check after all hooks
+  if (!color || typeof color.id === 'undefined') {
+    return null
+  }
+
   const handleEdit = () => {
-    onEdit(row.original)
+    onEdit(color)
   }
 
   const handleDeleteClick = () => {
@@ -82,13 +74,11 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
 
   const handleDeleteConfirm = async () => {
     try {
-      await mutation.mutateAsync() // Wait for delete to complete
-      console.log("Item deleted successfully")
-    } catch (error) {
-      console.error("Failed to delete item:", error)
+      await mutation.mutateAsync()
+    } catch {
+      // Error is already handled in mutation.onError
     }
   }
-  
 
   const handleDeleteCancel = () => {
     setShowDeleteModal(false)
@@ -96,13 +86,19 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
 
   return (
     <div className="flex items-center justify-center gap-[10px]">
-      <button onClick={handleEdit}>
+      <button
+        onClick={handleEdit}
+        className="text-gray-600 hover:text-blue-600 transition-colors"
+        aria-label="Edit color"
+      >
         <FiEdit className="w-5 h-5" />
       </button>
+      
       <button
         onClick={handleDeleteClick}
-        className="hover:text-red-600"
-        disabled={!token} // Disable if no token
+        className="text-gray-600 hover:text-red-600 transition-colors"
+        disabled={!token || mutation.isPending}
+        aria-label="Delete color"
       >
         <Trash2 className="w-5 h-5" />
       </button>
@@ -110,8 +106,8 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
       <DeleteConfirmationColorModal
         isOpen={showDeleteModal}
         onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm} // Pass async function
-        itemName={row.original.name}
+        onConfirm={handleDeleteConfirm}
+        itemName={color.name}
       />
     </div>
   )

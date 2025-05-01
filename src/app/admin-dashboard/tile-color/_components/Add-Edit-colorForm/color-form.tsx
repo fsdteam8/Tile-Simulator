@@ -12,6 +12,7 @@ import { ColorPicker } from "./color-picker"
 import { ImageUploader } from "./image-uploader"
 import { FormFooter } from "./form-footer"
 import { Color } from "../AllTilesColorData"
+import { useSession } from "next-auth/react"
 
 interface ColorFormProps {
   color: Color | null
@@ -39,8 +40,8 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>(initialMode)
 
   const isEditing = !!color
-  // const session = useSession()
-  // const token = (session?.data?.user as { token: string })?.token
+  const session = useSession()
+  const token = (session?.data?.user as { token: string })?.token
 
   const handleModeChange = (mode: SelectionMode) => {
     setSelectionMode(mode)
@@ -131,7 +132,7 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
         method: method,
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(colorData)
       })

@@ -5,6 +5,7 @@ import { SvgRenderer } from "./svg-renderer";
 import type { SvgData, ColorData } from "./types";
 import { ColorPicker } from "./color-picker";
 import GroutThicknessColor from "./grout-thickness-color";
+import { ColorItem } from "./colortype";
 
 interface ColorEditorProps {
   svgArray: SvgData[]; // Expect an array of SvgData
@@ -34,6 +35,35 @@ export function ColorEditor({
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   const [pathColors, setPathColors] = useState<Record<string, string>>({});
   const [svgColors, setSvgColors] = useState<string[]>([]);
+  const [apiColors, setApiColors] = useState<ColorItem[]>([]);
+  const [loadingColors, setLoadingColors] = useState(true);
+
+  console.log(loadingColors);
+
+
+  console.log("SVG color:", pathColors);
+
+  useEffect(() => {
+    const fetchColors = async () => {
+      try {
+        const response = await fetch(
+          "https://tilecustomizer.scaleupdevagency.com/api/colors"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch colors");
+        }
+        const data = await response.json();
+        setApiColors(data.data);
+        console.log("Fetched colors:", data.data[7]?.image);
+      } catch (error) {
+        console.error("Error fetching colors:", error);
+      } finally {
+        setLoadingColors(false);
+      }
+    };
+
+    fetchColors();
+  }, []);
 
   // Extract all unique colors from the SVG on component mount
   useEffect(() => {
@@ -83,8 +113,7 @@ export function ColorEditor({
         }
 
         console.log(
-          `Selected path: ${pathId} with color: ${
-            pathColors[pathId] || path.fill
+          `Selected path: ${pathId} with color: ${pathColors[pathId] || path.fill
           }`
         );
       }
@@ -124,6 +153,10 @@ export function ColorEditor({
           name: `Color ${color}`,
         };
 
+        console.log(
+          `Setting color for path ${pathId} to ${color}`
+        );
+
         setPathColors((prev) => ({
           ...prev,
           [pathId]: color,
@@ -161,8 +194,8 @@ export function ColorEditor({
 
   const selectedPathColor = selectedPathId
     ? pathColors[selectedPathId] ||
-      svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
-        ?.fill
+    svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
+      ?.fill
     : null;
 
   return (
@@ -185,13 +218,13 @@ export function ColorEditor({
           ) : (
             <div className="w-full h-full">
               <SvgRenderer
-              svgArray={svgArray}
-              selectedPathId={selectedPathId}
-              pathColors={pathColors}
-              onPathSelect={handlePathSelect}
-              onRotate={handleRotationChange}
-              rotations={rotations}
-            />
+                svgArray={svgArray}
+                selectedPathId={selectedPathId}
+                pathColors={pathColors}
+                onPathSelect={handlePathSelect}
+                onRotate={handleRotationChange}
+                rotations={rotations}
+              />
             </div>
           )}
         </div>
@@ -222,14 +255,13 @@ export function ColorEditor({
                     svgArray
                       .flatMap((svg) => svg.paths)
                       .find((p) => p.id === selectedPathId)?.originalFill ===
-                      color));
+                    color));
 
               return (
                 <div
                   key={index}
                   className={`w-6 h-6 rounded border cursor-pointer transition-transform relative
-                    hover:scale-110 ${
-                      isSelectedColor ? "ring-2 ring-black" : ""
+                    hover:scale-110 ${isSelectedColor ? "ring-2 ring-black" : ""
                     } 
                     ${isUsedByPath ? "border-${color}" : "border-gray-200"}`}
                   style={{ backgroundColor: color }}
@@ -273,34 +305,28 @@ export function ColorEditor({
         </div> */}
 
         {/* Color Palette */}
-        <div className="space-y-4 mt-[32px] ">
+        <div className="space-y-4 mt-[32px]">
           <div className="w-full flex gap-[15px]">
             <div className="grid grid-cols-8 gap-[13px]">
-              {colorPalette.map((color, index) => (
+              {apiColors.map((colorItem, index) => (
                 <button
                   key={index}
-                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
-                    selectedPathColor === color
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${selectedPathColor === (colorItem.code || colorItem.image)
                       ? "border-black ring-2 ring-black/20"
                       : "border-gray-200"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => handleColorSelect(color)}
-                  disabled={!selectedPathId}
-                />
-              ))}
-            </div>
-            <div className="grid grid-cols-8 gap-[13px]">
-              {colorPalette1.map((color, index) => (
-                <button
-                  key={index}
-                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
-                    selectedPathColor === color
-                      ? "border-black ring-2 ring-black/20"
-                      : "border-gray-200"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  onClick={() => handleColorSelect(color)}
+                    }`}
+                  style={{
+                    backgroundColor: colorItem.code || "transparent",
+                    backgroundImage: colorItem.image
+                      ? `url(${process.env.NEXT_PUBLIC_BACKEND_URL}/${colorItem.image})`
+                      : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center"
+                  }}
+                  onClick={() => {
+                    const color = colorItem.code || colorItem.image;
+                    if (color) handleColorSelect(color);
+                  }}
                   disabled={!selectedPathId}
                 />
               ))}
@@ -328,119 +354,5 @@ export function ColorEditor({
   );
 }
 
-const colorPalette = [
-  "#f5f5f0",
-  "#e6e6d8",
-  "#d8d8c0",
-  "#ccccb3",
-  "#bfbfa8",
-  "#b3b39e",
-  "#a6a693",
-  "#999989",
-  "#8c8c7f",
-  "#000000",
-  "#595959",
-  "#404040",
-  "#262626",
-  "#666666",
-  "#808080",
-  "#999999",
-  "#d9e6f2",
-  "#c6d9e6",
-  "#b3ccd9",
-  "#a0bfcc",
-  "#8cb3bf",
-  "#79a6b3",
-  "#6699a6",
-  "#538099",
-  "#d9e6d9",
-  "#c6d9c6",
-  "#b3ccb3",
-  "#a0bfa0",
-  "#8cb38c",
-  "#79a679",
-  "#669966",
-  "#538053",
-  "#f2d9d9",
-  "#e6c6c6",
-  "#d9b3b3",
-  "#cca0a0",
-  "#bf8c8c",
-  "#b37979",
-  "#a66666",
-  "#995353",
-  "#f2e6d9",
-  "#e6d9c6",
-  "#d9ccb3",
-  "#ccbfa0",
-  "#bfb38c",
-  "#b3a679",
-  "#a69966",
-  "#998c53",
-  "#ff5733",
-  "#33ff57",
-  "#3357ff",
-  "#ff33a1",
-  "#a133ff",
-  "#33ffa1",
-  "#ffeb33",
-  "#ff3362",
-];
-const colorPalette1 = [
-  "#c6d9e6",
-  "#b3ccd9",
-  "#a0bfcc",
-  "#8cb3bf",
-  "#79a6b3",
-  "#6699a6",
-  "#538099",
-  "#d9e6d9",
-  "#c6d9c6",
-  "#b3ccb3",
-  "#a0bfa0",
-  "#8cb38c",
-  "#79a679",
-  "#669966",
-  "#538053",
-  "#f2d9d9",
-  "#e6c6c6",
-  "#d9b3b3",
-  "#cca0a0",
-  "#bf8c8c",
-  "#b37979",
-  "#a66666",
-  "#995353",
-  "#f2e6d9",
-  "#e6d9c6",
-  "#d9ccb3",
-  "#ccbfa0",
-  "#bfb38c",
-  "#b3a679",
-  "#a69966",
-  "#998c53",
-  "#ff5733",
-  "#33ff57",
-  "#3357ff",
-  "#ff33a1",
-  "#a133ff",
-  "#33ffa1",
-  "#ffeb33",
-  "#ff3362",
-  "#f5f5f0",
-  "#e6e6d8",
-  "#d8d8c0",
-  "#ccccb3",
-  "#bfbfa8",
-  "#b3b39e",
-  "#a6a693",
-  "#999989",
-  "#8c8c7f",
-  "#000000",
-  "#595959",
-  "#404040",
-  "#262626",
-  "#666666",
-  "#808080",
-  "#999999",
-  "#d9e6f2",
-];
+
+

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import type { SvgData } from "@/components/svg-editor/types";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import type { SvgData } from "@/components/svg-editor/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   currentSvg: SvgData[] | null;
@@ -251,8 +251,12 @@ export default function ViewPanel({
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
-                <div className="flex items-center justify-center bg-black/20 w-full h-full">
-                  <h1 className="text-2xl">VIEW</h1>
+                <div className="flex items-center justify-center bg-black/20 w-full h-full relative">
+                  <Image
+                    src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746168040/image_piti7e.png"
+                    fill
+                    alt="default rom"
+                  />
                 </div>
               ) : (
                 <div>

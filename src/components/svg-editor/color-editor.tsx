@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { SvgRenderer } from "./svg-renderer";
-import type { SvgData, ColorData } from "./types";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import { ColorPicker } from "./color-picker";
-import GroutThicknessColor from "./grout-thickness-color";
 import { ColorItem } from "./colortype";
+import GroutThicknessColor from "./grout-thickness-color";
+import { SvgRenderer } from "./svg-renderer";
+import type { ColorData, SvgData } from "./types";
 
 interface ColorEditorProps {
   svgArray: SvgData[]; // Expect an array of SvgData
@@ -39,7 +40,6 @@ export function ColorEditor({
   const [loadingColors, setLoadingColors] = useState(true);
 
   console.log(loadingColors);
-
 
   console.log("SVG color:", pathColors);
 
@@ -113,7 +113,8 @@ export function ColorEditor({
         }
 
         console.log(
-          `Selected path: ${pathId} with color: ${pathColors[pathId] || path.fill
+          `Selected path: ${pathId} with color: ${
+            pathColors[pathId] || path.fill
           }`
         );
       }
@@ -153,9 +154,7 @@ export function ColorEditor({
           name: `Color ${color}`,
         };
 
-        console.log(
-          `Setting color for path ${pathId} to ${color}`
-        );
+        console.log(`Setting color for path ${pathId} to ${color}`);
 
         setPathColors((prev) => ({
           ...prev,
@@ -194,8 +193,8 @@ export function ColorEditor({
 
   const selectedPathColor = selectedPathId
     ? pathColors[selectedPathId] ||
-    svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
-      ?.fill
+      svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
+        ?.fill
     : null;
 
   return (
@@ -210,10 +209,12 @@ export function ColorEditor({
         </h3>
         <div className="w-full h-full flex justify-center items-start">
           {svgArray.length === 0 ? (
-            <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[500px] lg:h-[400px]">
-              <p className="text-sm font-medium text-gray-500">
-                No SVG data available.
-              </p>
+            <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[500px] lg:h-[400px] relative">
+              <Image
+                src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746167200/image_2x_fb6njy.png"
+                fill
+                alt="empty tile"
+              />
             </div>
           ) : (
             <div className="w-full h-full">
@@ -255,13 +256,14 @@ export function ColorEditor({
                     svgArray
                       .flatMap((svg) => svg.paths)
                       .find((p) => p.id === selectedPathId)?.originalFill ===
-                    color));
+                      color));
 
               return (
                 <div
                   key={index}
                   className={`w-6 h-6 rounded border cursor-pointer transition-transform relative
-                    hover:scale-110 ${isSelectedColor ? "ring-2 ring-black" : ""
+                    hover:scale-110 ${
+                      isSelectedColor ? "ring-2 ring-black" : ""
                     } 
                     ${isUsedByPath ? "border-${color}" : "border-gray-200"}`}
                   style={{ backgroundColor: color }}
@@ -311,17 +313,18 @@ export function ColorEditor({
               {apiColors.map((colorItem, index) => (
                 <button
                   key={index}
-                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${selectedPathColor === (colorItem.code || colorItem.image)
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
+                    selectedPathColor === (colorItem.code || colorItem.image)
                       ? "border-black ring-2 ring-black/20"
                       : "border-gray-200"
-                    }`}
+                  }`}
                   style={{
                     backgroundColor: colorItem.code || "transparent",
                     backgroundImage: colorItem.image
                       ? `url(${process.env.NEXT_PUBLIC_BACKEND_URL}/${colorItem.image})`
                       : "none",
                     backgroundSize: "cover",
-                    backgroundPosition: "center"
+                    backgroundPosition: "center",
                   }}
                   onClick={() => {
                     const color = colorItem.code || colorItem.image;
@@ -353,6 +356,3 @@ export function ColorEditor({
     </div>
   );
 }
-
-
-

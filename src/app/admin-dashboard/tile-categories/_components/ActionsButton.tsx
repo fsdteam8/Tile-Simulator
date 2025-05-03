@@ -8,6 +8,7 @@ import DeleteModal from "@/components/shared/modal/DeleteConfirmationModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface ActionsButtonProps {
   row: {
@@ -22,6 +23,8 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
   const [selectedTileId, setSelectedTileId] = useState<number | string | null>(
     null
   );
+
+  const router = useRouter();
 
   const queryClient = useQueryClient();
 
@@ -51,6 +54,7 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
         return;
       }
       toast.success(data?.message || "Category deleted successfully");
+      router.push("/admin-dashboard/tile-categories");
       setDeleteModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["allTilesCategories"] });
     },

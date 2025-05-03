@@ -43,32 +43,32 @@ export const createAllTilesCategoriesColumn = ({ onEdit }: ColumnProps): ColumnD
   },
   {
     header: "Count",
-    // cell: ({ row }) => {
-    //   return (
-    //     <div className="flex justify-center items-center gap-[2px]">
-    //       <span className="text-base font-normal text-black leading-[120%] text-center">{(row.original as string)?.count || "no data"}</span>
-    //     </div>
-    //   )
-    // },
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-center items-center gap-[2px]">
+          <span className="text-base font-normal text-black leading-[120%] text-center">{(row.original.tiles_count)}</span>
+        </div>
+      )
+    },
   },
-  // {
-  //   header: "Date",
-  //   cell: ({ row }) => {
-  //     const dateString = row.original.updated_at;
-  //     const date = new Date(dateString); // Parse the string into a Date object
+  {
+    header: "Date",
+    cell: ({ row }) => {
+      const dateString = row.original.updated_at;
+      const date = new Date(dateString); // Parse the string into a Date object
 
-  //     // Format the Date object
-  //     const formattedDate = date.toLocaleString('en-US', {
-  //       year: 'numeric', month: 'long', day: 'numeric',
-  //       hour: '2-digit'
-  //     });
-  //     return (
-  //       <div className="flex justify-center items-center gap-[2px]">
-  //         <span className="text-base font-normal text-black leading-[120%] text-center">{formattedDate}</span>
-  //       </div>
-  //     )
-  //   },
-  // },
+      // Format the Date object
+      const formattedDate = date.toLocaleString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit'
+      });
+      return (
+        <div className="flex justify-center items-center gap-[2px]">
+          <span className="text-base font-normal text-black leading-[120%] text-center">{formattedDate}</span>
+        </div>
+      )
+    },
+  },
   {
     header: "Actions",
     cell: ({ row }) => {

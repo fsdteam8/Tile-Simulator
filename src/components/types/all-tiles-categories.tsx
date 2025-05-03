@@ -2,6 +2,7 @@
 export type Category = {
   id: number;
   name: string;
+  tiles_count: number;
   description: string | null;
   created_at: string | null;
   updated_at: string;

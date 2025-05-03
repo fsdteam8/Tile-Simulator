@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 // Add the missing imports
 import {
@@ -44,6 +43,8 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import SVGUpload from "../add-new-tile/_components/SVGUpload";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface TileResponse {
   data: Tile;
@@ -85,6 +86,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   console.log(token);
 
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -122,6 +124,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   });
 
   //   console.log(tileSingleData?.data?.image);
+  console.log(tileSingleData?.data?.grid_category)
 
   useEffect(() => {
     if (tileSingleData) {
@@ -154,18 +157,13 @@ const EditNewTile = ({ id }: { id: number | string }) => {
       });
     },
     onSuccess: (data) => {
-      toast.success(data.message || "Tile updated successfully", {
-        position: "top-right",
-        richColors: true,
-      });
+      toast.success(data.message || "Tile updated successfully");
+      router.push("/admin-dashboard");
 
       queryClient.invalidateQueries({ queryKey: ["all tiles"] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to update tile", {
-        position: "top-right",
-        richColors: true,
-      });
+      toast.error(error.message || "Failed to update tile");
     },
   });
 
@@ -174,9 +172,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   }, []);
 
   if (error) {
-    toast.error("Failed to load categories", {
-      description: error.message,
-    });
+    toast.error("Failed to load categories")
   }
 
   const onSubmit = async (data: FormValues) => {
@@ -198,9 +194,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
       .filter(Boolean) as string[];
 
     if (selectedCategoryIds.length === 0) {
-      toast.error("Invalid Categories", {
-        description: "Please select at least one valid category",
-      });
+      toast.error("Invalid Categories");
       return;
     }
 
@@ -378,10 +372,10 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                         <FormLabel className="text-base font-medium text-secondary-200">
                           Grid Selection
                         </FormLabel>
-                        <FormControl>
+                        <FormControl>  
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            onValueChange={field?.onChange}
+                            value={field?.value}
                           >
                             <SelectTrigger className="w-full h-[40px] focus-visible:outline-none focus-visible:ring-0">
                               <SelectValue placeholder="Select a grid" />
@@ -404,6 +398,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                     )}
                   />
                 </div>
+
               </div>
             </div>
 

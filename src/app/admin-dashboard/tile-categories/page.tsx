@@ -8,6 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { AllTilesCategoriesResponse } from "./_components/AllTilesCategoriesData";
 import { Category } from "@/components/types/all-tiles-categories";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
 
 const TileCategories = () => {
   const [currectPage, setCurrentPage] = useState(1);
@@ -15,6 +17,9 @@ const TileCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
+  const { search, setSearch } = useSearchTile();
+
+  console.log("setSearch", setSearch)
 
   const handleAddNew = () => {
     setSelectedCategory(null);
@@ -35,11 +40,15 @@ const TileCategories = () => {
   const token = (session?.data?.user as { token: string })?.token;
   console.log(token);
 
+  const delay = 500;
+  
+    const debounceValue = useDebounce(search, delay);
+
   const { data, isLoading, isError, error } =
     useQuery<AllTilesCategoriesResponse>({
-      queryKey: ["allTilesCategories", currectPage],
+      queryKey: ["allTilesCategories", currectPage, search],
       queryFn: () =>
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?page=${currectPage}`).then(
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?page=${currectPage}&search=${debounceValue}`).then(
           (res) => res.json()
         ),
     });
@@ -49,7 +58,7 @@ const TileCategories = () => {
   return (
     <div>
       {!isAddingOrEditing && (
-        <AllTilesCategoriesHeader onAddNew={handleAddNew} />
+        <AllTilesCategoriesHeader  onAddNew={handleAddNew}  search={search} setSearch={setSearch} />
       )}
 
       {isAddingOrEditing ? (

@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Category } from "@/components/types/all-tiles-categories";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 // import { AllTilesCategory } from "./AllTilesCategoriesData"
 
 const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`;
@@ -48,6 +49,8 @@ export default function AddTileEditAndAddCategories({
   const token = (session?.data?.user as { token: string })?.token;
   console.log(token);
   const queryClient = useQueryClient();
+
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -82,8 +85,10 @@ export default function AddTileEditAndAddCategories({
       return response.json();
     },
     onSuccess: () => {
+      router.push("/admin-dashboard/tile-categories");
       queryClient.invalidateQueries({ queryKey: ["allTilesCategories"] }); // Refresh category list
       onCancel();
+      
     },
     onError: (error) => {
       console.error("Error saving category:", error);

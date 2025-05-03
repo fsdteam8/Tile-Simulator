@@ -1,15 +1,13 @@
 "use client"
 
-import { useState } from "react"
 import { type ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { DataTable } from "@/components/ui/data-table"
-import TilePagination from "@/components/ui/TilePagination"
 import { createAllTilesColorColumn } from "./AllTilesColorColumn"
-import { AllTilesColorDataType, Color } from "./AllTilesColorData"
+import { ColorApiResponse, ColorItem } from "./AllTilesColorData"
 
 interface TableContainerProps {
-  data: Color[]
-  columns: ColumnDef<Color>[]
+  data: ColorItem[]
+  columns: ColumnDef<ColorItem>[]
 }
 
 const TableContainer = ({ data, columns }: TableContainerProps) => {
@@ -23,15 +21,15 @@ const TableContainer = ({ data, columns }: TableContainerProps) => {
 }
 
 export interface AllTilesColorsCotainerProps {
-  onEdit: (color: Color) => void;
-  onDelete: (colorId: number) => void; // Changed to accept colorId instead of full color object
-  data: Color[] | undefined;
-  paginationData: AllTilesColorDataType | undefined;
+  onEdit: (color: ColorItem) => void;
+  onDelete: (colorId: number) => void;
+  data: ColorItem[] | undefined;
+  paginationData: ColorApiResponse | undefined;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-  isDeleting?: boolean; // Added to handle loading state during deletion
+  isDeleting?: boolean;
 }
 
 const AllTilesColorsCotainer = ({
@@ -41,26 +39,16 @@ const AllTilesColorsCotainer = ({
   isLoading,
   isError,
   error,
-  paginationData,
-  setCurrentPage,
   isDeleting = false,
 }: AllTilesColorsCotainerProps) => {
-  const [currentPage, setLocalCurrentPage] = useState(1)
 
-  // Handle page change - updates both local and parent state
-  const handlePageChange = (page: number) => {
-    setLocalCurrentPage(page)
-    setCurrentPage(page)
-  }
 
-  // Create columns with edit and delete actions
+
   const columns = createAllTilesColorColumn({
     onEdit,
-    onDelete: (color: Color) => {
+    onDelete: (color: ColorItem) => {
       if (color.id) {
-        if (typeof color.id === "number") {
-          onDelete(color.id)
-        }
+        onDelete(color.id)
       }
     },
   })
@@ -82,7 +70,7 @@ const AllTilesColorsCotainer = ({
         {content}
       </div>
       <div className="mt-[30px] w-full pb-[208px] flex justify-between">
-        <p className="font-normal text-[16px] leading-[19.2px] text-[#444444]">
+        {/* <p className="font-normal text-[16px] leading-[19.2px] text-[#444444]">
           Showing page {paginationData?.current_page} of {paginationData?.last_page}
         </p>
         <div>
@@ -91,7 +79,7 @@ const AllTilesColorsCotainer = ({
             totalPages={paginationData?.last_page || 1}
             onPageChange={handlePageChange}
           />
-        </div>
+        </div> */}
       </div>
     </section>
   )

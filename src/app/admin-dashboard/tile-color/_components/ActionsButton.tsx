@@ -6,16 +6,17 @@ import { Trash2 } from "lucide-react"
 import { FiEdit } from "react-icons/fi"
 import { DeleteConfirmationColorModal } from "./DeleteConfirmationModal"
 import { useSession } from "next-auth/react"
-import { Color } from "./AllTilesColorData"
+import { EditColorForm } from "./Add-Edit-colorForm/editColor"
+import { ColorItem } from "./AllTilesColorData"
 
 interface ActionsButtonProps {
-  color: Color
-  onEdit: (color: Color) => void
+  color: ColorItem
   onDelete?: (colorId: number) => void
 }
 
-function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
+function ActionsButton({ color, onDelete }: ActionsButtonProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const queryClient = useQueryClient()
   const { data: session } = useSession()
   const token = (session?.user as { token?: string })?.token
@@ -47,7 +48,7 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
     }
   }
 
-  const mutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: () => deleteColor(Number(color.id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allTilesColor"] })
@@ -59,13 +60,13 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
     },
   })
 
-  // Move the null check after all hooks
-  if (!color || typeof color.id === 'undefined') {
-    return null
+  const handleEditSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["allTilesColor"] })
+    setShowEditModal(false)
   }
 
-  const handleEdit = () => {
-    onEdit(color)
+  const handleEditClick = () => {
+    setShowEditModal(true)
   }
 
   const handleDeleteClick = () => {
@@ -74,7 +75,7 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
 
   const handleDeleteConfirm = async () => {
     try {
-      await mutation.mutateAsync()
+      await deleteMutation.mutateAsync()
     } catch {
       // Error is already handled in mutation.onError
     }
@@ -84,12 +85,18 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
     setShowDeleteModal(false)
   }
 
+  // Move the null check after all hooks
+  if (!color || typeof color.id === 'undefined') {
+    return null
+  }
+
   return (
     <div className="flex items-center justify-center gap-[10px]">
       <button
-        onClick={handleEdit}
+        onClick={handleEditClick}
         className="text-gray-600 hover:text-blue-600 transition-colors"
         aria-label="Edit color"
+        disabled={!token}
       >
         <FiEdit className="w-5 h-5" />
       </button>
@@ -97,7 +104,7 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
       <button
         onClick={handleDeleteClick}
         className="text-gray-600 hover:text-red-600 transition-colors"
-        disabled={!token || mutation.isPending}
+        disabled={!token || deleteMutation.isPending}
         aria-label="Delete color"
       >
         <Trash2 className="w-5 h-5" />
@@ -108,6 +115,13 @@ function ActionsButton({ color, onEdit, onDelete }: ActionsButtonProps) {
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
         itemName={color.name}
+      />
+
+      <EditColorForm
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        color={color}
+        onSuccess={handleEditSuccess}
       />
     </div>
   )

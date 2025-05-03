@@ -92,7 +92,22 @@ export function SvgRenderer({
   // }
 
   const getPathColor = useCallback(
-    (path: PathData) => pathColors[path.id] || path.originalFill || path.fill || "#000000",
+    (path: PathData) => {
+      // If there's a specific color assigned in pathColors, use that
+      if (pathColors[path.id]) {
+        const color = pathColors[path.id]
+
+        // Handle image-based colors
+        if (color.startsWith("image:")) {
+          return `url(#pattern-${path.id})`
+        }
+
+        return color
+      }
+
+      // Otherwise use the original fill or transparent (not black)
+      return path.originalFill || path.fill
+    },
     [pathColors],
   )
 
@@ -195,6 +210,35 @@ export function SvgRenderer({
               transition: "transform 0.3s ease-in-out",
             }}
           >
+
+            {/* Add pattern definitions */}
+            <defs>
+              {Object.entries(pathColors).map(([pathId, color]) => {
+                if (color && color.startsWith("image:")) {
+                  const imagePath = color.replace("image:", "")
+                  return (
+                    <pattern
+                      key={`pattern-${pathId}`}
+                      id={`pattern-${pathId}`}
+                      patternUnits="userSpaceOnUse"
+                      width="100%"
+                      height="100%"
+                    >
+                      <image
+                        href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`}
+                        x="0"
+                        y="0"
+                        width="100%"
+                        height="100%"
+                        preserveAspectRatio="xMidYMid slice"
+                      />
+                    </pattern>
+                  )
+                }
+                return null
+              })}
+            </defs>
+            
             {/* Render paths */}
             {svg.paths && svg.paths.length > 0 ? (
               svg.paths.map((path) => (

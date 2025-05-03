@@ -2,18 +2,22 @@
 
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
-const AllTilesContainer = () => {
+const AllTilesContainer = ({search}:{search:string}) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // const session = useSession();
   // const token = (session?.data?.user as { token: string })?.token;
   // console.log(token);
 
+  const delay = 500;
+
+  const debounceValue = useDebounce(search, delay);
+
   const { data } = useQuery<TileAllResponse>({
-    queryKey: ["all tiles", currentPage],
+    queryKey: ["all tiles", currentPage, debounceValue],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?page=${currentPage}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?search=${debounceValue}`
       ).then((res) => res.json()),
   });
 
@@ -56,6 +60,7 @@ import { Tile, TileAllResponse } from "./AllTilesData";
 // import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import TilePagination from "@/components/ui/TilePagination";
+import { useDebounce } from "@/hooks/useDebounce";
 // import { useSession } from "next-auth/react";
 
 const TableContainer = ({

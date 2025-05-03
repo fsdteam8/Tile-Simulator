@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 // Add the missing imports
 import {
@@ -44,6 +43,8 @@ import { cn } from "@/lib/utils";
 import { useCallback, useState } from "react";
 import SVGUpload from "./SVGUpload";
 import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 // Form Schema with zod
 const formSchema = z.object({
@@ -71,6 +72,8 @@ const AddNewTile = () => {
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
   console.log(token);
+
+  const router = useRouter();
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -109,19 +112,13 @@ const AddNewTile = () => {
         body: formData,
       }).then((res) => res.json()),
     onSuccess: (data) => {
-      console.log(data);
       if (!data?.success) {
-        toast.error(data.message, {
-          position: "top-right",
-          richColors: true,
-        });
+        toast.error(data.message || "Something went wrong");
         return;
       }
       form.reset();
-      toast.success(data.message, {
-        position: "top-right",
-        richColors: true,
-      });
+      router.push("/admin-dashboard")
+      toast.success(data.message || "Tile created successfully");
     },
   });
 
@@ -130,16 +127,12 @@ const AddNewTile = () => {
   }, []);
 
   if (error) {
-    toast.error("Failed to load categories", {
-      description: error.message,
-    });
+    toast.error("Failed to load categories");
   }
 
   const onSubmit = async (data: FormValues) => {
     if (!image) {
-      toast.error("Missing SVG", {
-        description: "Please upload an SVG file",
-      });
+      toast.error("Missing SVG");
       return;
     }
 
@@ -154,9 +147,7 @@ const AddNewTile = () => {
       .filter(Boolean) as string[];
 
     if (selectedCategoryIds.length === 0) {
-      toast.error("Invalid Categories", {
-        description: "Please select at least one valid category",
-      });
+      toast.error("Invalid Categories");
       return;
     }
 

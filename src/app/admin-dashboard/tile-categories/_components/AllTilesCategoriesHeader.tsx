@@ -2,17 +2,17 @@
 import { RiArrowRightSLine } from "react-icons/ri"
 import { FaPlus } from "react-icons/fa6"
 import Link from "next/link"
-import { useState } from "react"
 import { ListFilter, Search, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface AllTilesCategoriesHeaderProps {
   onAddNew: () => void
+  search: string
+  setSearch: (value: string) => void
 }
 
-const AllTilesCategoriesHeader = ({ onAddNew }: AllTilesCategoriesHeaderProps) => {
-  const [search, setSearch] = useState("")
+const AllTilesCategoriesHeader = ({ onAddNew, search, setSearch }: AllTilesCategoriesHeaderProps) => {
 
   return (
     <div>

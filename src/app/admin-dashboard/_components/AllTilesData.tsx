@@ -31,6 +31,7 @@ export interface Tile {
   description: string;
   grid_category: string;
   image: string;
+  status: string;
   created_at: string;
   updated_at: string;
   categories: Category[];

@@ -1,284 +1,155 @@
 "use client"
 
 import { useState } from "react"
-// import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { Palette, ImageIcon, AlertCircle, CheckCircle, X } from "lucide-react"
-import { FormHeader } from "./form-header"
+import { Palette, ImageIcon } from "lucide-react"
 import { ColorPicker } from "./color-picker"
-import { ImageUploader } from "./image-uploader"
-import { FormFooter } from "./form-footer"
-import { Color } from "../AllTilesColorData"
-import { useSession } from "next-auth/react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import axios from "axios"
+import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
-interface ColorFormProps {
-  color: Color | null
-  onCancel: () => void
-  onSave: (color: Color) => void
+interface ColorFormModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-type SelectionMode = "color" | "image"
-type MessageType = "success" | "error" | null
-
-// For development/testing when API is not available
-const MOCK_API_RESPONSE = false
-
-export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
-  console.log("color", color)
-  const [title, setTitle] = useState(color?.name || "")
-  const [selectedColor, setSelectedColor] = useState(color?.code || "")
-  const [selectedImage, setSelectedImage] = useState<string | null>(color?.image || null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-  const [messageType, setMessageType] = useState<MessageType>(null)
-
-  // Determine initial mode based on the color data
-  const initialMode: SelectionMode = color?.code ? "color" : "image"
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>(initialMode)
-
-  const isEditing = !!color
+export const ColorFormModal = ({
+  open,
+  onOpenChange,
+}: ColorFormModalProps) => {
+  const router = useRouter()
   const session = useSession()
   const token = (session?.data?.user as { token: string })?.token
+  
+  const [name, setName] = useState("")
+  const [selectedColor, setSelectedColor] = useState("")
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [tabValue, setTabValue] = useState<"color" | "image">("color")
 
-  const handleModeChange = (mode: SelectionMode) => {
-    setSelectionMode(mode)
-    if (mode === "color") {
-      setSelectedImage(null)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!token) {
+      toast.error("Authentication required. Please log in.")
+      return
+    }
+    
+    setIsLoading(true)
+
+    const formData = new FormData()
+    formData.append("name", name)
+    formData.append("status", "draft")
+
+    if (tabValue === "color" && selectedColor) {
+      formData.append("code", selectedColor)
+    } else if (tabValue === "image" && selectedImage) {
+      formData.append("image", selectedImage)
     } else {
-      setSelectedColor("")
-    }
-  }
-
-  const showMessage = (text: string, type: MessageType) => {
-    setMessage(text)
-    setMessageType(type)
-
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-      setMessage(null)
-      setMessageType(null)
-    }, 5000)
-  }
-
-  const handleSave = async () => {
-    if (!title) {
-      showMessage("Please enter a title for the color", "error")
+      toast.error("Please select either a color or an image")
+      setIsLoading(false)
       return
     }
-
-    if (selectionMode === "color" && !selectedColor) {
-      showMessage("Please select a color", "error")
-      return
-    }
-
-    if (selectionMode === "image" && !selectedImage) {
-      showMessage("Please select an image", "error")
-      return
-    }
-
-    setIsSubmitting(true)
 
     try {
-      const colorData: Partial<Color> = {
-        name: title,
-        code: selectionMode === "color" ? selectedColor : null,
-        image: selectionMode === "image" ? selectedImage : null,
+      const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors`
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
       }
+      
+      const response = await axios.post(url, formData, { headers })
 
-      // Determine if we're updating or creating
-      const url = isEditing
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors/${color?.id}`
-        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors`
-
-      // Use PUT method directly for updates
-      const method = isEditing ? "PUT" : "POST"
-
-      console.log(`${isEditing ? "Updating" : "Creating"} color with:`, {
-        url,
-        method,
-        data: colorData,
-      })
-
-      // For development/testing when API is not available
-      if (MOCK_API_RESPONSE) {
-        console.log("Using mock API response")
-        // Create a mock response
-        
-        const mockResponse: Color = {
-          id: isEditing ? color?.id || "mock-id" : `mock-id-${Date.now()}`,
-          name: title,
-          code: selectionMode === "color" ? selectedColor : null,
-          image: selectionMode === "image" ? selectedImage : null,
-          created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-
-        // Simulate a delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        console.log(`Color ${isEditing ? "updated" : "created"} successfully (MOCK):`, mockResponse)
-        showMessage(`Color ${isEditing ? "updated" : "created"} successfully (MOCK)`, "success")
-
-        onSave(mockResponse)
-        setIsSubmitting(false)
-        return
-      }
-
-      // Actual API call
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(colorData)
-      })
-
-      // Log the raw response for debugging
-      const responseText = await response.text()
-      console.log(
-        `Raw API Response (${response.status}):`,
-        responseText.substring(0, 500) + (responseText.length > 500 ? "..." : ""),
-      )
-
-      if (response.ok) {
-        let data
-        try {
-          // Try to parse the response as JSON
-          data = JSON.parse(responseText)
-        } catch (e) {
-          console.error("Error parsing JSON response:", e)
-          showMessage("Server returned a success status but the response was not valid JSON", "error")
-
-          // Create a fallback response object
-          data = {
-            id: isEditing ? color?.id || "fallback-id" : `fallback-id-${Date.now()}`,
-            name: title,
-            code: selectionMode === "color" ? selectedColor : null,
-            image: selectionMode === "image" ? selectedImage : null,
-            createdAt: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-        }
-
-        console.log(`Color ${isEditing ? "updated" : "created"} successfully:`, data)
-        showMessage(`Color ${isEditing ? "updated" : "created"} successfully`, "success")
-
-        onSave(data)
+      if (response.data.success) {
+        toast.success("Color created successfully")
+        resetForm()
+        onOpenChange(false)
+        router.refresh()
       } else {
-        console.error(`Error ${isEditing ? "updating" : "creating"} color (Status ${response.status}):`, responseText)
-
-        showMessage(
-          `Failed to ${isEditing ? "update" : "create"} color. Server returned status ${response.status}.`,
-          "error",
-        )
-
-        // If we're in development, create a fallback response for testing
-        if (process.env.NODE_ENV === "development") {
-          console.log("Using fallback response for development")
-          const fallbackData: Color = {
-            id: isEditing ? color?.id || "fallback-id" : `fallback-id-${Date.now()}`,
-            name: title,
-            code: selectionMode === "color" ? selectedColor : null,
-            image: selectionMode === "image" ? selectedImage : null,
-            created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-
-          onSave(fallbackData)
-        }
+        throw new Error(response.data.message || "Something went wrong")
       }
     } catch (error) {
-      console.error("Network error while saving color:", error)
-
-      showMessage("Failed to connect to the server. Please check your connection and try again.", "error")
-
-      // If we're in development, create a fallback response for testing
-      if (process.env.NODE_ENV === "development") {
-        console.log("Using fallback response for development after error")
-        const fallbackData: Color = {
-          id: isEditing ? color?.id || "fallback-id" : `fallback-id-${Date.now()}`,
-          name: title,
-          code: selectionMode === "color" ? selectedColor : null,
-          image: selectionMode === "image" ? selectedImage : null,
-          created_at: isEditing ? color?.created_at || new Date().toISOString() : new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-
-        onSave(fallbackData)
-      }
+      console.error("Error creating color:", error)
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while creating the color"
+      )
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
+  }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedImage(e.target.files[0])
+    }
+  }
+
+  const resetForm = () => {
+    setName("")
+    setSelectedColor("")
+    setSelectedImage(null)
+    setTabValue("color")
+  }
+
+  const handleClose = () => {
+    resetForm()
+    onOpenChange(false)
   }
 
   return (
-    <div className="">
-      <FormHeader isEditing={isEditing} isSubmitting={isSubmitting} onSave={handleSave} />
-
-      {message && (
-        <div
-          className={`mb-4 p-4 rounded-md flex items-start justify-between ${
-            messageType === "error"
-              ? "bg-red-50 text-red-700 border border-red-200"
-              : "bg-green-50 text-green-700 border border-green-200"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {messageType === "error" ? (
-              <AlertCircle className="h-5 w-5 text-red-500" />
-            ) : (
-              <CheckCircle className="h-5 w-5 text-green-500" />
-            )}
-            <span>{message}</span>
-          </div>
-          <button
-            onClick={() => {
-              setMessage(null)
-              setMessageType(null)
-            }}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <div className="space-y-6">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">
+            Add New Tile Color
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <Label htmlFor="title" className="text-base font-medium mb-2 block">
               Title
             </Label>
             <Input
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Type Title color name here..."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Type color name here..."
               className={cn(
                 "border-gray-300",
                 "placeholder:text-sm placeholder:text-gray-400 placeholder:leading-[120%] placeholder:font-normal",
-                "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-red-500 focus-visible:outline-none",
+                "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none"
               )}
+              required
             />
           </div>
 
           <Tabs
-            value={selectionMode}
-            onValueChange={(value) => handleModeChange(value as SelectionMode)}
+            value={tabValue}
+            onValueChange={(value) => setTabValue(value as "color" | "image")}
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="color" className="flex items-center gap-2">
                 <Palette className="w-4 h-4" />
-                Select Color
+                Color
               </TabsTrigger>
               <TabsTrigger value="image" className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4" />
-                Select Image
+                Image
               </TabsTrigger>
             </TabsList>
 
@@ -286,23 +157,56 @@ export function ColorForm({ color, onCancel, onSave }: ColorFormProps) {
               <ColorPicker
                 selectedColor={selectedColor}
                 onColorChange={setSelectedColor}
-                previousColor={isEditing ? color?.code : null}
+                previousColor={selectedColor || null}
               />
             </TabsContent>
 
             <TabsContent value="image" className="mt-0">
-              <ImageUploader
-                selectedImage={selectedImage}
-                onImageChange={setSelectedImage}
-                previousImage={isEditing ? color?.image : null}
-              />
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="cursor-pointer flex flex-col items-center justify-center gap-2"
+                >
+                  <ImageIcon className="w-8 h-8 text-gray-400" />
+                  <p className="text-sm text-gray-500">
+                    {selectedImage
+                      ? selectedImage.name
+                      : "Click to upload an image"}
+                  </p>
+                  <Button variant="outline" type="button">
+                    Select Image
+                  </Button>
+                </label>
+              </div>
             </TabsContent>
           </Tabs>
 
-          <FormFooter onCancel={onCancel} isSubmitting={isSubmitting} />
-        </div>
-      </div>
-    </div>
+          <div className="flex justify-end gap-4 pt-4">
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={handleClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+            className="text-white" 
+              type="submit" 
+              disabled={isLoading || !token || (!selectedColor && !selectedImage)}
+            >
+              {isLoading ? "Creating..." : "Create Color"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
-

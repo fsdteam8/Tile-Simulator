@@ -4,17 +4,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import type { ColumnDef } from "@tanstack/react-table"
 import ActionsButton from "./ActionsButton"
 import Image from "next/image"
-import { Color } from "./AllTilesColorData"
+import {  ColorItem } from "./AllTilesColorData"
 
 interface ColumnProps {
-  onEdit: (color: Color) => void
-  onDelete: (color: Color) => void
+  onEdit: (color: ColorItem) => void
+  onDelete: (color: ColorItem) => void
 }
 
 export const createAllTilesColorColumn = ({ 
-  onEdit, 
   onDelete 
-}: ColumnProps): ColumnDef<Color>[] => [
+}: ColumnProps): ColumnDef<ColorItem>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -135,7 +134,7 @@ export const createAllTilesColorColumn = ({
     cell: ({ row }) => (
       <ActionsButton 
         color={row.original} 
-        onEdit={() => onEdit(row.original)}
+        // onEdit={() => onEdit(row.original)}
         onDelete={() => onDelete(row.original)}
       />
     ),

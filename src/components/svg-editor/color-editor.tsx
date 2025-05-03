@@ -53,8 +53,7 @@ export function ColorEditor({
           throw new Error("Failed to fetch colors");
         }
         const data = await response.json();
-        setApiColors(data.data);
-        console.log("Fetched colors:", data.data[7]?.image);
+        setApiColors(data.data.data);
       } catch (error) {
         console.error("Error fetching colors:", error);
       } finally {
@@ -310,7 +309,7 @@ export function ColorEditor({
         <div className="space-y-4 mt-[32px]">
           <div className="w-full flex gap-[15px]">
             <div className="grid grid-cols-8 gap-[13px]">
-              {apiColors.map((colorItem, index) => (
+              {apiColors?.map((colorItem, index) => (
                 <button
                   key={index}
                   className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
@@ -327,47 +326,47 @@ export function ColorEditor({
                     backgroundPosition: "center",
                   }}
                   onClick={() => {
-                    // For image-based colors, use a special prefix to distinguish them
-                    const color = colorItem.code || (colorItem.image ? `image:${colorItem.image}` : null)
-                    if (color) {
-                      if (!selectedPathId && svgArray.length > 0) {
-                        // If no path is selected, find the first available path
-                        const firstPath = svgArray[0].paths[0]
-                        if (firstPath) {
-                          // First select the path and immediately apply the color
-                          setSelectedPathId(firstPath.id)
+                        // For image-based colors, use a special prefix to distinguish them
+                        const color = colorItem.code || (colorItem.image ? `image:${colorItem.image}` : null)
+                        if (color) {
+                          if (!selectedPathId && svgArray.length > 0) {
+                            // If no path is selected, find the first available path
+                            const firstPath = svgArray[0].paths[0]
+                            if (firstPath) {
+                              // First select the path and immediately apply the color
+                              setSelectedPathId(firstPath.id)
 
-                          // Create a new pathColors object with the updated color
-                          const updatedPathColors = { ...pathColors }
+                              // Create a new pathColors object with the updated color
+                              const updatedPathColors = { ...pathColors }
 
-                          // Apply to all related paths with the same base identifier
-                          const baseIdentifier = firstPath.id.split("-").pop()
-                          svgArray.forEach((svg) => {
-                            svg.paths.forEach((path) => {
-                              if (path.id.split("-").pop() === baseIdentifier) {
-                                updatedPathColors[path.id] = color
+                              // Apply to all related paths with the same base identifier
+                              const baseIdentifier = firstPath.id.split("-").pop()
+                              svgArray.forEach((svg) => {
+                                svg.paths.forEach((path) => {
+                                  if (path.id.split("-").pop() === baseIdentifier) {
+                                    updatedPathColors[path.id] = color
+                                  }
+                                })
+                              })
+
+                              // Update state with all changes at once
+                              setPathColors(updatedPathColors)
+
+                              // Also notify parent component
+                              if (onColorSelect) {
+                                onColorSelect(firstPath.id, {
+                                  id: `${firstPath.id}-${color}`,
+                                  color,
+                                  name: color.startsWith("image:") ? "Texture" : `Color ${color}`,
+                                })
                               }
-                            })
-                          })
-
-                          // Update state with all changes at once
-                          setPathColors(updatedPathColors)
-
-                          // Also notify parent component
-                          if (onColorSelect) {
-                            onColorSelect(firstPath.id, {
-                              id: `${firstPath.id}-${color}`,
-                              color,
-                              name: color.startsWith("image:") ? "Texture" : `Color ${color}`,
-                            })
+                            }
+                          } else if (selectedPathId) {
+                            // If a path is already selected, apply the color immediately
+                            handleColorSelect(color)
                           }
                         }
-                      } else if (selectedPathId) {
-                        // If a path is already selected, apply the color immediately
-                        handleColorSelect(color)
-                      }
-                    }
-                  }}
+                      }}
                   disabled={!selectedPathId}
                 />
               ))}

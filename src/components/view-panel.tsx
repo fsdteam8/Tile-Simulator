@@ -59,6 +59,8 @@ export default function ViewPanel({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  
+
   console.log(showTilePreview);
   console.log(setShowTilePreview);
   console.log(setGridSize);
@@ -169,6 +171,47 @@ export default function ViewPanel({
                 "fill",
                 pathColors[path.id] || path.fill || "#000000"
               );
+              const color = pathColors[path.id] || path.fill || "#000000"
+
+              if (color && color.startsWith("image:")) {
+                // For image-based colors, create a pattern
+                const imagePath = color.replace("image:", "")
+                const patternId = `pattern-${path.id}-${i}-${j}`
+
+                // Create pattern definition
+                const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
+                patternDef.setAttribute("id", patternId)
+                patternDef.setAttribute("patternUnits", "userSpaceOnUse")
+                patternDef.setAttribute("width", "100%")
+                patternDef.setAttribute("height", "100%")
+
+                // Create image element
+                const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
+                imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
+                imageEl.setAttribute("x", "0")
+                imageEl.setAttribute("y", "0")
+                imageEl.setAttribute("width", "100%")
+                imageEl.setAttribute("height", "100%")
+                imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
+
+                // Add image to pattern
+                patternDef.appendChild(imageEl)
+
+                // Add pattern to defs
+                const defs =
+                  svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
+                if (!svgElement.querySelector("defs")) {
+                  svgElement.appendChild(defs)
+                }
+                defs.appendChild(patternDef)
+
+                // Set fill to use pattern
+                pathElement.setAttribute("fill", `url(#${patternId})`)
+              } else {
+                // For solid colors
+                pathElement.setAttribute("fill", color)
+              }
+
               if (showBorders) {
                 pathElement.setAttribute("stroke", "#000000");
                 pathElement.setAttribute("stroke-width", "1");
@@ -213,10 +256,55 @@ export default function ViewPanel({
               "path"
             );
             pathElement.setAttribute("d", path.d);
-            pathElement.setAttribute(
-              "fill",
-              pathColors[path.id] || path.fill || "#000000"
-            );
+
+
+            // pathElement.setAttribute(
+            //   "fill",
+            //   pathColors[path.id] || path.fill || "#000000"
+            // );
+
+            const color = pathColors[path.id] || path.fill || "#000000"
+
+            if (color && color.startsWith("image:")) {
+              // For image-based colors, create a pattern
+              const imagePath = color.replace("image:", "")
+              const patternId = `pattern-${path.id}-${i}-${j}`
+
+              // Create pattern definition
+              const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
+              patternDef.setAttribute("id", patternId)
+              patternDef.setAttribute("patternUnits", "userSpaceOnUse")
+              patternDef.setAttribute("width", "100%")
+              patternDef.setAttribute("height", "100%")
+
+              // Create image element
+              const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
+              imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
+              imageEl.setAttribute("x", "0")
+              imageEl.setAttribute("y", "0")
+              imageEl.setAttribute("width", "100%")
+              imageEl.setAttribute("height", "100%")
+              imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
+
+              // Add image to pattern
+              patternDef.appendChild(imageEl)
+
+              // Add pattern to defs
+              const defs =
+                svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
+              if (!svgElement.querySelector("defs")) {
+                svgElement.appendChild(defs)
+              }
+              defs.appendChild(patternDef)
+
+              // Set fill to use pattern
+              pathElement.setAttribute("fill", `url(#${patternId})`)
+            } else {
+              // For solid colors
+              pathElement.setAttribute("fill", color)
+            }
+
+
             if (showBorders) {
               pathElement.setAttribute("stroke", "#000000");
               pathElement.setAttribute("stroke-width", "1");
@@ -275,13 +363,12 @@ export default function ViewPanel({
                     >
                       <div
                         ref={tileGridRef}
-                        className={`grid  gap-[${
-                          groutThickness === "none"
-                            ? "0"
-                            : groutThickness === "thin"
+                        className={`grid  gap-[${groutThickness === "none"
+                          ? "0"
+                          : groutThickness === "thin"
                             ? "1px"
                             : "2px"
-                        }]   bg-${groutColor}`}
+                          }]   bg-${groutColor}`}
                         style={{
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                           width: "2800px",
@@ -520,26 +607,24 @@ export default function ViewPanel({
         <TabsContent value="grid-view" className="space-y-4">
           {/* Tile Grid */}
           <div
-            className={`grid gap-[${
-              groutThickness === "none"
-                ? "0"
-                : groutThickness === "thin"
+            className={`grid gap-[${groutThickness === "none"
+              ? "0"
+              : groutThickness === "thin"
                 ? "1px"
                 : "2px"
-            }] bg-${groutColor} aspect-square`}
+              }] bg-${groutColor} aspect-square`}
             style={{
               gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
             }}
           >
             <div
               ref={tileGridRef}
-              className={`grid gap-[${
-                groutThickness === "none"
-                  ? "0"
-                  : groutThickness === "thin"
+              className={`grid gap-[${groutThickness === "none"
+                ? "0"
+                : groutThickness === "thin"
                   ? "1px"
                   : "2px"
-              }] bg-${groutColor}`}
+                }] bg-${groutColor}`}
               style={{
                 gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                 width: "100%",

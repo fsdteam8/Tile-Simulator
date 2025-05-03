@@ -47,7 +47,7 @@ export function ColorEditor({
     const fetchColors = async () => {
       try {
         const response = await fetch(
-          "https://tilecustomizer.scaleupdevagency.com/api/colors"
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch colors");
@@ -327,8 +327,46 @@ export function ColorEditor({
                     backgroundPosition: "center",
                   }}
                   onClick={() => {
-                    const color = colorItem.code || colorItem.image;
-                    if (color) handleColorSelect(color);
+                    // For image-based colors, use a special prefix to distinguish them
+                    const color = colorItem.code || (colorItem.image ? `image:${colorItem.image}` : null)
+                    if (color) {
+                      if (!selectedPathId && svgArray.length > 0) {
+                        // If no path is selected, find the first available path
+                        const firstPath = svgArray[0].paths[0]
+                        if (firstPath) {
+                          // First select the path and immediately apply the color
+                          setSelectedPathId(firstPath.id)
+
+                          // Create a new pathColors object with the updated color
+                          const updatedPathColors = { ...pathColors }
+
+                          // Apply to all related paths with the same base identifier
+                          const baseIdentifier = firstPath.id.split("-").pop()
+                          svgArray.forEach((svg) => {
+                            svg.paths.forEach((path) => {
+                              if (path.id.split("-").pop() === baseIdentifier) {
+                                updatedPathColors[path.id] = color
+                              }
+                            })
+                          })
+
+                          // Update state with all changes at once
+                          setPathColors(updatedPathColors)
+
+                          // Also notify parent component
+                          if (onColorSelect) {
+                            onColorSelect(firstPath.id, {
+                              id: `${firstPath.id}-${color}`,
+                              color,
+                              name: color.startsWith("image:") ? "Texture" : `Color ${color}`,
+                            })
+                          }
+                        }
+                      } else if (selectedPathId) {
+                        // If a path is already selected, apply the color immediately
+                        handleColorSelect(color)
+                      }
+                    }
                   }}
                   disabled={!selectedPathId}
                 />

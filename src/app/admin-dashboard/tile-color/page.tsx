@@ -1,44 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import AllTilesColorHeader from "./_components/AllTilesColorHeader";
 import AllTilesColorsCotainer from "./_components/AllTilesColorContainer";
-import type { AllTilesColorDataType, Color } from "./_components/AllTilesColorData";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import AddEditColor from "./_components/Add-Edit-colorForm/add-edit-colorForm";
 import { useSession } from "next-auth/react";
+import { TileColorsHeader } from "./_components/AllTilesColorHeader";
+import { ColorApiResponse, ColorItem } from "./_components/AllTilesColorData";
 
 const TileColors = () => {
-  const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
-  const [selectedColor, setSelectedColor] = useState<Color | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
   const session = useSession();
   const token = (session?.data?.user as { token?: string })?.token;
-  console.log("Token:", token);
-
-  const handleAddNew = () => {
-    setSelectedColor(null);
-    setIsAddingOrEditing(true);
-  };
-
-  const handleEdit = (color: Color) => {
-    setSelectedColor(color);
-    setIsAddingOrEditing(true);
-  };
-
-  const handleCancel = () => {
-    setIsAddingOrEditing(false);
-    setSelectedColor(null);
-  };
-
-  const handleSave = (color: Color) => {
-    setIsAddingOrEditing(false);
-    setSelectedColor(null);
-    const updatedColor = { ...color, image: color?.image ?? "" };
-    console.log(updatedColor);
-  };
 
   const deleteColorMutation = useMutation({
     mutationFn: (colorId: number) =>
@@ -64,12 +38,20 @@ const TileColors = () => {
     }
   };
 
+  const handleEdit = (color: ColorItem) => {
+    // Implement your edit logic here
+    // For example, you might want to open a modal with a form to edit the color
+    console.log('Editing color:', color);
+    // Or navigate to an edit page:
+    // router.push(`/colors/edit/${color.id}`);
+  };
+
   const {
     data,
     isLoading,
     isError,
     error,
-  } = useQuery<AllTilesColorDataType>({
+  } = useQuery<ColorApiResponse>({
     queryKey: ["allTilesColor", currentPage],
     queryFn: () =>
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors?page=${currentPage}`, {
@@ -85,21 +67,12 @@ const TileColors = () => {
 
   return (
     <div>
-      {!isAddingOrEditing && <AllTilesColorHeader onAddNew={handleAddNew} />}
-
-      {isAddingOrEditing ? (
-        <AddEditColor color={selectedColor} onCancel={handleCancel} onSave={handleSave} />
-      ) : (
-        <>
-          {isError && (
-            <div className="p-4 text-red-500">
-              Error fetching colors: {(error as Error)?.message}
-            </div>
-          )}
+      <TileColorsHeader/>
+        <div>
           <AllTilesColorsCotainer
             onEdit={handleEdit}
             onDelete={handleDelete}
-            data={data?.data}
+            data={data?.data?.data}
             paginationData={data}
             isLoading={isLoading}
             isError={isError}
@@ -107,8 +80,7 @@ const TileColors = () => {
             setCurrentPage={setCurrentPage}
             isDeleting={deleteColorMutation.isPending}
           />
-        </>
-      )}
+        </div>
     </div>
   );
 };

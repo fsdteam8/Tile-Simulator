@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { SvgRenderer } from "./svg-renderer";
-import type { SvgData, ColorData } from "./types";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import { ColorPicker } from "./color-picker";
+import { ColorItem } from "./colortype";
 import GroutThicknessColor from "./grout-thickness-color";
+import { SvgRenderer } from "./svg-renderer";
+import type { ColorData, SvgData } from "./types";
 
 interface ColorEditorProps {
   svgArray: SvgData[]; // Expect an array of SvgData
@@ -31,26 +33,93 @@ export function ColorEditor({
   groutColor,
   setGroutColor,
 }: ColorEditorProps) {
-  const [selectedColors, setSelectedColors] = useState<ColorData[]>([]);
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
   const [pathColors, setPathColors] = useState<Record<string, string>>({});
+  const [svgColors, setSvgColors] = useState<string[]>([]);
+  const [apiColors, setApiColors] = useState<ColorItem[]>([]);
+  const [loadingColors, setLoadingColors] = useState(true);
+
+  console.log(loadingColors);
+
+  console.log("SVG color:", pathColors);
+
+  useEffect(() => {
+    const fetchColors = async () => {
+      try {
+        const response = await fetch(
+          "https://tilecustomizer.scaleupdevagency.com/api/colors"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch colors");
+        }
+        const data = await response.json();
+        setApiColors(data.data);
+        console.log("Fetched colors:", data.data[7]?.image);
+      } catch (error) {
+        console.error("Error fetching colors:", error);
+      } finally {
+        setLoadingColors(false);
+      }
+    };
+
+    fetchColors();
+  }, []);
+
+  // Extract all unique colors from the SVG on component mount
+  useEffect(() => {
+    // Get all current colors from SVG paths (including modified ones)
+    const allCurrentColors = svgArray
+      .flatMap((svg) =>
+        svg.paths.map((path) => {
+          // Use the modified color if it exists, otherwise use the original
+          return pathColors[path.id] || path.originalFill || path.fill;
+        })
+      )
+      .filter(Boolean) as string[];
+
+    // Remove duplicates
+    const uniqueColors = [...new Set(allCurrentColors)];
+    setSvgColors(uniqueColors);
+  }, [svgArray, pathColors]);
+
+  // Update the display of colors when pathColors changes
+  useEffect(() => {
+    if (svgColors.length > 0 && Object.keys(pathColors).length > 0) {
+      // Don't add new colors, just update the display of existing ones
+      // This ensures we only show the original SVG colors (or their replacements)
+      setSvgColors((prevColors) => {
+        // Keep the same colors array, just force a re-render
+        return [...prevColors];
+      });
+    }
+  }, [pathColors, svgColors.length]);
 
   const handlePathSelect = useCallback(
     (pathId: string) => {
       setSelectedPathId(pathId);
 
-      // Assign color from path fill or default to red if not available
-      setPathColors((prev) => ({
-        ...prev,
-        [pathId]:
-          prev[pathId] ||
-          svgArray
-            .find((svg) => svg.paths.find((p) => p.id === pathId))
-            ?.paths.find((p) => p.id === pathId)?.fill ||
-          "red",
-      }));
+      // Highlight the selected path
+      const path = svgArray
+        .flatMap((svg) => svg.paths)
+        .find((p) => p.id === pathId);
+      if (path) {
+        // Add a subtle animation or effect when selecting a path
+        const svgElement = document.getElementById(pathId);
+        if (svgElement) {
+          svgElement.classList.add("path-selected");
+          setTimeout(() => {
+            svgElement.classList.remove("path-selected");
+          }, 300);
+        }
+
+        console.log(
+          `Selected path: ${pathId} with color: ${
+            pathColors[pathId] || path.fill
+          }`
+        );
+      }
     },
-    [svgArray]
+    [svgArray, pathColors]
   );
 
   // const handleSave = () => {
@@ -77,7 +146,7 @@ export function ColorEditor({
           .map((path) => path.id)
       );
 
-      // Create a new color object for each related path
+      // Update color for each related path
       relatedPaths.forEach((pathId) => {
         const newColor: ColorData = {
           id: `${pathId}-${color}`,
@@ -85,21 +154,19 @@ export function ColorEditor({
           name: `Color ${color}`,
         };
 
+        console.log(`Setting color for path ${pathId} to ${color}`);
+
         setPathColors((prev) => ({
           ...prev,
           [pathId]: color,
         }));
-
-        if (!selectedColors.some((c) => c.color === color)) {
-          setSelectedColors((prev) => [...prev, newColor]);
-        }
 
         if (onColorSelect) {
           onColorSelect(pathId, newColor);
         }
       });
     },
-    [selectedPathId, onColorSelect, selectedColors, svgArray]
+    [selectedPathId, onColorSelect, svgArray]
   );
 
   // const handleRemoveColor = useCallback(
@@ -124,57 +191,97 @@ export function ColorEditor({
     onRotate(tileId, index, newRotation);
   };
 
-  const selectedPathColor = selectedPathId ? pathColors[selectedPathId] : null;
+  const selectedPathColor = selectedPathId
+    ? pathColors[selectedPathId] ||
+      svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
+        ?.fill
+    : null;
 
   return (
-    <div className="flex gap-[130px]">
+    <div className="grid grid-cols-2 lg:grid-cols-7 gap-[50px] md:gap-[80px] lg:gap-[100px]  xl:gap-[130px] ">
       {/* SVG Preview (Click to select a path) */}
-      <div className="w-[482px] flex justify-center items-center">
-        {svgArray.length === 0 ? (
-          <div className="flex items-center justify-center bg-black/20 w-full h-full">
-            <p className="text-sm font-medium text-gray-500">
-              No SVG data available.
-            </p>
-          </div>
-        ) : (
-          <SvgRenderer
-            svgArray={svgArray}
-            selectedPathId={selectedPathId}
-            pathColors={pathColors}
-            onPathSelect={handlePathSelect}
-            onRotate={handleRotationChange}
-            rotations={rotations}
-          />
-        )}
+      <div className="col-span-2 lg:col-span-3">
+        <h5 className="text-base fotn-normal leading-[120%] text-[#595959] text-center">
+          Click on a section to change its color
+        </h5>
+        <h3 className="text-base font-medium text-black leading-[120%] text-center pt-[12px] lg:pt-[16px] xl:pt-[20px] 2xl:pt-[24px] pb-2 xl:pb-3 2xl:pb-4">
+          Tile Preview
+        </h3>
+        <div className="w-full h-full flex justify-center items-start">
+          {svgArray.length === 0 ? (
+            <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[500px] lg:h-[400px] relative">
+              <Image
+                src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746167200/image_2x_fb6njy.png"
+                fill
+                alt="empty tile"
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full">
+              <SvgRenderer
+                svgArray={svgArray}
+                selectedPathId={selectedPathId}
+                pathColors={pathColors}
+                onPathSelect={handlePathSelect}
+                onRotate={handleRotationChange}
+                rotations={rotations}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="w-[558px]">
+      <div className="col-span-2 lg:col-span-4">
         {/* Colors List */}
         <div className="space-y-2">
           {svgArray.length !== 0 && (
             <h3 className="text-sm font-medium">Colors Used:</h3>
           )}
           <div className="flex flex-wrap gap-2">
-            {Array.from(
-              new Set([
-                ...Object.values(pathColors),
-                ...svgArray.flatMap((svg) => svg.paths.map((p) => p.fill)),
-              ])
-            ).map((color, index) => (
-              <div
-                key={index}
-                className={`w-8 h-8 rounded border border-gray-200 cursor-pointer transition-transform 
+            {svgColors.map((color, index) => {
+              // Check if this color is currently used by any path
+              const pathsWithColor = svgArray.flatMap((svg) =>
+                svg.paths.filter(
+                  (p) =>
+                    pathColors[p.id] === color || // Check custom colors first
+                    (!pathColors[p.id] && (p.originalFill || p.fill) === color) // Then check original colors
+                )
+              );
+
+              const isUsedByPath = pathsWithColor.length > 0;
+              const isSelectedColor =
+                selectedPathId &&
+                (pathColors[selectedPathId] === color ||
+                  (!pathColors[selectedPathId] &&
+                    svgArray
+                      .flatMap((svg) => svg.paths)
+                      .find((p) => p.id === selectedPathId)?.originalFill ===
+                      color));
+
+              return (
+                <div
+                  key={index}
+                  className={`w-6 h-6 rounded border cursor-pointer transition-transform relative
                     hover:scale-110 ${
-                      selectedPathColor === color ? "ring-2 ring-black" : ""
-                    }`}
-                style={{ backgroundColor: color }}
-                onClick={() => {
-                  if (selectedPathId && color !== undefined) {
-                    handleColorSelect(color);
-                  }
-                }}
-              />
-            ))}
+                      isSelectedColor ? "ring-2 ring-black" : ""
+                    } 
+                    ${isUsedByPath ? "border-${color}" : "border-gray-200"}`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => {
+                    // Find paths with this color and select the first one
+                    if (pathsWithColor.length > 0) {
+                      handlePathSelect(pathsWithColor[0].id);
+                      // No color change here, just path selection
+                    }
+                  }}
+                >
+                  {/* Add indicator dot for selected color */}
+                  {isSelectedColor && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border border-white"></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -201,20 +308,32 @@ export function ColorEditor({
 
         {/* Color Palette */}
         <div className="space-y-4 mt-[32px]">
-          <div className="grid grid-cols-10 gap-1">
-            {colorPalette.map((color, index) => (
-              <button
-                key={index}
-                className={`w-8 h-8 rounded-sm border transition-transform hover:scale-110 ${
-                  selectedPathColor === color
-                    ? "border-black ring-2 ring-black/20"
-                    : "border-gray-200"
-                }`}
-                style={{ backgroundColor: color }}
-                onClick={() => handleColorSelect(color)}
-                disabled={!selectedPathId}
-              />
-            ))}
+          <div className="w-full flex gap-[15px]">
+            <div className="grid grid-cols-8 gap-[13px]">
+              {apiColors.map((colorItem, index) => (
+                <button
+                  key={index}
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
+                    selectedPathColor === (colorItem.code || colorItem.image)
+                      ? "border-black ring-2 ring-black/20"
+                      : "border-gray-200"
+                  }`}
+                  style={{
+                    backgroundColor: colorItem.code || "transparent",
+                    backgroundImage: colorItem.image
+                      ? `url(${process.env.NEXT_PUBLIC_BACKEND_URL}/${colorItem.image})`
+                      : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                  onClick={() => {
+                    const color = colorItem.code || colorItem.image;
+                    if (color) handleColorSelect(color);
+                  }}
+                  disabled={!selectedPathId}
+                />
+              ))}
+            </div>
           </div>
         </div>
         {/* Color Picker */}
@@ -234,69 +353,6 @@ export function ColorEditor({
           />
         </div>
       </div>
-
-      {/* <Button className="w-full" onClick={handleSave}>
-          Save
-        </Button> */}
     </div>
   );
 }
-
-const colorPalette = [
-  "#f5f5f0",
-  "#e6e6d8",
-  "#d8d8c0",
-  "#ccccb3",
-  "#bfbfa8",
-  "#b3b39e",
-  "#a6a693",
-  "#999989",
-  "#8c8c7f",
-  "#000000",
-  "#595959",
-  "#404040",
-  "#262626",
-  "#666666",
-  "#808080",
-  "#999999",
-  "#d9e6f2",
-  "#c6d9e6",
-  "#b3ccd9",
-  "#a0bfcc",
-  "#8cb3bf",
-  "#79a6b3",
-  "#6699a6",
-  "#538099",
-  "#d9e6d9",
-  "#c6d9c6",
-  "#b3ccb3",
-  "#a0bfa0",
-  "#8cb38c",
-  "#79a679",
-  "#669966",
-  "#538053",
-  "#f2d9d9",
-  "#e6c6c6",
-  "#d9b3b3",
-  "#cca0a0",
-  "#bf8c8c",
-  "#b37979",
-  "#a66666",
-  "#995353",
-  "#f2e6d9",
-  "#e6d9c6",
-  "#d9ccb3",
-  "#ccbfa0",
-  "#bfb38c",
-  "#b3a679",
-  "#a69966",
-  "#998c53",
-  "#ff5733",
-  "#33ff57",
-  "#3357ff",
-  "#ff33a1",
-  "#a133ff",
-  "#33ffa1",
-  "#ffeb33",
-  "#ff3362",
-];

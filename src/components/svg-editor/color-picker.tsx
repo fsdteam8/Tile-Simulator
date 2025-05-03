@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, X } from "lucide-react";
+import { TbColorPicker } from "react-icons/tb";
 
 interface ColorPickerProps {
   color: string;
@@ -278,25 +279,10 @@ export function ColorPicker({
             style={{ boxShadow: "0px 0px 8px 0px #00000029" }}
           >
             <button
-              className="w-7 h-7 bg-green-500 text-white p-2 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center"
+              className="w-7 h-7 bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center"
               onClick={() => setShowColorPicker(true)}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                <path d="M2 2l7.586 7.586"></path>
-                <circle cx="11" cy="11" r="2"></circle>
-              </svg>
+              <TbColorPicker />
             </button>
 
             <div className="flex-1">
@@ -330,14 +316,16 @@ export function ColorPicker({
 
           {/* My Pantone Colors */}
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">My Pantone Colors</h3>
+            <h3 className="text-base leading-[120%] text-black font-medium">
+              My Pantone Colors
+            </h3>
             <div className="flex gap-2">
               {[...new Set([...savedColors, ...recentColors])]
                 .slice(0, 5)
                 .map((savedColor, index) => (
                   <button
                     key={index}
-                    className={`w-8 h-8 rounded-md border border-gray-300 ${
+                    className={`w-6 h-6 rounded-md border border-gray-300 ${
                       savedColor === hexValue ? "ring-2 ring-black" : ""
                     }`}
                     style={{ backgroundColor: savedColor }}
@@ -368,22 +356,24 @@ export function ColorPicker({
           {/* Color gradient square */}
 
           <div className="flex gap-2 p-2">
-
-          <div className="p-2 rounded " style={{ boxShadow: "0px 0px 8px 0px #00000029" }}>
             <div
-              ref={paletteRef}
-              className="w-full h-64 cursor-crosshair relative"
-              style={{ background: getPaletteBackground() }}
-              onClick={handlePaletteClick}
+              className="p-2  rounded w-[190px] lg:w-[250px] h-[300px] lg:h-[400px]"
+              style={{ boxShadow: "0px 0px 8px 0px #00000029" }}
             >
               <div
-                className="w-4 h-4 rounded-full border-2 border-white absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                style={{
-                  left: `${saturation}%`,
-                  top: `${100 - lightness}%`,
-                }}
-              />
-            </div>
+                ref={paletteRef}
+                className="w-full h-44 lg:h-64 cursor-crosshair relative"
+                style={{ background: getPaletteBackground() }}
+                onClick={handlePaletteClick}
+              >
+                <div
+                  className="w-4 h-4 rounded-full border-2 border-white absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{
+                    left: `${saturation}%`,
+                    top: `${100 - lightness}%`,
+                  }}
+                />
+              </div>
 
               <div className="p-4 space-y-4">
                 <div className="flex items-center gap-2">
@@ -462,18 +452,18 @@ export function ColorPicker({
                 </div>
               </div>
             </div>
-            <div>
+            <div className=" w-[150px] lg:w-[200px]">
               <div ref={dropdownRef} className="relative w-[200px]">
                 <button
-                  className="flex items-center justify-between w-full px-4 py-2 text-left border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none"
+                  className="flex items-center justify-between  w-[150px] lg:w-[200px] px-4 py-2 text-left border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none"
                   onClick={() => setShowDropdown(!showDropdown)}
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className="w-5 h-5 rounded-sm border border-gray-300"
+                      className="w-4 h-4 lg:w-5 lg:h-5 rounded-sm border border-gray-300"
                       style={{ backgroundColor: hexValue }}
                     ></div>
-                    <span className="text-[18px] font-medium">
+                    <span className="text-[12px] lg:text-[18px] font-medium">
                       {selectedColorName}
                     </span>
                   </div>
@@ -486,11 +476,11 @@ export function ColorPicker({
 
                 {/* Dropdown menu */}
                 {showDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md max-h-[348px] shadow-lg overflow-auto">
+                  <div className="absolute z-50 w-[150px] lg:w-[200px] mt-1 bg-white border border-gray-200 rounded-md max-h-[348px] shadow-lg overflow-auto">
                     {namedColors.map((namedColor, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-red-100 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2  hover:bg-red-100 cursor-pointer"
                         onClick={() =>
                           handleNamedColorSelect(
                             namedColor.name,
@@ -502,7 +492,7 @@ export function ColorPicker({
                           className="w-4 h-4 rounded-sm border border-gray-300"
                           style={{ backgroundColor: namedColor.color }}
                         ></div>
-                        <span className="text-[18px] font-medium">
+                        <span className="text-[12px] lg:text-[18px] font-medium">
                           {namedColor.name}
                         </span>
                       </div>
@@ -512,7 +502,7 @@ export function ColorPicker({
               </div>
             </div>
           </div>
-          </div>
+        </div>
       )}
     </div>
   );

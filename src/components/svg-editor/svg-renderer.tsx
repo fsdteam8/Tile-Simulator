@@ -39,6 +39,8 @@ export function SvgRenderer({
   const [internalRotations, setInternalRotations] = useState<number[]>(svgArray.map(() => 0))
   const [relatedPaths, setRelatedPaths] = useState<string[]>([])
 
+  console.log("SVG kongkon:", pathColors)
+
   // Determine which rotations to use - external or internal
   const rotations = externalRotations || internalRotations
 
@@ -53,7 +55,14 @@ export function SvgRenderer({
     }
   }, [externalRotations])
 
-
+  // Update related paths when selectedPathId changes
+  // useEffect(() => {
+  //   if (selectedPathId) {
+  //     findRelatedPaths(selectedPathId)
+  //   } else {
+  //     setRelatedPaths([])
+  //   }
+  // }, [selectedPathId])
 
   // Add a useEffect to log rotations when they change
   useEffect(() => {
@@ -62,52 +71,44 @@ export function SvgRenderer({
     }
   }, [rotations])
 
-  const findRelatedPaths = useCallback(
-    (pathId: string) => {
-      // Extract the base identifier from the path ID
-      const pathIdParts = pathId.split("-")
-      const baseIdentifier = pathIdParts[pathIdParts.length - 1] // Get the last part which is likely the common identifier
+  // const findRelatedPaths = (pathId: string) => {
+  //   // Extract the base identifier from the path ID
+  //   const pathIdParts = pathId.split("-")
+  //   const baseIdentifier = pathIdParts[pathIdParts.length - 1] // Get the last part which is likely the common identifier
 
-      // Find all paths with matching identifiers across all tiles
-      const related = svgArray.flatMap((svg) =>
-        svg.paths
-          .filter((path) => {
-            const parts = path.id.split("-")
-            const pathIdentifier = parts[parts.length - 1]
-            return pathIdentifier === baseIdentifier
-          })
-          .map((path) => path.id),
-      )
+  //   // Find all paths with matching identifiers across all tiles
+  //   const related = svgArray.flatMap((svg) =>
+  //     svg.paths
+  //       .filter((path) => {
+  //         const parts = path.id.split("-")
+  //         const pathIdentifier = parts[parts.length - 1]
+  //         return pathIdentifier === baseIdentifier
+  //       })
+  //       .map((path) => path.id),
+  //   )
 
-      setRelatedPaths(related)
-      console.log("Related paths:", related)
-    },
-    [svgArray], // Dependencies
-  )
-
-  // Now, `findRelatedPaths` is defined before being used
-  useEffect(() => {
-    if (selectedPathId) {
-      findRelatedPaths(selectedPathId)
-    } else {
-      setRelatedPaths([])
-    }
-  }, [selectedPathId, findRelatedPaths]) // ✅ No more errors!
-
-
+  //   setRelatedPaths(related)
+  //   console.log("Related paths:", related)
+  // }
 
   const getPathColor = useCallback(
     (path: PathData) => pathColors[path.id] || path.originalFill || path.fill || "#000000",
     [pathColors],
   )
 
+  // Update the getPathStyle function to enhance hover and selection effects
   const getPathStyle = useCallback(
-    (pathId: string) => ({
-      cursor: "pointer",
-      stroke: selectedPathId === pathId || relatedPaths.includes(pathId) ? "#ffffff" : "none",
-      strokeWidth: selectedPathId === pathId || relatedPaths.includes(pathId) ? 2 : 0,
-      transition: "all 0.2s ease",
-    }),
+    (pathId: string) => {
+      const isSelected = selectedPathId === pathId || relatedPaths.includes(pathId)
+
+      return {
+        cursor: "pointer",
+        stroke: isSelected ? "#000000" : "none",
+        strokeWidth: isSelected ? 2 : 0,
+        filter: isSelected ? "brightness(1.2) drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.5))" : "none",
+        transition: "all 0.2s ease",
+      }
+    },
     [selectedPathId, relatedPaths],
   )
 
@@ -128,6 +129,7 @@ export function SvgRenderer({
     console.log(`Rotated SVG at index ${index} to ${newRotation} degrees`)
   }
 
+  // Enhance the handlePathSelect function to provide better visual feedback
   const handlePathSelect = (pathId: string) => {
     // Extract the base identifier from the path ID
     const pathIdParts = pathId.split("-")
@@ -143,6 +145,21 @@ export function SvgRenderer({
         })
         .map((path) => path.id),
     )
+
+    // Add visual feedback for selection
+    document.querySelectorAll(".path-element").forEach((el) => {
+      el.classList.remove("path-highlight-select")
+    })
+
+    // Add highlight to the selected path and related paths
+    setTimeout(() => {
+      document.getElementById(pathId)?.classList.add("path-highlight-select")
+      related.forEach((relatedId) => {
+        if (relatedId !== pathId) {
+          document.getElementById(relatedId)?.classList.add("path-highlight-related")
+        }
+      })
+    }, 0)
 
     // Select the first path to trigger the color picker
     if (related.length > 0) {
@@ -162,58 +179,78 @@ export function SvgRenderer({
   // })
 
   return (
-    <div>
-      <div className="text-center mb-[16px]">
-        <p className="text-[#595959] text-[16px] mb-[24px]">Click on a section to change its color</p>
-        <h1 className="text-black text-[16px]">Tile Preview</h1>
-      </div>
-      <div className={`grid ${svgArray.length === 4 ? "grid-cols-2 w-[482px] h-[470px]" : "grid-cols-1 w-[482px] h-[470px]"} gap-1`}>
-        {svgArray.map((svg, index) => (
-          <div key={svg.id || `svg-${index}`} className="relative group">
-            {/* Remove the rotation indicator */}
+    <div className={`grid ${svgArray.length === 4 ? "grid-cols-2" : "grid-cols-1"} gap-1`}>
+      {svgArray.map((svg, index) => (
+        <div key={svg.id || `svg-${index}`} className="relative group">
+          {/* Remove the rotation indicator */}
 
-            {/* SVG Element */}
-            <svg
-              width={svg.width || "100px"}
-              height={svg.height || "100px"}
-              viewBox={svg.viewBox || "0 0 100 100"}
-              className="border border-gray-300 rounded-lg shadow-md p-2 w-full h-full"
-              style={{
-                transform: `rotate(${rotations[index]}deg)`,
-                transition: "transform 0.3s ease-in-out",
-              }}
-            >
-              {/* Render paths */}
-              {svg.paths && svg.paths.length > 0 ? (
-                svg.paths.map((path) => (
-                  <path
-                    key={path.id}
-                    id={path.id}
-                    d={path.d}
-                    fill={getPathColor(path)}
-                    style={getPathStyle(path.id)}
-                    onClick={() => handlePathSelect(path.id)}
-                  />
-                ))
-              ) : (
-                <text x="10" y="50" fill="white" className="text-xs">
-                  No paths found
-                </text>
-              )}
-            </svg>
+          {/* SVG Element */}
+          <svg
+            width={svg.width || "100px"}
+            height={svg.height || "100px"}
+            viewBox={svg.viewBox || "0 0 100 100"}
+            className="border border-gray-300 rounded-lg shadow-md p-2 w-full h-full svg-container"
+            style={{
+              transform: `rotate(${rotations[index]}deg)`,
+              transition: "transform 0.3s ease-in-out",
+            }}
+          >
+            {/* Render paths */}
+            {svg.paths && svg.paths.length > 0 ? (
+              svg.paths.map((path) => (
+                <path
+                  key={path.id}
+                  id={path.id}
+                  d={path.d}
+                  fill={getPathColor(path)}
+                  style={getPathStyle(path.id)}
+                  onClick={() => handlePathSelect(path.id)}
+                  className={`path-element ${selectedPathId === path.id || relatedPaths.includes(path.id) ? "path-selected" : ""}`}
+                  data-path-id={path.id}
+                />
+              ))
+            ) : (
+              <text x="10" y="50" fill="white" className="text-xs">
+                No paths found
+              </text>
+            )}
+          </svg>
 
-            {/* Rotate Button */}
-            <button
-              onClick={() => handleRotate(index)}
-              className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-200"
-              aria-label="Rotate SVG"
-            >
-              <RotateCw size={16} />
-            </button>
-          </div>
-        ))}
-      </div>
+          {/* Rotate Button */}
+          <button
+            onClick={() => handleRotate(index)}
+            className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-200"
+            aria-label="Rotate SVG"
+          >
+            <RotateCw size={16} />
+          </button>
+        </div>
+      ))}
+
+      {/* Update the style tag at the bottom */}
+      <style jsx global>{`
+        .path-element {
+          transition: all 0.2s ease;
+        }
+        .path-element:hover {
+          filter: brightness(1.1) drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.3));
+          stroke: #000000;
+          stroke-width: 1px;
+          z-index: 10;
+        }
+        .path-selected, .path-highlight-select {
+          stroke: #000000;
+          stroke-width: 2px;
+          filter: brightness(1.2) drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.5));
+          z-index: 20;
+        }
+        .path-highlight-related {
+          stroke: #000000;
+          stroke-width: 1px;
+          filter: brightness(1.1) drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+          z-index: 15;
+        }
+      `}</style>
     </div>
   )
 }
-

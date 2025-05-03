@@ -62,6 +62,7 @@ export function LoginForm() {
     } catch (error) {
       if (error) {
         console.error("Login error:", error);
+        toast.error("Login failed, Please Valid Email and Password");
       }
     } finally {
       setIsLoading(false); // Stop loading state
@@ -152,7 +153,7 @@ export function LoginForm() {
           <Button
             disabled={isLoading}
             type="submit"
-            className="w-full bg-red-500 hover:bg-red-600"
+            className="w-full bg-red-500 hover:bg-red-600 text-white"
           >
             {isLoading ? "Please wait..." : "Login"}
           </Button>

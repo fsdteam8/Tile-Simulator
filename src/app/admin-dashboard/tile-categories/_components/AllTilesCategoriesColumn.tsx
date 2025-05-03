@@ -3,13 +3,13 @@
 import { Checkbox } from "@/components/ui/checkbox"
 import type { ColumnDef } from "@tanstack/react-table"
 import ActionsButton from "./ActionsButton"
-import { AllTilesCategory } from "./AllTilesCategoriesData"
+import { Category } from "@/components/types/all-tiles-categories"
 
 interface ColumnProps {
-  onEdit: (category: AllTilesCategory) => void
+  onEdit: (category: Category) => void
 }
 
-export const createAllTilesCategoriesColumn = ({ onEdit }: ColumnProps): ColumnDef< AllTilesCategory>[] => [
+export const createAllTilesCategoriesColumn = ({ onEdit }: ColumnProps): ColumnDef< Category>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -43,13 +43,13 @@ export const createAllTilesCategoriesColumn = ({ onEdit }: ColumnProps): ColumnD
   },
   {
     header: "Count",
-    cell: ({ row }) => {
-      return (
-        <div className="flex justify-center items-center gap-[2px]">
-          <span className="text-base font-normal text-black leading-[120%] text-center">{row.original.count}</span>
-        </div>
-      )
-    },
+    // cell: ({ row }) => {
+    //   return (
+    //     <div className="flex justify-center items-center gap-[2px]">
+    //       <span className="text-base font-normal text-black leading-[120%] text-center">{(row.original as string)?.count || "no data"}</span>
+    //     </div>
+    //   )
+    // },
   },
   // {
   //   header: "Date",

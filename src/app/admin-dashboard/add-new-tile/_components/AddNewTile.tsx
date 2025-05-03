@@ -43,6 +43,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCallback, useState } from "react";
 import SVGUpload from "./SVGUpload";
+import { useSession } from "next-auth/react";
 
 // Form Schema with zod
 const formSchema = z.object({
@@ -67,6 +68,9 @@ const gridSelectionData = ["1x1", "2x2"];
 const AddNewTile = () => {
   const [image, setSvgData] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
+  const session = useSession();
+  const token = (session?.data?.user as { token: string })?.token;
+  console.log(token);
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -98,6 +102,10 @@ const AddNewTile = () => {
     mutationFn: (formData: FormData) =>
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles`, {
         method: "POST",
+        headers:{
+          Authorization: `Bearer ${token}`,
+          // "Content-Type": "multipart/form-data",
+        },
         body: formData,
       }).then((res) => res.json()),
     onSuccess: (data) => {

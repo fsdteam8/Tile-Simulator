@@ -119,7 +119,7 @@ export default function Tiles() {
       <div className="">
         <div className="">
           <div className="">
-            <div className="max-w-[1235px] mx-auto">
+            <div className="max-w-[1235px] mx-auto ">
               <TileSelection
                 onTileSelect={handleTileSelect}
                 selectedTile={selectedTile}
@@ -129,29 +129,30 @@ export default function Tiles() {
               />
             </div>
 
-            <div
-              className="py-[100px] container"
-            >
+            <div className="container py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
               {currentSvg && (
-                <ColorEditor
-                  svgArray={currentSvg}
-                  showBorders={showBorders}
-                  setShowBorders={setShowBorders}
-                  onColorSelect={handleColorSelect}
-                  onRotate={handleRotation}
-                  tileId={selectedTile?.id || ""}
-                  rotations={
-                    selectedTile ? tileRotations[selectedTile.id] : undefined
-                  }
-                  groutThickness={groutThickness}
-                  setGroutThickness={setGroutThicknessWrapper}
-                  groutColor={groutColor}
-                  setGroutColor={setGroutColorWrapper}
-                />
+                <div>
+                  
+                  <ColorEditor
+                    svgArray={currentSvg}
+                    showBorders={showBorders}
+                    setShowBorders={setShowBorders}
+                    onColorSelect={handleColorSelect}
+                    onRotate={handleRotation}
+                    tileId={selectedTile?.id || ""}
+                    rotations={
+                      selectedTile ? tileRotations[selectedTile.id] : undefined
+                    }
+                    groutThickness={groutThickness}
+                    setGroutThickness={setGroutThicknessWrapper}
+                    groutColor={groutColor}
+                    setGroutColor={setGroutColorWrapper}
+                  />
+                </div>
               )}
             </div>
 
-            <div className="container">
+            <div className="container ">
               <ViewPanel
                 currentSvg={currentSvg}
                 pathColors={pathColors}

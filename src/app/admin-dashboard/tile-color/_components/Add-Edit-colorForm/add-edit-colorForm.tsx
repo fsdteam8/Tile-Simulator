@@ -1,12 +1,12 @@
 "use client"
 
-import type { AllTilesColorDataType } from "../AllTilesColorData"
+import { Color } from "../AllTilesColorData"
 import { ColorForm } from "./color-form"
 
 interface AddEditColorProps {
-  color: AllTilesColorDataType | null
+  color: Color | null
   onCancel: () => void
-  onSave: (color: AllTilesColorDataType) => void
+  onSave: (color: Color) => void
 }
 
 export default function AddEditColor({ color, onCancel, onSave }: AddEditColorProps) {

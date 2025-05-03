@@ -69,8 +69,8 @@ const AllTilesColorsCotainer = ({
       <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">
         {content}
       </div>
-      {/* <div className="mt-[30px] w-full pb-[208px] flex justify-between">
-        <p className="font-normal text-[16px] leading-[19.2px] text-[#444444]">
+      <div className="mt-[30px] w-full pb-[208px] flex justify-between">
+        {/* <p className="font-normal text-[16px] leading-[19.2px] text-[#444444]">
           Showing page {paginationData?.current_page} of {paginationData?.last_page}
         </p>
         <div>
@@ -79,8 +79,8 @@ const AllTilesColorsCotainer = ({
             totalPages={paginationData?.last_page || 1}
             onPageChange={handlePageChange}
           />
-        </div>
-      </div> */}
+        </div> */}
+      </div>
     </section>
   )
 }

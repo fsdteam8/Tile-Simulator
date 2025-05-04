@@ -168,7 +168,7 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
       return (
         <div className="w-full flex justify-center items-center">
           <span className="text-base font-normal text-black leading-[120%] text-center">
-            {moment(row.original.created_at).format("DD-MM-YYYY")}
+            {moment(row.original.created_at).format("D MMM, YYYY")}
           </span>
         </div>
       );

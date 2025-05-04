@@ -6,8 +6,7 @@ import AllTilesCategoriesCotainer from "./_components/AllTilesCategoriesCotainer
 import AddTileEditAndAddCategories from "./_components/AllTilesEdit-addCategories";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { AllTilesCategoriesResponse } from "./_components/AllTilesCategoriesData";
-import { Category } from "@/components/types/all-tiles-categories";
+import { CategoriesApiResponse, Category } from "@/components/types/all-tiles-categories";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
 
@@ -40,13 +39,13 @@ const TileCategories = () => {
   const token = (session?.data?.user as { token: string })?.token;
   console.log(token);
 
-  const delay = 500;
+  const delay = 200;
   
     const debounceValue = useDebounce(search, delay);
 
   const { data, isLoading, isError, error } =
-    useQuery<AllTilesCategoriesResponse>({
-      queryKey: ["allTilesCategories", currectPage, search],
+    useQuery<CategoriesApiResponse>({
+      queryKey: ["allTilesCategories", search, currectPage ],
       queryFn: () =>
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?page=${currectPage}&search=${debounceValue}`).then(
           (res) => res.json()

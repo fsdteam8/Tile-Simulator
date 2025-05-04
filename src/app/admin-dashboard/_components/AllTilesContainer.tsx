@@ -17,11 +17,11 @@ const AllTilesContainer = ({search}:{search:string}) => {
     queryKey: ["all tiles", currentPage, debounceValue],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?search=${debounceValue}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?search=${debounceValue}&paginate_count=8&page=${currentPage}`
       ).then((res) => res.json()),
   });
 
-  console.log(data?.data);
+  console.log(data);
 
   return (
     <section className="w-full">
@@ -31,11 +31,11 @@ const AllTilesContainer = ({search}:{search:string}) => {
           columns={AllTilesColumn}
         />
       </div>
-      <div className="pb-[208px]">
+      <div className="pb-[208px] ">
         {data && data?.total_pages > 1 && (
           <div className="mt-[30px]  w-full   flex justify-between">
             <p className="font-normal text-base leading-[120%] text-secondary-100">
-              Showing {data?.current_page} from {data?.total_pages}
+              Showing {data?.data?.current_page} from {data?.total_pages}
             </p>
             <div>
               <TilePagination

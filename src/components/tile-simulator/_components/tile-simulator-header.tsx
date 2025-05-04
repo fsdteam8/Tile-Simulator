@@ -1,5 +1,5 @@
 "use client";
-import { APIResponse } from "@/components/types/all-tiles-categories";
+import { CategoriesApiResponse } from "@/components/types/all-tiles-categories";
 import {
   Select,
   SelectContent,
@@ -18,7 +18,7 @@ const TileSimulatorHeader = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
-  const { data } = useQuery<APIResponse>({
+  const { data } = useQuery<CategoriesApiResponse>({
     queryKey: ["all-tiles-categories"],
     queryFn: () =>
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`).then(

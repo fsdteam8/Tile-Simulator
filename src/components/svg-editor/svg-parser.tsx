@@ -14,6 +14,12 @@ export function parseSvgString(svgString: string, svgId: string): SvgData {
       return createEmptySvgData(svgId)
     }
 
+    // Check if the string actually contains an SVG
+    if (!svgString.includes("<svg")) {
+      console.error("String does not contain SVG markup:", svgString.substring(0, 100) + "...")
+      return createEmptySvgData(svgId)
+    }
+
     const parser = new DOMParser()
     const doc = parser.parseFromString(svgString, "image/svg+xml")
 
@@ -34,48 +40,58 @@ export function parseSvgString(svgString: string, svgId: string): SvgData {
     const pathElements = svgElement.querySelectorAll("path")
     const paths: PathData[] = []
 
-    pathElements.forEach((pathElement, index) => {
-      const d = pathElement.getAttribute("d")
-      if (!d) return // Skip paths without d attribute
-
-      // Get fill from various sources
-      let fill = pathElement.getAttribute("fill") || "#000000"
-
-      // Try to get fill from inline style
-      if (pathElement.hasAttribute("style")) {
-        const styleAttr = pathElement.getAttribute("style") || ""
-        const fillMatch = styleAttr.match(/fill:\s*([^;]+)/)
-        if (fillMatch && fillMatch[1]) {
-          fill = fillMatch[1].trim()
-        }
-      }
-
-      // Try to extract fill from class-based styles
-      const className = pathElement.getAttribute("class")
-      if (className) {
-        const styleElements = doc.querySelectorAll("style")
-        styleElements.forEach((styleEl) => {
-          const styleText = styleEl.textContent || ""
-          // Safely extract class-based fill
-          try {
-            const classRegex = new RegExp(`\\.${className.split(" ")[0]}\\s*{[^}]*fill:\\s*([^;\\s}]+)`, "i")
-            const match = styleText.match(classRegex)
-            if (match && match[1]) {
-              fill = match[1]
-            }
-          } catch (e) {
-            console.warn("Error parsing class styles:", e)
-          }
-        })
-      }
-
+    // If no paths found, create a default rectangle path
+    if (pathElements.length === 0) {
       paths.push({
-        id: pathElement.id || `path-${svgId}-${index}`,
-        d,
-        fill,
-        originalFill: fill,
+        id: `${svgId}-default-path`,
+        d: "M10,10 L90,10 L90,90 L10,90 Z", // Simple rectangle
+        fill: "#cccccc",
+        originalFill: "#cccccc",
       })
-    })
+    } else {
+      pathElements.forEach((pathElement, index) => {
+        const d = pathElement.getAttribute("d")
+        if (!d) return // Skip paths without d attribute
+
+        // Get fill from various sources
+        let fill = pathElement.getAttribute("fill") || "#000000"
+
+        // Try to get fill from inline style
+        if (pathElement.hasAttribute("style")) {
+          const styleAttr = pathElement.getAttribute("style") || ""
+          const fillMatch = styleAttr.match(/fill:\s*([^;]+)/)
+          if (fillMatch && fillMatch[1]) {
+            fill = fillMatch[1].trim()
+          }
+        }
+
+        // Try to extract fill from class-based styles
+        const className = pathElement.getAttribute("class")
+        if (className) {
+          const styleElements = doc.querySelectorAll("style")
+          styleElements.forEach((styleEl) => {
+            const styleText = styleEl.textContent || ""
+            // Safely extract class-based fill
+            try {
+              const classRegex = new RegExp(`\\.${className.split(" ")[0]}\\s*{[^}]*fill:\\s*([^;\\s}]+)`, "i")
+              const match = styleText.match(classRegex)
+              if (match && match[1]) {
+                fill = match[1]
+              }
+            } catch (e) {
+              console.warn("Error parsing class styles:", e)
+            }
+          })
+        }
+
+        paths.push({
+          id: pathElement.id || `path-${svgId}-${index}`,
+          d,
+          fill,
+          originalFill: fill,
+        })
+      })
+    }
 
     return {
       id: svgId,
@@ -99,7 +115,26 @@ function createEmptySvgData(id: string): SvgData {
     width: "100%",
     height: "100%",
     viewBox: "0 0 100 100",
-    paths: [],
+    paths: [
+      {
+        id: `${id}-error-rect`,
+        d: "M10,10 L90,10 L90,90 L10,90 Z", // Simple rectangle
+        fill: "#f0f0f0",
+        originalFill: "#f0f0f0",
+      },
+      {
+        id: `${id}-error-x1`,
+        d: "M20,20 L80,80", // X mark (part 1)
+        fill: "none",
+        originalFill: "none",
+      },
+      {
+        id: `${id}-error-x2`,
+        d: "M80,20 L20,80", // X mark (part 2)
+        fill: "none",
+        originalFill: "none",
+      },
+    ],
   }
 }
 
@@ -123,4 +158,3 @@ export function svgDataToString(svgData: SvgData): string {
     ${pathsString}
   </svg>`
 }
-

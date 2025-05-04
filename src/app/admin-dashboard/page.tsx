@@ -11,7 +11,7 @@ const Page = () => {
             <AllTilesHeader search={search} setSearch={setSearch}/>
             <AllTilesContainer search={search}/>
         </div>
-    );
+    ); 
 };
 
 export default Page;

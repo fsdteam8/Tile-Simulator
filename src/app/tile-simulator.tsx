@@ -8,27 +8,20 @@ import type { SvgData } from "@/components/svg-editor/types";
 import ViewPanel from "@/components/view-panel";
 import TileSimulator from "@/components/tile-simulator/page";
 
-interface Tile {
-  id: string;
-  name: string;
-  collection: string;
-  svg: string[]; // Array of SVG strings
-}
+import type { Tile } from "@/components/types/tiles";
 
 export default function Tiles() {
   const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
   const [currentSvg, setCurrentSvg] = useState<SvgData[] | null>([]);
   const [showBorders, setShowBorders] = useState<boolean>(false);
   const [pathColors, setPathColors] = useState<Record<string, string>>({});
-  const [tileRotations, setTileRotations] = useState<Record<string, number[]>>(
-    {}
-  );
-  const [groutColor, setGroutColor] = useState<
-    "orange" | "green" | "turquoise" | "blue"
-  >("orange");
-  const [groutThickness, setGroutThickness] = useState<
-    "none" | "thin" | "thick"
-  >("thin");
+  const [tileRotations, setTileRotations] = useState<Record<string, number[]>>({});
+  const [groutColor, setGroutColor] = useState<"orange" | "green" | "turquoise" | "blue">("orange");
+  const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin");
+  
+  // Add state for category and search
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const setGroutColorWrapper = (groutColor: string) => {
     setGroutColor(groutColor as "orange" | "green" | "turquoise" | "blue");
@@ -36,6 +29,20 @@ export default function Tiles() {
 
   const setGroutThicknessWrapper = (groutThickness: string) => {
     setGroutThickness(groutThickness as "none" | "thin" | "thick");
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleAddBorder = () => {
+    // Your border adding logic here
+    console.log("Add border clicked");
+    setShowBorders(!showBorders);
   };
 
   const handleTileSelect = (tile: Tile) => {
@@ -69,10 +76,7 @@ export default function Tiles() {
         [tile.id]: initialRotations,
       }));
 
-      console.log(
-        `Applied initial rotations for ${tile.id}:`,
-        initialRotations
-      );
+      console.log(`Applied initial rotations for ${tile.id}:`, initialRotations);
     } else {
       setCurrentSvg(null);
     }
@@ -93,9 +97,7 @@ export default function Tiles() {
     index: number,
     newRotation: number
   ) => {
-    console.log(
-      `[APP] Rotating tile ${tileId}, SVG ${index} to ${newRotation}°`
-    );
+    console.log(`[APP] Rotating tile ${tileId}, SVG ${index} to ${newRotation}°`);
 
     setTileRotations((prev) => {
       const currentRotations = [
@@ -115,7 +117,13 @@ export default function Tiles() {
 
   return (
     <div>
-      <TileSimulator />
+      <TileSimulator
+        onCategoryChange={handleCategoryChange}
+        onSearchChange={handleSearchChange}
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        onAddBorder={handleAddBorder}
+      />
       <div className="">
         <div className="">
           <div className="">
@@ -126,20 +134,21 @@ export default function Tiles() {
                 onRotate={handleRotation}
                 tileRotations={tileRotations}
                 pathColors={pathColors}
+                selectedCategory={selectedCategory}
+                searchQuery={searchQuery}
               />
             </div>
 
             <div className="container py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
               {currentSvg && (
                 <div>
-                  
                   <ColorEditor
                     svgArray={currentSvg}
                     showBorders={showBorders}
                     setShowBorders={setShowBorders}
                     onColorSelect={handleColorSelect}
                     onRotate={handleRotation}
-                    tileId={selectedTile?.id || ""}
+                    tileId={selectedTile ? String(selectedTile.id) : ""}
                     rotations={
                       selectedTile ? tileRotations[selectedTile.id] : undefined
                     }
@@ -172,17 +181,3 @@ export default function Tiles() {
     </div>
   );
 }
-
-// import TileSimulator from '@/components/tile-simulator/page';
-// import React from 'react';
-
-// const Page = () => {
-//   return (
-//     <div>
-//       <TileSimulator/>
-
-//     </div>
-//   );
-// };
-
-// export default Page;

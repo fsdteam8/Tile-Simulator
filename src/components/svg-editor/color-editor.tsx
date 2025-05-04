@@ -53,14 +53,18 @@ export function ColorEditor({
           throw new Error("Failed to fetch colors");
         }
         const data = await response.json();
-        setApiColors(data.data.data);
+        // Filter colors to only include published ones
+        const publishedColors = data.data.data.filter(
+          (color: ColorItem) => color.status === "published"
+        );
+        setApiColors(publishedColors);
       } catch (error) {
         console.error("Error fetching colors:", error);
       } finally {
         setLoadingColors(false);
       }
     };
-
+  
     fetchColors();
   }, []);
 

@@ -184,7 +184,7 @@ export function SubmissionForm({ open, onOpenChange }: SubmissionFormProps) {
 
           <div className="">
             <ReCAPTCHA
-              sitekey="6LdJTCErAAAAAN2PcYOPlqK_a7W409uexqQ6kJLD"
+              sitekey="6Lewci4rAAAAACN2I3hdbY1U1Bt_5Tz-57UwbyYJ"
               onChange={onChange}
             />
           </div>

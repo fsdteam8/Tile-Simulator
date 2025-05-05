@@ -22,7 +22,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Category } from "@/components/types/all-tiles-categories";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-// import { AllTilesCategory } from "./AllTilesCategoriesData"
 
 const API_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`;
 

@@ -20,7 +20,7 @@ const AuctionButton = ({ row }: any) => {
 
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
-  console.log(token);
+  // console.log(token);
 
   console.log({ row });
 

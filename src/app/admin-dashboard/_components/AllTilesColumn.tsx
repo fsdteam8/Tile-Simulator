@@ -122,9 +122,7 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
         <div className="w-full flex justify-center items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                className="px-2 py-1 text-base font-normal rounded-[30px] leading-[120%] bg-[#EBEBEB] text-black flex items-center gap-1"
-              >
+              <button className="px-2 py-1 text-base font-normal rounded-[30px] leading-[120%] bg-[#EBEBEB] text-black flex items-center gap-1">
                 {status}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

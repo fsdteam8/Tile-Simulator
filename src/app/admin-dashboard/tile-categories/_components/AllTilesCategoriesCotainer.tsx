@@ -8,8 +8,7 @@ import {
 import { DataTable } from "@/components/ui/data-table";
 import TilePagination from "@/components/ui/TilePagination";
 import { createAllTilesCategoriesColumn } from "./AllTilesCategoriesColumn";
-import { Category } from "@/components/types/all-tiles-categories";
-import { AllTilesCategoriesResponse } from "./AllTilesCategoriesData";
+import { CategoriesApiResponse, Category } from "@/components/types/all-tiles-categories";
 
 interface TableContainerProps {
   data: Category[];
@@ -38,7 +37,7 @@ interface AllTilesCategoriesCotainerProps {
   error: unknown;
   currentPage: number;
   setCurrentPage: (page: number) => void;
-  paginationData?: AllTilesCategoriesResponse;
+  paginationData?: CategoriesApiResponse;
 }
 
 const AllTilesCategoriesCotainer = ({
@@ -51,7 +50,6 @@ const AllTilesCategoriesCotainer = ({
   setCurrentPage,
   paginationData,
 }: AllTilesCategoriesCotainerProps) => {
-  console.log(paginationData?.data);
   const columns = createAllTilesCategoriesColumn({
     onEdit,
   });
@@ -65,13 +63,9 @@ const AllTilesCategoriesCotainer = ({
     content = <TableContainer data={data ?? []} columns={columns} />;
   }
 
-  console.log(data);
-
   return (
     <section className="w-full">
       <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">
-        {/* <TableContainer data={AllTilesCategoriesData} columns={columns} /> */}
-
         {content}
       </div>
       {/* pagination  */}

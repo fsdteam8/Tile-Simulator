@@ -75,7 +75,7 @@ export function TileSelection({
 
                 try {
                   const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`
-                  console.log(`Fetching SVG from: ${svgUrl}`)
+                  console.log(`Fetchings SVG from: ${svgUrl}`)
 
                   const svgResponse = await fetch(svgUrl)
 
@@ -283,6 +283,10 @@ export function TileSelection({
       setCurrentPage(currentPage - 1)
     }
   }
+
+
+  
+
 
   // Calculate visible tiles based on current page
   const startIdx = (currentPage - 1) * tilesPerRow * rowsPerPage
@@ -520,9 +524,6 @@ export function TileSelection({
               <ChevronRight className="h-6 w-6" />
             </button>
           </div>
-
-
-
           {/* Pagination indicator */}
           <div className="text-center mt-4">
             <span className="text-sm text-gray-500">
@@ -531,6 +532,8 @@ export function TileSelection({
           </div>
         </div>
       )}
+
+      
     </div>
   )
 }

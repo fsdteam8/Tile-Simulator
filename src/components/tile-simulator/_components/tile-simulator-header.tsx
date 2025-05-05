@@ -56,7 +56,7 @@ const TileSimulatorHeader = ({
   return (
     <div className="w-full space-y-2 md:space-y-0 lg:space-y-0 md:flex lg:flex items-center gap-5">
       {/* searching  */}
-      <div className="relative flex-1">
+      <div className="relative">
         <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary" size={18} />
         <Input
           type="search"
@@ -64,7 +64,7 @@ const TileSimulatorHeader = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={cn(
-            "pl-10 pr-10 2xl:h-[52px]", // Added pr-10 to make room for the clear icon
+            "pl-10 pr-10 2xl:h-[52px] w-[243px]", // Added pr-10 to make room for the clear icon
             "border-primary",
             "placeholder:text-sm placeholder:text-[#F0C1C1] placeholder:leading-[120%] placeholder:font-normal",
             "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none",

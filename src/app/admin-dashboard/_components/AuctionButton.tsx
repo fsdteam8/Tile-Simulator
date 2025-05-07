@@ -22,7 +22,6 @@ const AuctionButton = ({ row }: any) => {
   const token = (session?.data?.user as { token: string })?.token;
   // console.log(token);
 
-  console.log({ row });
 
   const handleEditTiles = (id: number) => {
     router.push(`/admin-dashboard/edit-new-tile/${id}`);

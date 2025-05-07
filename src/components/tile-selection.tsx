@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-mobile"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TilesData } from "@/data/TilesData"
-import { Tile } from "./types/tiles"
+import type { Tile } from "./types/tiles"
 
 interface TileSelectionProps {
   onTileSelect: (tile: Tile) => void
@@ -70,36 +70,54 @@ export function TileSelection({
             // Transform API tiles to our Tile format
             const transformedTiles = await Promise.all(
               data.data.data.map(async (apiTile: Tile) => {
-                // For each tile, fetch the SVG content
+                // For each tile, process the SVG content
                 let svgContent: string[] = []
 
                 try {
-                  const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`
-                  console.log(`Fetchings SVG from: ${svgUrl}`)
+                  // Check if we have base64 encoded SVG
+                  if (apiTile.image_svg_text) {
+                    const decodedSvg = decodeSvgFromBase64(apiTile.image_svg_text)
 
-                  const svgResponse = await fetch(svgUrl)
-
-                  if (!svgResponse.ok) {
-                    throw new Error(`Failed to fetch SVG: ${svgResponse.status} ${svgResponse.statusText}`)
+                    // For 2x2 grid category, we need to create 4 SVGs
+                    if (apiTile.grid_category === "2x2") {
+                      // Use the same SVG 4 times for 2x2 grid
+                      svgContent = [decodedSvg, decodedSvg, decodedSvg, decodedSvg]
+                    } else {
+                      // For 1x1, just use the single SVG
+                      svgContent = [decodedSvg]
+                    }
                   }
+                  // If no base64 SVG, try to fetch from URL
+                  else if (apiTile.image) {
+                    const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`
+                    console.log(`Fetching SVG from: ${svgUrl}`)
 
-                  const svgText = await svgResponse.text()
+                    const svgResponse = await fetch(svgUrl)
 
-                  // Check if we got valid SVG content
-                  if (!svgText.includes("<svg") || svgText.trim() === "") {
-                    throw new Error("Invalid SVG content received")
-                  }
+                    if (!svgResponse.ok) {
+                      throw new Error(`Failed to fetch SVG: ${svgResponse.status} ${svgResponse.statusText}`)
+                    }
 
-                  // For 2x2 grid category, we need to create 4 SVGs
-                  if (apiTile.grid_category === "2x2") {
-                    // Use the same SVG 4 times for 2x2 grid
-                    svgContent = [svgText, svgText, svgText, svgText]
+                    const svgText = await svgResponse.text()
+
+                    // Check if we got valid SVG content
+                    if (!svgText.includes("<svg") || svgText.trim() === "") {
+                      throw new Error("Invalid SVG content received")
+                    }
+
+                    // For 2x2 grid category, we need to create 4 SVGs
+                    if (apiTile.grid_category === "2x2") {
+                      // Use the same SVG 4 times for 2x2 grid
+                      svgContent = [svgText, svgText, svgText, svgText]
+                    } else {
+                      // For 1x1, just use the single SVG
+                      svgContent = [svgText]
+                    }
                   } else {
-                    // For 1x1, just use the single SVG
-                    svgContent = [svgText]
+                    throw new Error("No SVG content available")
                   }
                 } catch (error) {
-                  console.error(`Error fetching SVG for tile ${apiTile.id}:`, error)
+                  console.error(`Error processing SVG for tile ${apiTile.id}:`, error)
 
                   // Create a fallback SVG with error message
                   const fallbackSvg = `<svg id="tile-${apiTile.id}-error" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -117,11 +135,19 @@ export function TileSelection({
                 }
 
                 return {
-                  id: apiTile.id.toString(),
+                  id: Number(apiTile.id), // Ensure id is a number
                   name: apiTile.name,
+                  description: apiTile.description || "",
                   collection: apiTile.categories[0]?.name || "Uncategorized",
                   svg: svgContent,
                   grid_category: apiTile.grid_category,
+                  // Add other required properties from your Tile type
+                  status: apiTile.status || "",
+                  created_at: apiTile.created_at || "",
+                  updated_at: apiTile.updated_at || "",
+                  categories: apiTile.categories || [],
+                  colors: apiTile.colors || [],
+                  image: apiTile.image || "",
                 }
               }),
             )
@@ -150,20 +176,22 @@ export function TileSelection({
           }
 
           // setTiles(filteredTiles)
-          setTiles(filteredTiles.map((tile) => ({
-            id: parseInt(tile.id, 10),
-            name: tile.name,
-            description: '', // You may need to provide a default value or fetch this from an API
-            grid_category: '', // You may need to provide a default value or fetch this from an API
-            image: '', // You may need to provide a default value or fetch this from an API
-            status: '', // You may need to provide a default value or fetch this from an API
-            created_at: '', // You may need to provide a default value or fetch this from an API
-            updated_at: '', // You may need to provide a default value or fetch this from an API
-            categories: [], // You may need to provide a default value or fetch this from an API
-            colors: [], // You may need to provide a default value or fetch this from an API
-            collection: tile.collection,
-            svg: tile.svg,
-          })));
+          setTiles(
+            filteredTiles.map((tile) => ({
+              id: Number.parseInt(tile.id, 10),
+              name: tile.name,
+              description: "", // You may need to provide a default value or fetch this from an API
+              grid_category: "", // You may need to provide a default value or fetch this from an API
+              image: "", // You may need to provide a default value or fetch this from an API
+              status: "", // You may need to provide a default value or fetch this from an API
+              created_at: "", // You may need to provide a default value or fetch this from an API
+              updated_at: "", // You may need to provide a default value or fetch this from an API
+              categories: [], // You may need to provide a default value or fetch this from an API
+              colors: [], // You may need to provide a default value or fetch this from an API
+              collection: tile.collection,
+              svg: tile.svg,
+            })),
+          )
           setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
         }
       } catch (error) {
@@ -186,20 +214,22 @@ export function TileSelection({
         }
 
         // setTiles(filteredTiles)
-        setTiles(filteredTiles.map((tile) => ({
-          id: parseInt(tile.id, 10),
-          name: tile.name,
-          description: '', // You may need to provide a default value or fetch this from an API
-          grid_category: '', // You may need to provide a default value or fetch this from an API
-          image: '', // You may need to provide a default value or fetch this from an API
-          status: '', // You may need to provide a default value or fetch this from an API
-          created_at: '', // You may need to provide a default value or fetch this from an API
-          updated_at: '', // You may need to provide a default value or fetch this from an API
-          categories: [], // You may need to provide a default value or fetch this from an API
-          colors: [], // You may need to provide a default value or fetch this from an API
-          collection: tile.collection,
-          svg: tile.svg,
-        })));
+        setTiles(
+          filteredTiles.map((tile) => ({
+            id: Number.parseInt(tile.id, 10),
+            name: tile.name,
+            description: "", // You may need to provide a default value or fetch this from an API
+            grid_category: "", // You may need to provide a default value or fetch this from an API
+            image: "", // You may need to provide a default value or fetch this from an API
+            status: "", // You may need to provide a default value or fetch this from an API
+            created_at: "", // You may need to provide a default value or fetch this from an API
+            updated_at: "", // You may need to provide a default value or fetch this from an API
+            categories: [], // You may need to provide a default value or fetch this from an API
+            colors: [], // You may need to provide a default value or fetch this from an API
+            collection: tile.collection,
+            svg: tile.svg,
+          })),
+        )
         setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
       } finally {
         setLoading(false)
@@ -272,6 +302,38 @@ export function TileSelection({
     }
   }
 
+  // Helper function to decode base64 SVG content
+  const decodeSvgFromBase64 = (base64String: string): string => {
+    if (!base64String) {
+      console.error("Empty SVG base64 string provided")
+      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
+          Invalid SVG
+        </text>
+      </svg>`
+    }
+
+    try {
+      // First decode the base64 string to a UTF-8 string
+      const decodedString = atob(base64String)
+      // Then decode any URL-encoded characters
+      return decodeURIComponent(
+        Array.from(decodedString)
+          .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
+          .join(""),
+      )
+    } catch (error) {
+      console.error("Error decoding SVG:", error)
+      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
+          SVG Error
+        </text>
+      </svg>`
+    }
+  }
+
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1)
@@ -283,10 +345,6 @@ export function TileSelection({
       setCurrentPage(currentPage - 1)
     }
   }
-
-
-  
-
 
   // Calculate visible tiles based on current page
   const startIdx = (currentPage - 1) * tilesPerRow * rowsPerPage
@@ -375,139 +433,142 @@ export function TileSelection({
             <div className="container px-2 md:px-4">
               {/* First row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3 mb-4">
-                {getRowTiles(0).map((tile) => (
-                  <div key={tile.id} className="flex flex-col items-center border border-[#595959]/40">
-                    <button
-                      onClick={() => handleTileSelect(tile)}
-                      className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                        selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
-                      )}
-                    >
-                      <div
-                        className="grid gap-[1px]"
-                        style={{
-                          gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                          gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                        }}
+                {getRowTiles(0).map((tile) => {
+                  // When using tile.id as a key or in tileRotations
+                  const tileIdStr = String(tile.id)
+                  return (
+                    <div key={tileIdStr} className="flex flex-col items-center border border-[#595959]/40">
+                      <button
+                        onClick={() => handleTileSelect(tile)}
+                        className={cn(
+                          "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                          selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
+                        )}
                       >
-                        {tile.svg.map((svgString: string, index: number) => {
-                          // Only apply rotations for 2x2 grid category
-                          let rotation: number = 0
+                        <div
+                          className="grid gap-[1px]"
+                          style={{
+                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                          }}
+                        >
+                          {tile.svg.map((svgString: string, index: number) => {
+                            // Only apply rotations for 2x2 grid category
+                            let rotation = 0
 
-                          if (tile.grid_category === "2x2") {
-                            // Use the correct initial rotation pattern if not in tileRotations
-                            const defaultRotation: number = (() => {
-                              switch (index) {
-                                case 0:
-                                  return 0 // First SVG: 0°
-                                case 1:
-                                  return 90 // Second SVG: 90°
-                                case 2:
-                                  return 270 // Third SVG: 270°
-                                case 3:
-                                  return 180 // Fourth SVG: 180°
-                                default:
-                                  return 0
-                              }
-                            })()
+                            if (tile.grid_category === "2x2") {
+                              // Use the correct initial rotation pattern if not in tileRotations
+                              const defaultRotation: number = (() => {
+                                switch (index) {
+                                  case 0:
+                                    return 0 // First SVG: 0°
+                                  case 1:
+                                    return 90 // Second SVG: 90°
+                                  case 2:
+                                    return 270 // Third SVG: 270°
+                                  case 3:
+                                    return 180 // Fourth SVG: 180°
+                                  default:
+                                    return 0
+                                }
+                              })()
 
-                            rotation = tileRotations[tile.id] ? tileRotations[tile.id][index] : defaultRotation
-                          }
-                          console.log("tiledata", tile)
-                          return (
-                            <div key={`${tile.id}-${index}`} className="flex items-center justify-center">
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: applyColorsToSvg(svgString, pathColors || {}),
-                                }}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
-                                  transition: "transform 0.3s ease-in-out",
-                                }}
-                                className="svg-container"
-                              />
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </button>
+                              rotation = tileRotations[tileIdStr] ? tileRotations[tileIdStr][index] : defaultRotation
+                            }
+                            console.log("tiledata", tile)
+                            return (
+                              <div key={`${tileIdStr}-${index}`} className="flex items-center justify-center">
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: applyColorsToSvg(svgString, pathColors || {}),
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
+                                    transition: "transform 0.3s ease-in-out",
+                                  }}
+                                  className="svg-container"
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </button>
 
-
-                    <p className="text-[12px] font-normal text-center truncate mt-1 w-full px-1">{tile.name}</p>
-                  </div>
-                ))}
+                      <p className="text-[12px] font-normal text-center truncate mt-1 w-full px-1">{tile.name}</p>
+                    </div>
+                  )
+                })}
               </div>
 
               {/* Second row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3">
-                {getRowTiles(1).map((tile) => (
-                  <div key={`second-${tile.id}`} className="flex flex-col items-center border border-[#595959]/40">
-                    <button
-                      onClick={() => handleTileSelect(tile)}
-                      className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                        selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
-                      )}
-                    >
-                      <div
-                        className="grid gap-[1px]"
-                        style={{
-                          gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                          gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                        }}
+                {getRowTiles(1).map((tile) => {
+                  // When using tile.id as a key or in tileRotations
+                  const tileIdStr = String(tile.id)
+                  return (
+                    <div key={`second-${tileIdStr}`} className="flex flex-col items-center border border-[#595959]/40">
+                      <button
+                        onClick={() => handleTileSelect(tile)}
+                        className={cn(
+                          "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                          selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
+                        )}
                       >
-                        {tile.svg.map((svgString: string, index: number) => {
-                          // Only apply rotations for 2x2 grid category
-                          let rotation: number = 0
+                        <div
+                          className="grid gap-[1px]"
+                          style={{
+                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                          }}
+                        >
+                          {tile.svg.map((svgString: string, index: number) => {
+                            // Only apply rotations for 2x2 grid category
+                            let rotation = 0
 
-                          if (tile.grid_category === "2x2") {
-                            const defaultRotation: number = (() => {
-                              switch (index) {
-                                case 0:
-                                  return 0
-                                case 1:
-                                  return 90
-                                case 2:
-                                  return 270
-                                case 3:
-                                  return 180
-                                default:
-                                  return 0
-                              }
-                            })()
+                            if (tile.grid_category === "2x2") {
+                              const defaultRotation: number = (() => {
+                                switch (index) {
+                                  case 0:
+                                    return 0
+                                  case 1:
+                                    return 90
+                                  case 2:
+                                    return 270
+                                  case 3:
+                                    return 180
+                                  default:
+                                    return 0
+                                }
+                              })()
 
-                            rotation = tileRotations[tile.id] ? tileRotations[tile.id][index] : defaultRotation
-                          }
+                              rotation = tileRotations[tileIdStr] ? tileRotations[tileIdStr][index] : defaultRotation
+                            }
 
-                          return (
-                            <div key={`second-${tile.id}-${index}`} className="flex items-center justify-center">
-                              <div
-
-                                dangerouslySetInnerHTML={{
-                                  __html: applyColorsToSvg(svgString, pathColors || {}),
-                                }}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
-                                  transition: "transform 0.3s ease-in-out",
-                                }}
-                                className="svg-container"
-                              />
-
-
-
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </button>
-                    <p className="text-xs font-medium text-center truncate mt-1 w-full px-1">{tile.name}</p>
-                  </div>
-                ))}
+                            return (
+                              <div key={`second-${tileIdStr}-${index}`} className="flex items-center justify-center">
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: applyColorsToSvg(svgString, pathColors || {}),
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
+                                    transition: "transform 0.3s ease-in-out",
+                                  }}
+                                  className="svg-container"
+                                />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </button>
+                      <p className="text-xs font-medium text-center truncate mt-1 w-full px-1">{tile.name}</p>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -532,8 +593,6 @@ export function TileSelection({
           </div>
         </div>
       )}
-
-      
     </div>
   )
 }

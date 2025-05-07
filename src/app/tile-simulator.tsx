@@ -18,7 +18,7 @@ export default function Tiles() {
   const [tileRotations, setTileRotations] = useState<Record<string, number[]>>({});
   const [groutColor, setGroutColor] = useState<"orange" | "green" | "turquoise" | "blue">("orange");
   const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin");
-  
+
   // Add state for category and search
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +46,7 @@ export default function Tiles() {
   };
 
   const handleTileSelect = (tile: Tile) => {
+
     setSelectedTile(tile);
 
     if (tile.svg.length > 0) {

@@ -10,6 +10,8 @@ export type Tile = {
   updated_at: string;
   categories: Category[];
   colors: Color[];
+  image_svg_text: string;
+
 };
 
 export type Category = {

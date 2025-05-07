@@ -58,6 +58,7 @@ export function ColorEditor({
           (color: ColorItem) => color.status === "published"
         );
         setApiColors(publishedColors);
+        console.log("published colors", publishedColors);
       } catch (error) {
         console.error("Error fetching colors:", error);
       } finally {

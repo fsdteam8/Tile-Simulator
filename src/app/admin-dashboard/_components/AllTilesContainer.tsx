@@ -19,6 +19,7 @@ const AllTilesContainer = ({search}:{search:string}) => {
       fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?search=${debounceValue}&paginate_count=8&page=${currentPage}`
       ).then((res) => res.json()),
+      
   });
 
   return (

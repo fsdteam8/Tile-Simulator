@@ -2,7 +2,6 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
-import Image from "next/image";
 import AuctionButton from "./AuctionButton";
 import { Tile } from "./AllTilesData";
 import moment from "moment";
@@ -41,17 +40,23 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
   {
     header: "Tiles",
     cell: ({ row }) => {
-      console.log(row.original.image);
-      return (
-        <div className="w-full flex justify-center items-center">
-          <Image
-            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${row.original.image}`}
-            alt="tile image"
-            width={75}
-            height={75}
-          />
-        </div>
-      );
+      const svgBase64 = row.original.image_svg_text;
+  
+      if (svgBase64) {
+        try {
+          const decodedSvg = decodeURIComponent(escape(atob(svgBase64)));
+          return (
+            <div
+              className="w-[75px] h-[75px] flex items-center justify-center border border-gray-200 rounded"
+              dangerouslySetInnerHTML={{ __html: decodedSvg }}
+            />
+          );
+        } catch {
+          return <span className="text-red-500">Invalid SVG</span>;
+        }
+      }
+  
+      return <span className="text-gray-400">No image</span>;
     },
   },
   {
@@ -69,7 +74,6 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
   {
     header: "Category",
     cell: ({ row }) => {
-      console.log(row);
       return (
         <div className="w-full flex justify-center items-center">
           <span className="text-base font-normal text-black leading-[120%] text-center">

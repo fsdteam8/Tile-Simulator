@@ -51,7 +51,7 @@ export function TileSelection({
       try {
         if (process.env.NEXT_PUBLIC_BACKEND_URL) {
           // Build the URL with all possible filters
-          let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?page=${currentPage}`
+          let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=18&page=${currentPage}`
 
           // Add category filter if provided
           if (selectedCategory && selectedCategory !== "all") {
@@ -148,6 +148,7 @@ export function TileSelection({
                   categories: apiTile.categories || [],
                   colors: apiTile.colors || [],
                   image: apiTile.image || "",
+                  image_svg_text: apiTile.image_svg_text || "", // Add the missing property
                 }
               }),
             )
@@ -175,23 +176,29 @@ export function TileSelection({
             )
           }
 
-          // setTiles(filteredTiles)
-          setTiles(
-            filteredTiles.map((tile) => ({
+          // Transform mock data to match your Tile type
+          const transformedTiles = filteredTiles.map((tile) => {
+            // Create a base64 representation of the SVG for mock data
+            const mockBase64 = btoa(tile.svg[0] || "<svg></svg>")
+
+            return {
               id: Number.parseInt(tile.id, 10),
               name: tile.name,
-              description: "", // You may need to provide a default value or fetch this from an API
-              grid_category: "", // You may need to provide a default value or fetch this from an API
-              image: "", // You may need to provide a default value or fetch this from an API
-              status: "", // You may need to provide a default value or fetch this from an API
-              created_at: "", // You may need to provide a default value or fetch this from an API
-              updated_at: "", // You may need to provide a default value or fetch this from an API
-              categories: [], // You may need to provide a default value or fetch this from an API
-              colors: [], // You may need to provide a default value or fetch this from an API
+              description: "",
+              grid_category: "",
+              image: "",
+              status: "",
+              created_at: "",
+              updated_at: "",
+              categories: [],
+              colors: [],
               collection: tile.collection,
               svg: tile.svg,
-            })),
-          )
+              image_svg_text: mockBase64, // Add the missing property
+            }
+          })
+
+          setTiles(transformedTiles)
           setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
         }
       } catch (error) {
@@ -213,23 +220,29 @@ export function TileSelection({
           )
         }
 
-        // setTiles(filteredTiles)
-        setTiles(
-          filteredTiles.map((tile) => ({
+        // Transform mock data to match your Tile type
+        const transformedTiles = filteredTiles.map((tile) => {
+          // Create a base64 representation of the SVG for mock data
+          const mockBase64 = btoa(tile.svg[0] || "<svg></svg>")
+
+          return {
             id: Number.parseInt(tile.id, 10),
             name: tile.name,
-            description: "", // You may need to provide a default value or fetch this from an API
-            grid_category: "", // You may need to provide a default value or fetch this from an API
-            image: "", // You may need to provide a default value or fetch this from an API
-            status: "", // You may need to provide a default value or fetch this from an API
-            created_at: "", // You may need to provide a default value or fetch this from an API
-            updated_at: "", // You may need to provide a default value or fetch this from an API
-            categories: [], // You may need to provide a default value or fetch this from an API
-            colors: [], // You may need to provide a default value or fetch this from an API
+            description: "",
+            grid_category: "",
+            image: "",
+            status: "",
+            created_at: "",
+            updated_at: "",
+            categories: [],
+            colors: [],
             collection: tile.collection,
             svg: tile.svg,
-          })),
-        )
+            image_svg_text: mockBase64, // Add the missing property
+          }
+        })
+
+        setTiles(transformedTiles)
         setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
       } finally {
         setLoading(false)
@@ -328,7 +341,7 @@ export function TileSelection({
       return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#f0f0f0"/>
         <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-          SVG Error
+          Invalid SVG
         </text>
       </svg>`
     }
@@ -584,12 +597,6 @@ export function TileSelection({
             >
               <ChevronRight className="h-6 w-6" />
             </button>
-          </div>
-          {/* Pagination indicator */}
-          <div className="text-center mt-4">
-            <span className="text-sm text-gray-500">
-              Page {currentPage} of {totalPages}
-            </span>
           </div>
         </div>
       )}

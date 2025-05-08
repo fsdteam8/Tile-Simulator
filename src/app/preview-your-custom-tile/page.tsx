@@ -1,84 +1,84 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Clock4, Download } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import { Label } from "@/components/ui/label";
-import type { PathData, SvgData } from "@/components/svg-editor/types";
-import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm";
-import { PiShareFatBold } from "react-icons/pi";
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Clock4, Download } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+import { Label } from "@/components/ui/label"
+import type { PathData, SvgData } from "@/components/svg-editor/types"
+import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
+import { PiShareFatBold } from "react-icons/pi"
 
 interface TileData {
-  svgData: SvgData[];
-  rotations: number[]; // Rotations for each SVG in the grid
-  groutThickness: string; // Class for grout thickness, e.g., 'grout-thick'
-  groutColor: string; // Class for grout color, e.g., 'gray'
-  pathColors: Record<string, string>; // Path color mapping by path ID
-  showBorders: boolean; // Whether to show borders on paths
+  svgData: SvgData[]
+  rotations: number[] // Rotations for each SVG in the grid
+  groutThickness: string // Class for grout thickness, e.g., 'grout-thick'
+  groutColor: string // Class for grout color, e.g., 'gray'
+  pathColors: Record<string, string> // Path color mapping by path ID
+  showBorders: boolean // Whether to show borders on paths
 }
 
 export default function PreviewYourCustomTile() {
   const [tileData, setTileData] = useState<{
-    svgData: SvgData[] | null;
-    pathColors: Record<string, string>;
-    showBorders: boolean;
-    rotations: number[];
-    groutColor: string;
-    groutThickness: string;
-    gridSize: string;
-    environment: string;
-  } | null>(null);
+    svgData: SvgData[] | null
+    pathColors: Record<string, string>
+    showBorders: boolean
+    rotations: number[]
+    groutColor: string
+    groutThickness: string
+    gridSize: string
+    environment: string
+  } | null>(null)
 
-  const [email, setEmail] = useState("");
-  const tileGridRef = useRef<HTMLDivElement>(null);
-  const patternGridRef = useRef<HTMLDivElement>(null);
-  const environmentPreviewRef = useRef<HTMLDivElement>(null);
+  const [email, setEmail] = useState("")
+  const tileGridRef = useRef<HTMLDivElement>(null)
+  const patternGridRef = useRef<HTMLDivElement>(null)
+  const environmentPreviewRef = useRef<HTMLDivElement>(null)
 
-  const [openFormModal, setOpenFormModal] = useState(false);
+  const [openFormModal, setOpenFormModal] = useState(false)
 
   // Add isSmallScreen state and useEffect for responsive behavior
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
   const [tileTransform, setTileTransform] = useState({
     marginTop: isSmallScreen ? "18px" : "0px",
     transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
     height: "0%",
-  });
+  })
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth <= 834);
-    };
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initialize on mount
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+      setIsSmallScreen(window.innerWidth <= 834)
+    }
+    window.addEventListener("resize", handleResize)
+    handleResize() // Initialize on mount
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     // Load data from localStorage
-    const savedData = localStorage.getItem("tilePreviewData");
+    const savedData = localStorage.getItem("tilePreviewData")
     if (savedData) {
       try {
-        const parsedData = JSON.parse(savedData);
-        setTileData(parsedData);
+        const parsedData = JSON.parse(savedData)
+        setTileData(parsedData)
 
         // Render the grids after data is loaded
         setTimeout(() => {
           if (parsedData.svgData) {
-            renderTileGrid(tileGridRef.current, 1, 1, parsedData);
-            renderTileGrid(patternGridRef.current, 30, 8, parsedData);
+            renderTileGrid(tileGridRef.current, 1, 1, parsedData)
+            renderTileGrid(patternGridRef.current, 30, 8, parsedData)
 
             if (parsedData.environment !== "none") {
-              renderTileGrid(environmentPreviewRef.current, 32, 16, parsedData);
+              renderTileGrid(environmentPreviewRef.current, 32, 16, parsedData)
             }
           }
-        }, 100);
+        }, 100)
       } catch (error) {
-        console.error("Error parsing saved tile data:", error);
+        console.error("Error parsing saved tile data:", error)
       }
     }
-  }, []);
+  }, [])
 
   // Update the environment handling to set tileTransform when environment changes
   useEffect(() => {
@@ -87,165 +87,285 @@ export default function PreviewYourCustomTile() {
         marginTop: isSmallScreen ? "18px" : "0px",
         transform: isSmallScreen ? "rotateX(65deg)" : "rotateX(71deg)",
         height: "70%",
-      });
+      })
     }
-  }, [tileData?.environment, isSmallScreen]);
+  }, [tileData?.environment, isSmallScreen])
 
-  const renderTileGrid = (
-    container: HTMLDivElement | null,
-    rows: number,
-    cols: number,
-    data: TileData
-  ) => {
-    console.log(data);
-    if (!container || !data.svgData || !data.svgData.length) return;
+  const renderTileGrid = (container: HTMLDivElement | null, rows: number, cols: number, data: TileData) => {
+    console.log("Rendering tile grid with data:", data)
+    if (!container || !data.svgData || !data.svgData.length) return
 
     // Clear existing content
-    container.innerHTML = "";
+    container.innerHTML = ""
 
     // Define styling function for hexagonal grid positioning
     function style(i: number) {
       return {
         marginLeft: i % 2 !== 0 ? "35px" : "0px", // Apply marginLeft if i is odd
         marginTop: i >= 1 && i <= 45 ? "-36px" : "0px", // Apply marginTop if i is between 1 and 30
-      };
+      }
     }
 
-    const useQuadPattern = data.svgData.length === 4;
+    const useQuadPattern = data.svgData.length === 4
 
     // Create grid cells
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        const cell = document.createElement("div");
-        cell.className = `tile-cell ${data.groutThickness} ${data.groutColor}-grout`;
+        const cell = document.createElement("div")
+        cell.className = `tile-cell ${data.groutThickness} ${data.groutColor}-grout`
 
         if (useQuadPattern) {
           // Create a 2x2 grid inside each cell for 4 SVGs
-          const innerGrid = document.createElement("div");
-          innerGrid.className = "grid grid-cols-2 w-full h-full gap-[1px]";
+          const innerGrid = document.createElement("div")
+          innerGrid.className = "grid grid-cols-2 w-full h-full gap-[1px]"
 
           // Add 4 SVGs in a 2x2 pattern
           for (let k = 0; k < 4; k++) {
-            const svgIndex = k;
-            const svg = data.svgData[svgIndex];
-            const rotation = data.rotations[svgIndex] || 0;
+            const svgIndex = k
+            const svg = data.svgData[svgIndex]
+            const rotation = data.rotations[svgIndex] || 0
 
-            const innerCell = document.createElement("div");
-            innerCell.className = "relative w-full h-full";
+            const innerCell = document.createElement("div")
+            innerCell.className = "relative w-full h-full"
 
-            const svgElement = document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "svg"
-            );
-            svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100");
-            svgElement.style.transform = `rotate(${rotation}deg)`;
+            const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+            svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100")
+            svgElement.style.transform = `rotate(${rotation}deg)`
 
             // Add paths
             svg.paths.forEach((path: PathData) => {
-              const pathElement = document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "path"
-              );
-              pathElement.setAttribute("d", path.d);
-              pathElement.setAttribute(
-                "fill",
-                data.pathColors[path.id] || path.fill || "#000000"
-              );
-              if (data.showBorders) {
-                pathElement.setAttribute("stroke", "#000000");
-                pathElement.setAttribute("stroke-width", "1");
-              }
-              svgElement.appendChild(pathElement);
-            });
+              const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path")
+              pathElement.setAttribute("d", path.d)
 
-            innerCell.appendChild(svgElement);
-            innerGrid.appendChild(innerCell);
+              const color = data.pathColors[path.id] || path.fill || "#000000"
+
+              if (color && color.startsWith("image:")) {
+                // For image-based colors, create a pattern
+                const imagePath = color.replace("image:", "")
+                const patternId = `pattern-${path.id}-${i}-${j}-${k}`
+
+                // Create pattern definition
+                const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
+                patternDef.setAttribute("id", patternId)
+                patternDef.setAttribute("patternUnits", "userSpaceOnUse")
+                patternDef.setAttribute("width", "100%")
+                patternDef.setAttribute("height", "100%")
+
+                // Create image element
+                const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
+                imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
+                imageEl.setAttribute("x", "0")
+                imageEl.setAttribute("y", "0")
+                imageEl.setAttribute("width", "100%")
+                imageEl.setAttribute("height", "100%")
+                imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
+
+                // Add image to pattern
+                patternDef.appendChild(imageEl)
+
+                // Add pattern to defs
+                const defs =
+                  svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
+                if (!svgElement.querySelector("defs")) {
+                  svgElement.appendChild(defs)
+                }
+                defs.appendChild(patternDef)
+
+                // Set fill to use pattern
+                pathElement.setAttribute("fill", `url(#${patternId})`)
+              } else {
+                // For solid colors
+                pathElement.setAttribute("fill", color)
+              }
+
+              if (data.showBorders) {
+                pathElement.setAttribute("stroke", "#000000")
+                pathElement.setAttribute("stroke-width", "1")
+              }
+              svgElement.appendChild(pathElement)
+            })
+
+            innerCell.appendChild(svgElement)
+            innerGrid.appendChild(innerCell)
           }
 
-          cell.appendChild(innerGrid);
+          cell.appendChild(innerGrid)
         } else {
           // Original single SVG per cell logic
-          const svgIndex = (i * cols + j) % data.svgData.length;
-          const svg = data.svgData[svgIndex];
-          const rotation = data.rotations[svgIndex] || 0;
+          const svgIndex = (i * cols + j) % data.svgData.length
+          const svg = data.svgData[svgIndex]
+          const rotation = data.rotations[svgIndex] || 0
 
           // Create a wrapper div for the SVG
-          const wrapper = document.createElement("div");
-          wrapper.className = "relative w-full h-full";
+          const wrapper = document.createElement("div")
+          wrapper.className = "relative w-full h-full"
 
           // Apply styled margins based on i and j
-          Object.assign(wrapper.style, style(i));
+          Object.assign(wrapper.style, style(i))
 
-          const svgElement = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "svg"
-          );
-          svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100");
-          svgElement.style.transform = `rotate(${rotation}deg)`;
-          svgElement.style.padding = `3px`; // Add padding to all SVG elements
+          const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+          svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100")
+          svgElement.style.transform = `rotate(${rotation}deg)`
+          svgElement.style.padding = `3px` // Add padding to all SVG elements
 
           // Add paths
           svg.paths.forEach((path: PathData) => {
-            const pathElement = document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "path"
-            );
-            pathElement.setAttribute("d", path.d);
-            pathElement.setAttribute(
-              "fill",
-              data.pathColors[path.id] || path.fill || "#000000"
-            );
-            if (data.showBorders) {
-              pathElement.setAttribute("stroke", "#000000");
-              pathElement.setAttribute("stroke-width", "1");
-            }
-            svgElement.appendChild(pathElement);
-          });
+            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path")
+            pathElement.setAttribute("d", path.d)
 
-          wrapper.appendChild(svgElement);
-          cell.appendChild(wrapper);
+            const color = data.pathColors[path.id] || path.fill || "#000000"
+
+            if (color && color.startsWith("image:")) {
+              // For image-based colors, create a pattern
+              const imagePath = color.replace("image:", "")
+              const patternId = `pattern-${path.id}-${i}-${j}`
+
+              // Create pattern definition
+              const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
+              patternDef.setAttribute("id", patternId)
+              patternDef.setAttribute("patternUnits", "userSpaceOnUse")
+              patternDef.setAttribute("width", "100%")
+              patternDef.setAttribute("height", "100%")
+
+              // Create image element
+              const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
+              imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
+              imageEl.setAttribute("x", "0")
+              imageEl.setAttribute("y", "0")
+              imageEl.setAttribute("width", "100%")
+              imageEl.setAttribute("height", "100%")
+              imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
+
+              // Add image to pattern
+              patternDef.appendChild(imageEl)
+
+              // Add pattern to defs
+              const defs =
+                svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
+              if (!svgElement.querySelector("defs")) {
+                svgElement.appendChild(defs)
+              }
+              defs.appendChild(patternDef)
+
+              // Set fill to use pattern
+              pathElement.setAttribute("fill", `url(#${patternId})`)
+            } else {
+              // For solid colors
+              pathElement.setAttribute("fill", color)
+            }
+
+            if (data.showBorders) {
+              pathElement.setAttribute("stroke", "#000000")
+              pathElement.setAttribute("stroke-width", "1")
+            }
+            svgElement.appendChild(pathElement)
+          })
+
+          wrapper.appendChild(svgElement)
+          cell.appendChild(wrapper)
         }
 
-        container.appendChild(cell);
+        container.appendChild(cell)
       }
     }
-  };
+  }
 
   // Generate SVG string for download
   const generateSvgString = () => {
-    if (!tileData || !tileData.svgData || !tileData.svgData.length) return "";
+    if (!tileData || !tileData.svgData || !tileData.svgData.length) return ""
 
-    const svg = tileData.svgData[0];
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${
+    const svg = tileData.svgData[0]
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${
       svg.viewBox || "0 0 100 100"
-    }">`;
+    }" width="500" height="500">`
 
+    // Add defs section for patterns
+    svgString += "<defs>"
+
+    // Create a map to track which patterns we've already added
+    const addedPatterns = new Set()
+
+    // First pass: add all patterns needed for image-based colors
     svg.paths.forEach((path) => {
-      const fill = tileData.pathColors[path.id] || path.fill || "#000000";
-      svgString += `<path d="${path.d}" fill="${fill}" ${
-        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
-      }/>`;
-    });
+      const color = tileData.pathColors[path.id] || path.fill || "#000000"
 
-    svgString += "</svg>";
-    return svgString;
-  };
+      if (color && color.startsWith("image:")) {
+        const imagePath = color.replace("image:", "")
+        const patternId = `pattern-${path.id}`
+
+        if (!addedPatterns.has(patternId)) {
+          // Create a full URL for the image
+          const imageUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`
+
+          svgString += `
+            <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
+              <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+            </pattern>
+          `
+          addedPatterns.add(patternId)
+        }
+      }
+    })
+
+    svgString += "</defs>"
+
+    // Second pass: add all paths with appropriate fill references
+    svg.paths.forEach((path) => {
+      const color = tileData.pathColors[path.id] || path.fill || "#000000"
+      let fillAttribute
+
+      if (color && color.startsWith("image:")) {
+        const patternId = `pattern-${path.id}`
+        fillAttribute = `url(#${patternId})`
+      } else {
+        fillAttribute = color
+      }
+
+      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${
+        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
+      }/>`
+    })
+
+    svgString += "</svg>"
+    return svgString
+  }
 
   const handleDownloadSVG = () => {
-    const svgString = generateSvgString();
-    if (!svgString) return;
+    console.log("Downloading SVG...")
+    const svgString = generateSvgString()
+    if (!svgString) {
+      console.error("Failed to generate SVG string")
+      return
+    }
 
-    const blob = new Blob([svgString], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
+    console.log("Generated SVG string:", svgString.substring(0, 100) + "...")
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "custom-tile.svg";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    try {
+      // Create a temporary DOM element to properly format the SVG
+      const parser = new DOMParser()
+      const svgDoc = parser.parseFromString(svgString, "image/svg+xml")
+
+      // Format the SVG with proper XML declaration
+      const serializer = new XMLSerializer()
+      const formattedSvgString = serializer.serializeToString(svgDoc)
+
+      // Create a blob with the formatted SVG
+      const blob = new Blob([formattedSvgString], { type: "image/svg+xml" })
+      const url = URL.createObjectURL(blob)
+
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "custom-tile.svg"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      console.log("SVG download complete")
+    } catch (error) {
+      console.error("Error downloading SVG:", error)
+    }
+  }
 
   const handleShare = () => {
     // Implement share functionality
@@ -256,50 +376,62 @@ export default function PreviewYourCustomTile() {
           text: "Check out my custom cement tile design!",
           url: window.location.href,
         })
-        .catch((error) => console.log("Error sharing", error));
+        .catch((error) => console.log("Error sharing", error))
     } else {
       // Fallback for browsers that don't support the Web Share API
       navigator.clipboard
         .writeText(window.location.href)
         .then(() => alert("Link copied to clipboard!"))
-        .catch((err) => console.error("Could not copy text: ", err));
+        .catch((err) => console.error("Could not copy text: ", err))
     }
-  };
+  }
 
   const handleSaveEmail = () => {
-    alert(`Design saved to email: ${email}`);
-    setEmail("");
-  };
+    alert(`Design saved to email: ${email}`)
+    setEmail("")
+  }
 
   // Extract color information for display
   const getUniqueColors = () => {
-    if (!tileData || !tileData.svgData) return [];
+    if (!tileData || !tileData.svgData) return []
 
-    console.log(tileData.environment);
-
-    const colors = new Set<string>();
+    const colors = new Set<string>()
+    const imageColors = new Set<string>()
 
     if (tileData.pathColors) {
       Object.values(tileData.pathColors).forEach((color) => {
-        if (typeof color === "string") colors.add(color);
-      });
+        if (typeof color === "string") {
+          if (color.startsWith("image:")) {
+            imageColors.add(color)
+          } else {
+            colors.add(color)
+          }
+        }
+      })
     }
 
     if (tileData.svgData) {
       tileData.svgData.forEach((svg) => {
         svg.paths.forEach((path) => {
-          if (path.fill) colors.add(path.fill);
-        });
-      });
+          if (path.fill) {
+            if (path.fill.startsWith("image:")) {
+              imageColors.add(path.fill)
+            } else {
+              colors.add(path.fill)
+            }
+          }
+        })
+      })
     }
 
-    return Array.from(colors);
-  };
+    // Combine regular colors and image colors
+    return [...Array.from(colors), ...Array.from(imageColors)]
+  }
 
-  const uniqueColors = getUniqueColors();
+  const uniqueColors = getUniqueColors()
 
   if (!tileData) {
-    return <div className="p-8 text-center">Loading preview data...</div>;
+    return <div className="p-8 text-center">Loading preview data...</div>
   }
 
   return (
@@ -312,11 +444,18 @@ export default function PreviewYourCustomTile() {
           Preview Your Custom Tile
         </h1>
         <div className="flex items-center justify-center gap-[20px] 2xl:gap-[24px]">
-          <button type="button" className="flex flex-col justify-center items-center gap-2 text-base font-medium text-black leading-[120%]" onClick={handleShare}>
-            <PiShareFatBold className="w-6 h-6"/>
+          <button
+            type="button"
+            className="flex flex-col justify-center items-center gap-2 text-base font-medium text-black leading-[120%]"
+            onClick={handleShare}
+          >
+            <PiShareFatBold className="w-6 h-6" />
             Share
           </button>
-          <button className="flex flex-col items-center justify-center gap-[8px] text-base font-medium text-black leading-[120%]" onClick={handleDownloadSVG}>
+          <button
+            className="flex flex-col items-center justify-center gap-[8px] text-base font-medium text-black leading-[120%]"
+            onClick={handleDownloadSVG}
+          >
             <Download className="mr-2 h-6 w-6" />
             Download SVG
           </button>
@@ -330,22 +469,27 @@ export default function PreviewYourCustomTile() {
             <div className="">
               <h3 className="text-xl font-medium leading-[120%] text-black mb-2">Colors:</h3>
               {uniqueColors.length > 0 ? (
-                <div
-                  defaultValue={uniqueColors[0]}
-                  className="flex gap-4 flex-wrap"
-                >
+                <div defaultValue={uniqueColors[0]} className="flex gap-4 flex-wrap">
                   {uniqueColors.map((color, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      {/* <RadioGroupItem value={color} id={`color-${index}`} /> */}
-                      <Label
-                        htmlFor={`color-${index}`}
-                        className="flex items-center text-[#595959]"
-                      >
-                        <span
-                          className="w-4 h-4 rounded-full mr-2"
-                          style={{ backgroundColor: color }}
-                        ></span>
-                        {color.toUpperCase()}
+                      <Label htmlFor={`color-${index}`} className="flex items-center text-[#595959]">
+                        {color.startsWith("image:") ? (
+                          <>
+                            <span className="w-4 h-4 rounded-full mr-2 bg-gray-200 overflow-hidden">
+                              <Image
+                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${color.replace("image:", "")}`}
+                                alt="Pattern"
+                                className="w-full h-full object-cover"
+                              />
+                            </span>
+                            {`Pattern ${index + 1}`}
+                          </>
+                        ) : (
+                          <>
+                            <span className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: color }}></span>
+                            {color.toUpperCase()}
+                          </>
+                        )}
                       </Label>
                     </div>
                   ))}
@@ -356,12 +500,7 @@ export default function PreviewYourCustomTile() {
             </div>
           </div>
           <div>
-            <Image
-              src="/assets/lili_tile_logo.png"
-              alt="Logo"
-              width={48}
-              height={48}
-            />
+            <Image src="/assets/lili_tile_logo.png" alt="Logo" width={48} height={48} />
           </div>
           {/* <div className="mb-6">
           <h3 className="text-md font-medium mb-2">Grout:</h3>
@@ -379,12 +518,7 @@ export default function PreviewYourCustomTile() {
               className={`grid aspect-square ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(1, 1fr)`,
-                gap:
-                  tileData.groutThickness === "none"
-                    ? "0px"
-                    : tileData.groutThickness === "thin"
-                    ? "1px"
-                    : "2px",
+                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
                 // width: "562px",
                 width: isSmallScreen ? "100%" : "562px",
               }}
@@ -396,12 +530,7 @@ export default function PreviewYourCustomTile() {
               className={`grid aspect-square ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(8, 1fr)`,
-                gap:
-                  tileData.groutThickness === "none"
-                    ? "0px"
-                    : tileData.groutThickness === "thin"
-                    ? "1px"
-                    : "2px",
+                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
                 width: isSmallScreen ? "100%" : "auto",
               }}
             />
@@ -431,8 +560,8 @@ export default function PreviewYourCustomTile() {
                             tileData.groutThickness === "none"
                               ? "0"
                               : tileData.groutThickness === "thin"
-                              ? "1px"
-                              : "2px"
+                                ? "1px"
+                                : "2px"
                           }] bg-${tileData.groutColor}`}
                           style={{
                             gridTemplateColumns: `repeat(${16}, 1fr)`,
@@ -475,15 +604,12 @@ export default function PreviewYourCustomTile() {
 
       <div className="mt-8 text-center">
         <p className="text-xl lg:text-[22px] 2xl:text-[24px] leading-[120%] font-medium text-black">
-          Thank you for choosing to create a one-of-a-kind (1) custom cement
-          tile!
+          Thank you for choosing to create a one-of-a-kind (1) custom cement tile!
         </p>
       </div>
 
       <div className="pt-6">
-        <h2 className="text-[24px] font-medium  text-center mb-6">
-          Custom Design Process
-        </h2>
+        <h2 className="text-[24px] font-medium  text-center mb-6">Custom Design Process</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="flex justify-center mb-2">
@@ -550,36 +676,26 @@ export default function PreviewYourCustomTile() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex items-center justify-center gap-2">
             <Clock4 />
-            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">
-              Next day
-            </p>
+            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">Next day</p>
           </div>
           <div className="flex items-center gap-2 justify-center">
             <Clock4 />
-            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">
-              1 week
-            </p>
+            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">1 week</p>
           </div>
           <div className="flex items-center gap-2 justify-center">
             <Clock4 />
-            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">
-              3 weeks
-            </p>
+            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">3 weeks</p>
           </div>
           <div className="flex items-center gap-2 justify-center">
             <Clock4 />
-            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">
-              12-14 weeks
-            </p>
+            <p className="text-lg xl:text-xl text-black leading-[120%] font-normal">12-14 weeks</p>
           </div>
         </div>
       </div>
 
       <div className="mt-8">
         <div className="space-y-[10px]">
-          <h1 className="text-base font-medium text-black leading-[120%]">
-            Send yourself a copy
-          </h1>
+          <h1 className="text-base font-medium text-black leading-[120%]">Send yourself a copy</h1>
           <div className="flex items-center gap-[30px] overflow-hidden">
             <input
               type="email"
@@ -608,9 +724,7 @@ export default function PreviewYourCustomTile() {
       </div>
 
       {/* modal form  */}
-      {openFormModal && (
-        <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} />
-      )}
+      {openFormModal && <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} />}
 
       <style jsx>{`
         .tile-cell {
@@ -648,5 +762,5 @@ export default function PreviewYourCustomTile() {
         }
       `}</style>
     </div>
-  );
+  )
 }

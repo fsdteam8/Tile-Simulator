@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,15 +14,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
 });
 
 export function ForgotPasswordForm() {
-  const router = useRouter();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,11 +29,30 @@ export function ForgotPasswordForm() {
     },
   });
 
+  // forgot password api integration
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["forgot-password"],
+    mutationFn: (email: string) =>
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/password/email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      }).then((res) => res.json()),
+    onSuccess: (data) => {
+      if (!data.success) {
+        toast.error(data?.message || "Something went wrong");
+        return;
+      }
+      toast.success(
+        data?.message || "Email sent successfully. Please check your inbox."
+      );
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle forgot password logic here
-    console.log(values);
-    // Redirect to reset password page in a real app
-    router.push("/resetPassword");
+    mutate(values.email);
   }
 
   return (
@@ -74,19 +91,14 @@ export function ForgotPasswordForm() {
           />
 
           <Button
+            disabled={isPending}
             type="submit"
             className="w-full bg-red-500 hover:bg-red-600 text-base font-medium leading-[120%] text-white py-3 2xl:py-4"
           >
-            Submit
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
         </form>
       </Form>
-
-      <div className="mt-4 text-center">
-        <Link href="/login" className="text-sm text-primary hover:underline">
-          Back to Login
-        </Link>
-      </div>
     </div>
   );
 }

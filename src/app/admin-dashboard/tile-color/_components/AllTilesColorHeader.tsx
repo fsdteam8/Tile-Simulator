@@ -1,14 +1,11 @@
+
 "use client"
 
 import { useState } from "react"
 import Link from "next/link"
-
-
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-
 import { cn } from "@/lib/utils"
-
 import { ColorFormModal } from "./Add-Edit-colorForm/color-form"
 import { RiArrowRightSLine } from "react-icons/ri"
 import { FaPlus } from "react-icons/fa6"
@@ -22,10 +19,16 @@ interface ColorData {
   status?: string
 }
 
-export function TileColorsHeader() {
+interface TileColorsHeaderProps {
+  search: string;
+  setSearch: (value: string) => void;
+}
+
+export function TileColorsHeader({ search, setSearch }: TileColorsHeaderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentColor, setCurrentColor] = useState<ColorData | null>(null)
-  console.log("currentColor", currentColor)
+
+  console.log(currentColor)
 
   const handleAddNew = () => {
     setCurrentColor(null)
@@ -34,9 +37,11 @@ export function TileColorsHeader() {
 
   return (
     <div>
-      <AllTilesColorHeader onAddNew={handleAddNew} />
-      
-      {/* TODO: Add tile colors list here */}
+      <AllTilesColorHeader 
+        onAddNew={handleAddNew} 
+        search={search} 
+        setSearch={setSearch} 
+      />
       
       <ColorFormModal
         open={isModalOpen}
@@ -46,9 +51,13 @@ export function TileColorsHeader() {
   )
 }
 
-const AllTilesColorHeader = ({ onAddNew }: { onAddNew: () => void }) => {
-  const [search, setSearch] = useState("")
+interface AllTilesColorHeaderProps {
+  onAddNew: () => void;
+  search: string;
+  setSearch: (value: string) => void;
+}
 
+const AllTilesColorHeader = ({ onAddNew, search, setSearch }: AllTilesColorHeaderProps) => {
   return (
     <div>
       <div className="flex items-center justify-between pb-5">

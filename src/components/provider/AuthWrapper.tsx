@@ -6,7 +6,6 @@ import { ReactNode, useEffect } from "react";
 
 const AuthWrapper = ({ children }: { children: ReactNode }) => {
   const { status } = useSession();
-  console.log({status})
   const router = useRouter();
 
   useEffect(() => {

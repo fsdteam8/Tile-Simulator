@@ -99,6 +99,7 @@ export function parseSvgString(svgString: string, svgId: string): SvgData {
       height: svgElement.getAttribute("height") || "100%",
       viewBox: svgElement.getAttribute("viewBox") || "0 0 100 100",
       paths,
+      image_svg_text: svgString, // Now properly included in the returned object
     }
   } catch (error) {
     console.error("Error parsing SVG:", error)
@@ -135,6 +136,11 @@ function createEmptySvgData(id: string): SvgData {
         originalFill: "none",
       },
     ],
+    image_svg_text: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" id="${id}">
+      <path id="${id}-error-rect" d="M10,10 L90,10 L90,90 L10,90 Z" fill="#f0f0f0" />
+      <path id="${id}-error-x1" d="M20,20 L80,80" fill="none" />
+      <path id="${id}-error-x2" d="M80,20 L20,80" fill="none" />
+    </svg>`
   }
 }
 

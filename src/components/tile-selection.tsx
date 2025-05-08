@@ -1,21 +1,20 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useMediaQuery } from "@/hooks/use-mobile"
-import { Skeleton } from "@/components/ui/skeleton"
-import { TilesData } from "@/data/TilesData"
-import type { Tile } from "./types/tiles"
+"use client";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TilesData } from "@/data/TilesData";
+import type { Tile } from "./types/tiles";
 
 interface TileSelectionProps {
-  onTileSelect: (tile: Tile) => void
-  selectedTile: Tile | null
-  onRotate: (tileId: string, index: number, newRotation: number) => void
-  tileRotations?: Record<string, number[]>
-  pathColors?: Record<string, string>
-  selectedCategory?: string | null
-  searchQuery?: string
+  onTileSelect: (tile: Tile) => void;
+  selectedTile: Tile | null;
+  onRotate: (tileId: string, index: number, newRotation: number) => void;
+  tileRotations?: Record<string, number[]>;
+  pathColors?: Record<string, string>;
+  selectedCategory?: string;
+  searchQuery?: string;
 }
 
 export function TileSelection({
@@ -26,210 +25,122 @@ export function TileSelection({
   selectedCategory,
   searchQuery,
 }: TileSelectionProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [tiles, setTiles] = useState<Tile[]>([])
-  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [tiles, setTiles] = useState<Tile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Media queries for responsive design
-  const isSmallScreen = useMediaQuery("(max-width: 767px)")
-  const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
+  const isSmallScreen = useMediaQuery("(max-width: 767px)");
+  const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+  const tilesPerRow = isSmallScreen ? 2 : isMediumScreen ? 4 : 9;
+  const rowsPerPage = 2;
 
-  // Calculate tiles per row based on screen size
-  const tilesPerRow = isSmallScreen ? 2 : isMediumScreen ? 4 : 9
-  const rowsPerPage = 2 // Always 2 rows max
-
-  // Reset to page 1 when category or search changes
+  // Reset to page 1 when filters change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [selectedCategory, searchQuery])
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
 
   // Fetch tiles from API or use mock data
   useEffect(() => {
     const fetchTiles = async () => {
-      setLoading(true)
+      setLoading(true);
+      setError(null);
+      
       try {
+        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${tilesPerRow * rowsPerPage}&page=${currentPage}`;
+
+        if (selectedCategory && selectedCategory !== "all") {
+          url += `&category_id=${selectedCategory}`;
+        }
+
+        if (searchQuery) {
+          url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+        }
+
         if (process.env.NEXT_PUBLIC_BACKEND_URL) {
-          // Build the URL with all possible filters
-          let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=18&page=${currentPage}`
-
-          // Add category filter if provided
-          if (selectedCategory && selectedCategory !== "all") {
-            url += `&category=${selectedCategory}`
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-
-          // Add search query if provided
-          if (searchQuery) {
-            url += `&search=${encodeURIComponent(searchQuery)}`
-          }
-
-          const response = await fetch(url)
-          const data = await response.json()
+          const data = await response.json();
 
           if (data.success) {
-            // Transform API tiles to our Tile format
             const transformedTiles = await Promise.all(
               data.data.data.map(async (apiTile: Tile) => {
-                // For each tile, process the SVG content
-                let svgContent: string[] = []
+                let svgContent: string[] = [];
 
                 try {
-                  // Check if we have base64 encoded SVG
                   if (apiTile.image_svg_text) {
-                    const decodedSvg = decodeSvgFromBase64(apiTile.image_svg_text)
-
-                    // For 2x2 grid category, we need to create 4 SVGs
-                    if (apiTile.grid_category === "2x2") {
-                      // Use the same SVG 4 times for 2x2 grid
-                      svgContent = [decodedSvg, decodedSvg, decodedSvg, decodedSvg]
-                    } else {
-                      // For 1x1, just use the single SVG
-                      svgContent = [decodedSvg]
-                    }
-                  }
-                  // If no base64 SVG, try to fetch from URL
-                  else if (apiTile.image) {
-                    const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`
-                    console.log(`Fetching SVG from: ${svgUrl}`)
-
-                    const svgResponse = await fetch(svgUrl)
-
-                    if (!svgResponse.ok) {
-                      throw new Error(`Failed to fetch SVG: ${svgResponse.status} ${svgResponse.statusText}`)
-                    }
-
-                    const svgText = await svgResponse.text()
-
-                    // Check if we got valid SVG content
-                    if (!svgText.includes("<svg") || svgText.trim() === "") {
-                      throw new Error("Invalid SVG content received")
-                    }
-
-                    // For 2x2 grid category, we need to create 4 SVGs
-                    if (apiTile.grid_category === "2x2") {
-                      // Use the same SVG 4 times for 2x2 grid
-                      svgContent = [svgText, svgText, svgText, svgText]
-                    } else {
-                      // For 1x1, just use the single SVG
-                      svgContent = [svgText]
-                    }
+                    const decodedSvg = decodeSvgFromBase64(apiTile.image_svg_text);
+                    svgContent = apiTile.grid_category === "2x2" 
+                      ? [decodedSvg, decodedSvg, decodedSvg, decodedSvg] 
+                      : [decodedSvg];
+                  } else if (apiTile.image) {
+                    const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`;
+                    const svgResponse = await fetch(svgUrl);
+                    if (!svgResponse.ok) throw new Error("Failed to fetch SVG");
+                    const svgText = await svgResponse.text();
+                    svgContent = apiTile.grid_category === "2x2" 
+                      ? [svgText, svgText, svgText, svgText] 
+                      : [svgText];
                   } else {
-                    throw new Error("No SVG content available")
+                    throw new Error("No SVG content available");
                   }
                 } catch (error) {
-                  console.error(`Error processing SVG for tile ${apiTile.id}:`, error)
-
-                  // Create a fallback SVG with error message
-                  const fallbackSvg = `<svg id="tile-${apiTile.id}-error" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100%" height="100%" fill="#f0f0f0"/>
-                    <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-                      SVG Error
-                    </text>
-                  </svg>`
-
-                  if (apiTile.grid_category === "2x2") {
-                    svgContent = [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg]
-                  } else {
-                    svgContent = [fallbackSvg]
-                  }
+                  console.error(`Error processing SVG for tile ${apiTile.id}:`, error);
+                  const fallbackSvg = createFallbackSvg(apiTile.id.toString());
+                  svgContent = apiTile.grid_category === "2x2" 
+                    ? [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg] 
+                    : [fallbackSvg];
                 }
 
                 return {
-                  id: Number(apiTile.id), // Ensure id is a number
+                  id: Number(apiTile.id),
                   name: apiTile.name,
                   description: apiTile.description || "",
                   collection: apiTile.categories[0]?.name || "Uncategorized",
                   svg: svgContent,
-                  grid_category: apiTile.grid_category,
-                  // Add other required properties from your Tile type
+                  grid_category: apiTile.grid_category || "1x1",
                   status: apiTile.status || "",
                   created_at: apiTile.created_at || "",
                   updated_at: apiTile.updated_at || "",
                   categories: apiTile.categories || [],
                   colors: apiTile.colors || [],
                   image: apiTile.image || "",
-                  image_svg_text: apiTile.image_svg_text || "", // Add the missing property
-                }
-              }),
-            )
+                  image_svg_text: apiTile.image_svg_text || "",
+                };
+              })
+            );
 
-            setTiles(transformedTiles)
-            setTotalPages(data.data.last_page)
+            setTiles(transformedTiles);
+            setTotalPages(data.data.last_page);
+          } else {
+            throw new Error(data.message || "Failed to fetch tiles");
           }
         } else {
-          // Use mock data if no backend URL is provided
-          console.log("Using mock data")
-
-          // Filter mock data based on category and search query
-          let filteredTiles = [...TilesData]
+          // Fallback to mock data
+          let filteredTiles = [...TilesData];
 
           if (selectedCategory && selectedCategory !== "all") {
             filteredTiles = filteredTiles.filter(
-              (tile) => tile.collection.toLowerCase() === selectedCategory.toLowerCase(),
-            )
+              (tile) => tile.collection.toLowerCase() === selectedCategory.toLowerCase()
+            );
           }
 
           if (searchQuery) {
-            const query = searchQuery.toLowerCase()
+            const query = searchQuery.toLowerCase();
             filteredTiles = filteredTiles.filter(
-              (tile) => tile.name.toLowerCase().includes(query) || tile.collection.toLowerCase().includes(query),
-            )
+              (tile) => tile.name.toLowerCase().includes(query) || 
+                      tile.collection.toLowerCase().includes(query)
+            );
           }
 
-          // Transform mock data to match your Tile type
-          const transformedTiles = filteredTiles.map((tile) => {
-            // Create a base64 representation of the SVG for mock data
-            const mockBase64 = btoa(tile.svg[0] || "<svg></svg>")
-
-            return {
-              id: Number.parseInt(tile.id, 10),
-              name: tile.name,
-              description: "",
-              grid_category: "",
-              image: "",
-              status: "",
-              created_at: "",
-              updated_at: "",
-              categories: [],
-              colors: [],
-              collection: tile.collection,
-              svg: tile.svg,
-              image_svg_text: mockBase64, // Add the missing property
-            }
-          })
-
-          setTiles(transformedTiles)
-          setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
-        }
-      } catch (error) {
-        console.error("Error fetching tiles:", error)
-
-        // Fallback to mock data on error
-        let filteredTiles = [...TilesData]
-
-        if (selectedCategory && selectedCategory !== "all") {
-          filteredTiles = filteredTiles.filter(
-            (tile) => tile.collection.toLowerCase() === selectedCategory.toLowerCase(),
-          )
-        }
-
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase()
-          filteredTiles = filteredTiles.filter(
-            (tile) => tile.name.toLowerCase().includes(query) || tile.collection.toLowerCase().includes(query),
-          )
-        }
-
-        // Transform mock data to match your Tile type
-        const transformedTiles = filteredTiles.map((tile) => {
-          // Create a base64 representation of the SVG for mock data
-          const mockBase64 = btoa(tile.svg[0] || "<svg></svg>")
-
-          return {
-            id: Number.parseInt(tile.id, 10),
+          const transformedTiles = filteredTiles.map((tile) => ({
+            id: parseInt(tile.id, 10),
             name: tile.name,
             description: "",
-            grid_category: "",
+            grid_category: "1x1",
             image: "",
             status: "",
             created_at: "",
@@ -238,150 +149,128 @@ export function TileSelection({
             colors: [],
             collection: tile.collection,
             svg: tile.svg,
-            image_svg_text: mockBase64, // Add the missing property
-          }
-        })
+            image_svg_text: btoa(tile.svg[0] || "<svg></svg>"),
+          }));
 
-        setTiles(transformedTiles)
-        setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)))
+          setTiles(transformedTiles);
+          setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)));
+        }
+      } catch (err) {
+        console.error("Error fetching tiles:", err);
+        setError(err instanceof Error ? err.message : "Failed to load tiles");
+        // Fallback to empty array to prevent crashes
+        setTiles([]);
+        setTotalPages(1);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchTiles()
-  }, [currentPage, selectedCategory, searchQuery, tilesPerRow, rowsPerPage])
+    fetchTiles();
+  }, [currentPage, selectedCategory, searchQuery, tilesPerRow, rowsPerPage]);
 
   const handleTileSelect = (tile: Tile) => {
-    onTileSelect(tile)
-  }
+    onTileSelect(tile);
+  };
 
-  // Helper function to apply colors to SVG string
   const applyColorsToSvg = (svgString: string, colors: Record<string, string>) => {
     if (!svgString || typeof svgString !== "string") {
-      console.error("Invalid SVG string provided:", svgString)
-      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f0f0f0"/>
-        <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-          Invalid SVG
-        </text>
-      </svg>`
+      return createFallbackSvg("error");
     }
 
-    if (!colors || Object.keys(colors).length === 0) return svgString
+    if (!colors || Object.keys(colors).length === 0) return svgString;
 
     try {
-      let modifiedSvg = svgString
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgString, "image/svg+xml");
+      const parserError = doc.querySelector("parsererror");
+      if (parserError) return svgString;
 
-      // Create a temporary DOM element to parse the SVG
-      const parser = new DOMParser()
-      const doc = parser.parseFromString(svgString, "image/svg+xml")
-
-      // Check for parsing errors
-      const parserError = doc.querySelector("parsererror")
-      if (parserError) {
-        console.error("SVG parsing error:", parserError.textContent)
-        return svgString
-      }
-
-      // Find all paths in the SVG
-      const paths = doc.querySelectorAll("path")
-      let modified = false
+      const paths = doc.querySelectorAll("path");
+      let modified = false;
 
       paths.forEach((path) => {
-        // Get the path ID or create one based on attributes
-        const pathId = path.id || path.getAttribute("d")?.substring(0, 20)
-
-        // Check if we have a color for this path
+        const pathId = path.id || path.getAttribute("d")?.substring(0, 20);
         Object.keys(colors).forEach((colorPathId) => {
-          // Check if the colorPathId contains or matches part of our path's id or d attribute
-          if (pathId !== undefined && (colorPathId.includes(pathId) || colorPathId.includes(pathId))) {
-            path.setAttribute("fill", colors[colorPathId])
-            modified = true
+          if (pathId && (colorPathId.includes(pathId) || pathId.includes(colorPathId))) {
+            path.setAttribute("fill", colors[colorPathId]);
+            modified = true;
           }
-        })
-      })
+        });
+      });
 
-      // If we modified any paths, serialize the SVG back to a string
       if (modified) {
-        const serializer = new XMLSerializer()
-        modifiedSvg = serializer.serializeToString(doc)
+        const serializer = new XMLSerializer();
+        return serializer.serializeToString(doc);
       }
-
-      return modifiedSvg
+      return svgString;
     } catch (error) {
-      console.error("Error applying colors to SVG:", error)
-      return svgString
+      console.error("Error applying colors to SVG:", error);
+      return svgString;
     }
-  }
+  };
 
-  // Helper function to decode base64 SVG content
   const decodeSvgFromBase64 = (base64String: string): string => {
-    if (!base64String) {
-      console.error("Empty SVG base64 string provided")
-      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f0f0f0"/>
-        <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-          Invalid SVG
-        </text>
-      </svg>`
-    }
+    if (!base64String) return createFallbackSvg("empty");
 
     try {
-      // First decode the base64 string to a UTF-8 string
-      const decodedString = atob(base64String)
-      // Then decode any URL-encoded characters
+      const decodedString = atob(base64String);
       return decodeURIComponent(
         Array.from(decodedString)
           .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
-          .join(""),
-      )
+          .join("")
+      );
     } catch (error) {
-      console.error("Error decoding SVG:", error)
-      return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f0f0f0"/>
-        <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-          Invalid SVG
-        </text>
-      </svg>`
+      console.error("Error decoding SVG:", error);
+      return createFallbackSvg("decode-error");
     }
-  }
+  };
+
+  const createFallbackSvg = (id: string) => {
+    return `<svg id="tile-${id}-error" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f0f0f0"/>
+      <text x="50%" y="50%" text-anchor="middle" fill="red" font-size="10">
+        SVG Error
+      </text>
+    </svg>`;
+  };
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
+      setCurrentPage(currentPage + 1);
     }
-  }
+  };
 
   const goToPrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
+      setCurrentPage(currentPage - 1);
     }
-  }
+  };
 
-  // Calculate visible tiles based on current page
-  const startIdx = (currentPage - 1) * tilesPerRow * rowsPerPage
-  const visibleTiles = tiles.slice(startIdx, startIdx + tilesPerRow * rowsPerPage)
+  const visibleTiles = tiles.slice(0, tilesPerRow * rowsPerPage);
 
-  // Split tiles into rows based on responsive grid
   const getRowTiles = (rowIndex: number) => {
-    const startIdx = rowIndex * tilesPerRow
-    return visibleTiles.slice(startIdx, startIdx + tilesPerRow)
-  }
+    const startIdx = rowIndex * tilesPerRow;
+    return visibleTiles.slice(startIdx, startIdx + tilesPerRow);
+  };
 
-  // Render loading skeletons
   const renderSkeletons = () => {
     return Array.from({ length: tilesPerRow * rowsPerPage }).map((_, index) => (
       <div key={`skeleton-${index}`} className="flex flex-col items-center border border-[#595959]/40">
         <Skeleton className="w-full aspect-square" />
         <Skeleton className="h-4 w-3/4 mt-1" />
       </div>
-    ))
-  }
+    ));
+  };
 
   return (
     <div className="p-4 space-y-4">
-      {/* No results message */}
+      {error && (
+        <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
+          Error: {error}
+        </div>
+      )}
+
       {!loading && tiles.length === 0 && (
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <p className="text-lg font-medium text-gray-600">No tiles found</p>
@@ -394,7 +283,6 @@ export function TileSelection({
       {loading ? (
         <div className="relative">
           <div className="flex items-center justify-between">
-            {/* Left navigation arrow */}
             <button
               disabled
               className="bg-white border border-black rounded-full shadow-md p-1 opacity-50 cursor-not-allowed"
@@ -403,20 +291,15 @@ export function TileSelection({
               <ChevronLeft className="h-6 w-6" />
             </button>
 
-            {/* Carousel container */}
             <div className="container px-2 md:px-4">
-              {/* First row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3 mb-4">
                 {renderSkeletons().slice(0, tilesPerRow)}
               </div>
-
-              {/* Second row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3">
                 {renderSkeletons().slice(tilesPerRow)}
               </div>
             </div>
 
-            {/* Right navigation arrow */}
             <button
               disabled
               className="bg-white border border-black rounded-full shadow-md p-1 opacity-50 cursor-not-allowed"
@@ -429,7 +312,6 @@ export function TileSelection({
       ) : (
         <div className="relative">
           <div className="flex items-center justify-between">
-            {/* Left navigation arrow */}
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
@@ -442,13 +324,10 @@ export function TileSelection({
               <ChevronLeft className="h-6 w-6" />
             </button>
 
-            {/* Carousel container */}
             <div className="container px-2 md:px-4">
-              {/* First row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3 mb-4">
                 {getRowTiles(0).map((tile) => {
-                  // When using tile.id as a key or in tileRotations
-                  const tileIdStr = String(tile.id)
+                  const tileIdStr = String(tile.id);
                   return (
                     <div key={tileIdStr} className="flex flex-col items-center border border-[#595959]/40">
                       <button
@@ -466,29 +345,12 @@ export function TileSelection({
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {
-                            // Only apply rotations for 2x2 grid category
-                            let rotation = 0
-
+                            let rotation = 0;
                             if (tile.grid_category === "2x2") {
-                              // Use the correct initial rotation pattern if not in tileRotations
-                              const defaultRotation: number = (() => {
-                                switch (index) {
-                                  case 0:
-                                    return 0 // First SVG: 0°
-                                  case 1:
-                                    return 90 // Second SVG: 90°
-                                  case 2:
-                                    return 270 // Third SVG: 270°
-                                  case 3:
-                                    return 180 // Fourth SVG: 180°
-                                  default:
-                                    return 0
-                                }
-                              })()
-
-                              rotation = tileRotations[tileIdStr] ? tileRotations[tileIdStr][index] : defaultRotation
+                              const defaultRotation = [0, 90, 270, 180][index] || 0;
+                              rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation;
                             }
-                            console.log("tiledata", tile)
+
                             return (
                               <div key={`${tileIdStr}-${index}`} className="flex items-center justify-center">
                                 <div
@@ -504,24 +366,21 @@ export function TileSelection({
                                   className="svg-container"
                                 />
                               </div>
-                            )
+                            );
                           })}
                         </div>
                       </button>
-
                       <p className="text-[12px] font-normal text-center truncate mt-1 w-full px-1">{tile.name}</p>
                     </div>
-                  )
+                  );
                 })}
               </div>
 
-              {/* Second row */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2 md:gap-3">
                 {getRowTiles(1).map((tile) => {
-                  // When using tile.id as a key or in tileRotations
-                  const tileIdStr = String(tile.id)
+                  const tileIdStr = `second-${tile.id}`;
                   return (
-                    <div key={`second-${tileIdStr}`} className="flex flex-col items-center border border-[#595959]/40">
+                    <div key={tileIdStr} className="flex flex-col items-center border border-[#595959]/40">
                       <button
                         onClick={() => handleTileSelect(tile)}
                         className={cn(
@@ -537,30 +396,14 @@ export function TileSelection({
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {
-                            // Only apply rotations for 2x2 grid category
-                            let rotation = 0
-
+                            let rotation = 0;
                             if (tile.grid_category === "2x2") {
-                              const defaultRotation: number = (() => {
-                                switch (index) {
-                                  case 0:
-                                    return 0
-                                  case 1:
-                                    return 90
-                                  case 2:
-                                    return 270
-                                  case 3:
-                                    return 180
-                                  default:
-                                    return 0
-                                }
-                              })()
-
-                              rotation = tileRotations[tileIdStr] ? tileRotations[tileIdStr][index] : defaultRotation
+                              const defaultRotation = [0, 90, 270, 180][index] || 0;
+                              rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation;
                             }
 
                             return (
-                              <div key={`second-${tileIdStr}-${index}`} className="flex items-center justify-center">
+                              <div key={`${tileIdStr}-${index}`} className="flex items-center justify-center">
                                 <div
                                   dangerouslySetInnerHTML={{
                                     __html: applyColorsToSvg(svgString, pathColors || {}),
@@ -574,18 +417,17 @@ export function TileSelection({
                                   className="svg-container"
                                 />
                               </div>
-                            )
+                            );
                           })}
                         </div>
                       </button>
                       <p className="text-xs font-medium text-center truncate mt-1 w-full px-1">{tile.name}</p>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
 
-            {/* Right navigation arrow */}
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
@@ -601,5 +443,5 @@ export function TileSelection({
         </div>
       )}
     </div>
-  )
+  );
 }

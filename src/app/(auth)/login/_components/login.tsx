@@ -56,7 +56,6 @@ export function LoginForm() {
       if (result?.error) {
         throw new Error(result.error);
       }
-      console.log("Login successful:", values);
       toast.success("Login successful");
       router.push("/admin-dashboard");
     } catch (error) {

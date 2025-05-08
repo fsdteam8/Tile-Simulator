@@ -30,6 +30,7 @@ export type ColorApiResponse = {
     prev_page_url: string | null;
     to: number;
     total: number;
+    total_pages: number;
   };
   current_page: number;
   total_pages: number;

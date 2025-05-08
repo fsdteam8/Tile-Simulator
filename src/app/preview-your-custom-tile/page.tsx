@@ -7,7 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import type { PathData, SvgData } from "@/components/svg-editor/types"
-import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
+// import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
 import { PiShareFatBold } from "react-icons/pi"
 
 interface TileData {
@@ -18,6 +18,21 @@ interface TileData {
   pathColors: Record<string, string> // Path color mapping by path ID
   showBorders: boolean // Whether to show borders on paths
 }
+
+// interface SubmissionFormProps {
+//   open: boolean;
+//   onOpenChange: (open: boolean) => void;
+//   tileData?: {
+//     svgData: SvgData[] | null;
+//     pathColors: Record<string, string>;
+//     showBorders: boolean;
+//     rotations: number[];
+//     groutColor: string;
+//     groutThickness: string;
+//     gridSize: string;
+//     environment: string;
+//   };
+// }
 
 export default function PreviewYourCustomTile() {
   const [tileData, setTileData] = useState<{
@@ -37,6 +52,7 @@ export default function PreviewYourCustomTile() {
   const environmentPreviewRef = useRef<HTMLDivElement>(null)
 
   const [openFormModal, setOpenFormModal] = useState(false)
+  console.log("openFormModal:", openFormModal);
 
   // Add isSmallScreen state and useEffect for responsive behavior
   const [isSmallScreen, setIsSmallScreen] = useState(false)
@@ -338,7 +354,7 @@ export default function PreviewYourCustomTile() {
       return
     }
 
-    console.log("Generated SVG string:", svgString.substring(0, 100) + "...")
+    console.log("Generated SVG string:", svgString)
 
     try {
       // Create a temporary DOM element to properly format the SVG
@@ -389,6 +405,71 @@ export default function PreviewYourCustomTile() {
   const handleSaveEmail = () => {
     alert(`Design saved to email: ${email}`)
     setEmail("")
+  }
+
+  // Function to handle opening the form modal
+  const handleOpenFormModal = () => {
+    // Log SVG and tile information before opening the modal
+    console.log("Opening Order Sample Form")
+
+    if (tileData && tileData.svgData && tileData.svgData.length > 0) {
+      // Get the first SVG (main tile)
+      const svg = tileData.svgData[0]
+
+      // Log tile name if available
+      console.log("Tile Name:", svg.name || "Custom Tile")
+
+      // Generate and log the SVG string
+      const svgString = generateSvgString()
+      console.log("SVG String:", svgString)
+
+      // If there's base64 encoded SVG data, decode and log it
+      if (svg.image_svg_text) {
+        try {
+          const decodedSvg = atob(svg.image_svg_text)
+          console.log("Decoded Base64 SVG:", decodedSvg)
+        } catch (error) {
+          console.error("Error decoding SVG:", error)
+        }
+      }
+
+      // Log the postman-like data structure
+      console.log("Tile Data Structure:", {
+        id: svg.id || Math.floor(Math.random() * 1000),
+        name: svg.name || "Custom Tile",
+        description: svg.description || "Custom tile design",
+        grid_category: tileData.svgData.length === 4 ? "2x2" : "1x1",
+        image: null,
+        image_svg_text: svg.image_svg_text || btoa(svgString),
+        status: "custom",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        categories: [
+          {
+            id: 3,
+            name: "Pattern",
+            description: "Pattern Pattern Pattern",
+            status: "default",
+            pivot: {
+              tile_id: svg.id || Math.floor(Math.random() * 1000),
+              category_id: 3,
+              priority: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          },
+        ],
+        colors: Object.entries(tileData.pathColors).map(([ color], index) => ({
+          id: index + 1,
+          name: typeof color === "string" && !color.startsWith("image:") ? color : `Color ${index + 1}`,
+          value: typeof color === "string" && !color.startsWith("image:") ? color : null,
+          image: typeof color === "string" && color.startsWith("image:") ? color.replace("image:", "") : null,
+        })),
+      })
+    }
+
+    // Open the modal
+    setOpenFormModal(true)
   }
 
   // Extract color information for display
@@ -465,7 +546,9 @@ export default function PreviewYourCustomTile() {
       <div className="shadow-[0px_0px_8px_0px_rgba(0,0,0,0.16)] rounded-[8px] p-2 ">
         <div className="flex items-center justify-between shadow-[0px_0px_8px_0px_rgba(0,0,0,0.16)] rounded-[8px] p-4 mb-6">
           <div>
-            <h2 className="text-xl font-medium leading-[120%] text-black mb-2">Pattern: rabbits</h2>
+            <h2 className="text-xl font-medium leading-[120%] text-black mb-2">
+              Pattern: {tileData.svgData?.[0]?.name || "Custom Tile"}
+            </h2>
             <div className="">
               <h3 className="text-xl font-medium leading-[120%] text-black mb-2">Colors:</h3>
               {uniqueColors.length > 0 ? (
@@ -479,6 +562,8 @@ export default function PreviewYourCustomTile() {
                               <Image
                                 src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${color.replace("image:", "")}`}
                                 alt="Pattern"
+                                width={32}
+                                height={32}
                                 className="w-full h-full object-cover"
                               />
                             </span>
@@ -717,14 +802,14 @@ export default function PreviewYourCustomTile() {
       <div className="pb-[45px] md:pb-[60px] lg:pb-[85px] xl:pb-[100px]  2xl:pb-[115px] pt-[26px] md:pt-[32px] lg:pt-[40px] xl:pt-[48px] 2xl:pt-[56px] text-center">
         <Button
           className="px-8 w-full lg:w-[418px] h-[51px] text-[16px] font-medium leading-[120%] text-white"
-          onClick={() => setOpenFormModal(true)}
+          onClick={handleOpenFormModal}
         >
           Order a Sample
         </Button>
       </div>
 
       {/* modal form  */}
-      {openFormModal && <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} />}
+      {/* {openFormModal && <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} tileData={tileData } />} */}
 
       <style jsx>{`
         .tile-cell {

@@ -51,7 +51,7 @@ export function ColorEditor({
         );
         if (!response.ok) {
           throw new Error("Failed to fetch colors");
-        }
+        } 
         const data = await response.json();
         // Filter colors to only include published ones
         const publishedColors = data.data.data.filter(
@@ -65,7 +65,7 @@ export function ColorEditor({
         setLoadingColors(false);
       }
     };
-  
+
     fetchColors();
   }, []);
 
@@ -117,8 +117,7 @@ export function ColorEditor({
         }
 
         console.log(
-          `Selected path: ${pathId} with color: ${
-            pathColors[pathId] || path.fill
+          `Selected path: ${pathId} with color: ${pathColors[pathId] || path.fill
           }`
         );
       }
@@ -126,10 +125,6 @@ export function ColorEditor({
     [svgArray, pathColors]
   );
 
-  // const handleSave = () => {
-  //   console.log("Saved Path Colors:", pathColors)
-  //   console.log("SVG Data:", svgArray)
-  // }
 
   const handleColorSelect = useCallback(
     (color: string) => {
@@ -173,20 +168,6 @@ export function ColorEditor({
     [selectedPathId, onColorSelect, svgArray]
   );
 
-  // const handleRemoveColor = useCallback(
-  //   (colorToRemove: string) => {
-  //     const updatedPathColors = { ...pathColors }
-  //     Object.keys(updatedPathColors).forEach((pathId) => {
-  //       if (updatedPathColors[pathId] === colorToRemove) {
-  //         delete updatedPathColors[pathId]
-  //       }
-  //     })
-
-  //     setPathColors(updatedPathColors)
-  //     setSelectedColors((prev) => prev.filter((c) => c.color !== colorToRemove))
-  //   },
-  //   [pathColors],
-  // )
 
   const handleRotationChange = (index: number, newRotation: number) => {
     console.log(`[COLOR EDITOR] Rotating SVG ${index} to ${newRotation}°`);
@@ -197,8 +178,8 @@ export function ColorEditor({
 
   const selectedPathColor = selectedPathId
     ? pathColors[selectedPathId] ||
-      svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
-        ?.fill
+    svgArray.flatMap((svg) => svg.paths).find((p) => p.id === selectedPathId)
+      ?.fill
     : null;
 
   return (
@@ -260,14 +241,13 @@ export function ColorEditor({
                     svgArray
                       .flatMap((svg) => svg.paths)
                       .find((p) => p.id === selectedPathId)?.originalFill ===
-                      color));
+                    color));
 
               return (
                 <div
                   key={index}
                   className={`w-6 h-6 rounded border cursor-pointer transition-transform relative
-                    hover:scale-110 ${
-                      isSelectedColor ? "ring-2 ring-black" : ""
+                    hover:scale-110 ${isSelectedColor ? "ring-2 ring-black" : ""
                     } 
                     ${isUsedByPath ? "border-${color}" : "border-gray-200"}`}
                   style={{ backgroundColor: color }}
@@ -289,39 +269,17 @@ export function ColorEditor({
           </div>
         </div>
 
-        {/* Border Controls */}
-        {/* <div className="space-y-2">
-          <Button
-            variant={showBorders ? "default" : "outline"}
-            className="w-full"
-            onClick={() => setShowBorders(!showBorders)}
-          >
-            {showBorders ? (
-              <>
-                <X className="mr-2 h-4 w-4" />
-                Remove Borders
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Borders
-              </>
-            )}
-          </Button>
-        </div> */}
-
         {/* Color Palette */}
         <div className="space-y-4 mt-[32px]">
-          <div className="w-full flex gap-[15px]">
-            <div className="grid grid-cols-8 gap-[13px]">
+          <div className="w-full flex">
+            <div className="space-x-2">
               {apiColors?.map((colorItem, index) => (
                 <button
                   key={index}
-                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${
-                    selectedPathColor === (colorItem.code || colorItem.image)
+                  className={`w-5 md:w-6 h-5 md:h-6 rounded-sm transition-transform hover:scale-110 ${selectedPathColor === (colorItem.code || colorItem.image)
                       ? "border-black ring-2 ring-black/20"
                       : "border-gray-200"
-                  }`}
+                    }`}
                   style={{
                     backgroundColor: colorItem.code || "transparent",
                     backgroundImage: colorItem.image
@@ -331,47 +289,47 @@ export function ColorEditor({
                     backgroundPosition: "center",
                   }}
                   onClick={() => {
-                        // For image-based colors, use a special prefix to distinguish them
-                        const color = colorItem.code || (colorItem.image ? `image:${colorItem.image}` : null)
-                        if (color) {
-                          if (!selectedPathId && svgArray.length > 0) {
-                            // If no path is selected, find the first available path
-                            const firstPath = svgArray[0].paths[0]
-                            if (firstPath) {
-                              // First select the path and immediately apply the color
-                              setSelectedPathId(firstPath.id)
+                    // For image-based colors, use a special prefix to distinguish them
+                    const color = colorItem.code || (colorItem.image ? `image:${colorItem.image}` : null)
+                    if (color) {
+                      if (!selectedPathId && svgArray.length > 0) {
+                        // If no path is selected, find the first available path
+                        const firstPath = svgArray[0].paths[0]
+                        if (firstPath) {
+                          // First select the path and immediately apply the color
+                          setSelectedPathId(firstPath.id)
 
-                              // Create a new pathColors object with the updated color
-                              const updatedPathColors = { ...pathColors }
+                          // Create a new pathColors object with the updated color
+                          const updatedPathColors = { ...pathColors }
 
-                              // Apply to all related paths with the same base identifier
-                              const baseIdentifier = firstPath.id.split("-").pop()
-                              svgArray.forEach((svg) => {
-                                svg.paths.forEach((path) => {
-                                  if (path.id.split("-").pop() === baseIdentifier) {
-                                    updatedPathColors[path.id] = color
-                                  }
-                                })
-                              })
-
-                              // Update state with all changes at once
-                              setPathColors(updatedPathColors)
-
-                              // Also notify parent component
-                              if (onColorSelect) {
-                                onColorSelect(firstPath.id, {
-                                  id: `${firstPath.id}-${color}`,
-                                  color,
-                                  name: color.startsWith("image:") ? "Texture" : `Color ${color}`,
-                                })
+                          // Apply to all related paths with the same base identifier
+                          const baseIdentifier = firstPath.id.split("-").pop()
+                          svgArray.forEach((svg) => {
+                            svg.paths.forEach((path) => {
+                              if (path.id.split("-").pop() === baseIdentifier) {
+                                updatedPathColors[path.id] = color
                               }
-                            }
-                          } else if (selectedPathId) {
-                            // If a path is already selected, apply the color immediately
-                            handleColorSelect(color)
+                            })
+                          })
+
+                          // Update state with all changes at once
+                          setPathColors(updatedPathColors)
+
+                          // Also notify parent component
+                          if (onColorSelect) {
+                            onColorSelect(firstPath.id, {
+                              id: `${firstPath.id}-${color}`,
+                              color,
+                              name: color.startsWith("image:") ? "Texture" : `Color ${color}`,
+                            })
                           }
                         }
-                      }}
+                      } else if (selectedPathId) {
+                        // If a path is already selected, apply the color immediately
+                        handleColorSelect(color)
+                      }
+                    }
+                  }}
                   disabled={!selectedPathId}
                 />
               ))}

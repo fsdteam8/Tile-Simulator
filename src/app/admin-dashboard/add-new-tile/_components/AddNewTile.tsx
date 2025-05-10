@@ -70,7 +70,7 @@ const AddNewTile = () => {
         if (!process.env.NEXT_PUBLIC_BACKEND_URL) {
           throw new Error("Backend URL is not defined")
         }
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=1000`)
         if (!response.ok) {
           throw new Error(`Failed to fetch categories: ${response.status}`)
         }

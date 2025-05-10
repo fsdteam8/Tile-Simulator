@@ -1,39 +1,79 @@
 "use client"
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { FileUploader } from "react-drag-drop-files"
-import Image from "next/image"
 import { X, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
+
 interface SVGUploadProps {
   onUpload: (file: File | null, svgPath?: string) => void
   maxSizeKB: number
   initialImage?: string
+  initialSvgBase64?: string
 }
-const SVGUpload = ({ onUpload, maxSizeKB, initialImage }: SVGUploadProps) => {
+
+const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGUploadProps) => {
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null)
+  const [svgContent, setSvgContent] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   console.log(file)
+  // Debug logs
+  useEffect(() => {
+    console.log("SVG Component Initialized with:", {
+      initialImage: initialImage?.substring(0, 50),
+      initialSvgBase64: initialSvgBase64?.substring(0, 50),
+    })
+  }, [initialImage, initialSvgBase64])
+
+  // Process initialSvgBase64 if provided
+  useEffect(() => {
+    if (initialSvgBase64) {
+      try {
+        console.log("Processing base64 SVG data")
+        // Decode the base64 SVG
+        const decodedSvg = decodeURIComponent(escape(atob(initialSvgBase64)))
+        setSvgContent(decodedSvg)
+        console.log("SVG content set from base64")
+      } catch (error) {
+        console.error("Error decoding SVG base64:", error)
+      }
+    }
+  }, [initialSvgBase64])
+
+  // Process initialImage if it's an SVG URL
+  useEffect(() => {
+    if (initialImage && initialImage.toLowerCase().endsWith(".svg")) {
+      console.log("Fetching SVG from URL:", initialImage)
+      fetch(initialImage)
+        .then((response) => response.text())
+        .then((svgText) => {
+          setSvgContent(svgText)
+          console.log("SVG content set from URL")
+        })
+        .catch((error) => {
+          console.error("Error fetching SVG:", error)
+        })
+    }
+  }, [initialImage])
+
   const extractSVGPath = async (file: File): Promise<string> => {
     try {
       const svgText = await file.text()
-      // Log the full SVG content without truncation
-      console.log("Full SVG Content (without truncation):")
-      console.log(svgText)
-      console.log("SVG Content Length:", svgText.length, "characters")
-      // Return the full SVG content
       return svgText
     } catch (error) {
       console.error("Error extracting SVG path:", error)
       return ""
     }
   }
+
   const handleChange = useCallback(
     async (file: File) => {
       if (file.size > maxSizeKB * 1024) {
         alert(`File size should be less than ${maxSizeKB}KB`)
         return
       }
+
       try {
         const fileText = await file.text()
         // Basic SVG validation
@@ -41,37 +81,67 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage }: SVGUploadProps) => {
           alert("Please upload a valid SVG file")
           return
         }
-        // Extract SVG path
+
+        // Extract SVG path and set content for direct rendering
         const svgPath = await extractSVGPath(file)
+        setSvgContent(svgPath)
         setFile(file)
         onUpload(file, svgPath)
-        // Create preview URL
+
+        // Create preview URL as fallback
         const reader = new FileReader()
         reader.onload = (e) => {
           setPreviewUrl(e.target?.result as string)
         }
         reader.readAsDataURL(file)
-      }catch {
-        console.error("Error extracting SVG path")
-        return ""
+      } catch (error) {
+        console.error("Error processing SVG file:", error)
+        alert("Error processing SVG file. Please try another file.")
       }
     },
     [maxSizeKB, onUpload],
   )
+
   const handleRemove = useCallback(() => {
     setFile(null)
     setPreviewUrl(null)
+    setSvgContent(null)
     onUpload(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }, [onUpload])
+
   return (
     <div className="w-full">
       <div className="flex flex-col items-center justify-center w-full h-[300px] border-2 border-dashed border-[#B0B0B0] rounded-[8px] relative bg-gray-50">
-        {previewUrl ? (
+        {svgContent ? (
           <>
-            <Image src={previewUrl || "/placeholder.svg"} alt="Preview" fill className="object-contain p-4" />
+            {/* Direct SVG rendering for better compatibility */}
+            <div
+              className="w-[300px] h-[300px] p-4 flex items-center justify-center"
+              dangerouslySetInnerHTML={{ __html: svgContent }}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 rounded-full bg-white hover:bg-gray-100"
+              onClick={handleRemove}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </>
+        ) : previewUrl ? (
+          <>
+            {/* Fallback to img tag instead of Next.js Image for better SVG support */}
+            <Image
+              src={previewUrl || "/placeholder.svg"}
+              alt="SVG Preview"
+              width={300}
+              height={300}
+              className="max-w-full max-h-full object-contain p-4"
+            />
             <Button
               type="button"
               variant="ghost"
@@ -111,4 +181,5 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage }: SVGUploadProps) => {
     </div>
   )
 }
+
 export default SVGUpload

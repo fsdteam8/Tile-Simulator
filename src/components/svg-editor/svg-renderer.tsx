@@ -204,7 +204,8 @@ export function SvgRenderer({
             width={svg.width || "100px"}
             height={svg.height || "100px"}
             viewBox={svg.viewBox || "0 0 100 100"}
-            className="border border-gray-300 rounded-lg shadow-md p-2 w-full h-full svg-container"
+            className={`border border-gray-300 rounded-lg shadow-md p-2 w-full h-full svg-container ${svgArray.length === 4 ? "smaller-size" : "w-full h-[400px]"
+              }`}
             style={{
               transform: `rotate(${rotations[index]}deg)`,
               transition: "transform 0.3s ease-in-out",
@@ -238,7 +239,7 @@ export function SvgRenderer({
                 return null
               })}
             </defs>
-            
+
             {/* Render paths */}
             {svg.paths && svg.paths.length > 0 ? (
               svg.paths.map((path) => (

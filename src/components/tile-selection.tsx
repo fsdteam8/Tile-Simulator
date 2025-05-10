@@ -46,7 +46,7 @@ export function TileSelection({
     const fetchTiles = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${tilesPerRow * rowsPerPage}&page=${currentPage}`;
 
@@ -73,16 +73,16 @@ export function TileSelection({
                 try {
                   if (apiTile.image_svg_text) {
                     const decodedSvg = decodeSvgFromBase64(apiTile.image_svg_text);
-                    svgContent = apiTile.grid_category === "2x2" 
-                      ? [decodedSvg, decodedSvg, decodedSvg, decodedSvg] 
+                    svgContent = apiTile.grid_category === "2x2"
+                      ? [decodedSvg, decodedSvg, decodedSvg, decodedSvg]
                       : [decodedSvg];
                   } else if (apiTile.image) {
                     const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`;
                     const svgResponse = await fetch(svgUrl);
                     if (!svgResponse.ok) throw new Error("Failed to fetch SVG");
                     const svgText = await svgResponse.text();
-                    svgContent = apiTile.grid_category === "2x2" 
-                      ? [svgText, svgText, svgText, svgText] 
+                    svgContent = apiTile.grid_category === "2x2"
+                      ? [svgText, svgText, svgText, svgText]
                       : [svgText];
                   } else {
                     throw new Error("No SVG content available");
@@ -90,8 +90,8 @@ export function TileSelection({
                 } catch (error) {
                   console.error(`Error processing SVG for tile ${apiTile.id}:`, error);
                   const fallbackSvg = createFallbackSvg(apiTile.id.toString());
-                  svgContent = apiTile.grid_category === "2x2" 
-                    ? [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg] 
+                  svgContent = apiTile.grid_category === "2x2"
+                    ? [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg]
                     : [fallbackSvg];
                 }
 
@@ -131,8 +131,8 @@ export function TileSelection({
           if (searchQuery) {
             const query = searchQuery.toLowerCase();
             filteredTiles = filteredTiles.filter(
-              (tile) => tile.name.toLowerCase().includes(query) || 
-                      tile.collection.toLowerCase().includes(query)
+              (tile) => tile.name.toLowerCase().includes(query) ||
+                tile.collection.toLowerCase().includes(query)
             );
           }
 
@@ -329,12 +329,13 @@ export function TileSelection({
                 {getRowTiles(0).map((tile) => {
                   const tileIdStr = String(tile.id);
                   return (
-                    <div key={tileIdStr} className="flex flex-col items-center border border-[#595959]/40">
+                    <div key={tileIdStr} className={cn("flex flex-col items-center border border-[#595959]/40", selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
+                    )}>
                       <button
                         onClick={() => handleTileSelect(tile)}
                         className={cn(
                           "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                          selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
+                          selectedTile?.id === tile.id ? "scale-[0.98] " : "",
                         )}
                       >
                         <div
@@ -352,7 +353,10 @@ export function TileSelection({
                             }
 
                             return (
-                              <div key={`${tileIdStr}-${index}`} className="flex items-center justify-center">
+                              <div key={`${tileIdStr}-${index}`} className={cn(
+                                "flex items-center justify-center",
+                                tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
+                              )}>
                                 <div
                                   dangerouslySetInnerHTML={{
                                     __html: applyColorsToSvg(svgString, pathColors || {}),
@@ -370,7 +374,7 @@ export function TileSelection({
                           })}
                         </div>
                       </button>
-                      <p className="text-[12px] font-normal text-center truncate mt-1 w-full px-1">{tile.name}</p>
+                      <p className="text-[12px] font-normal border-t border-[#595959]/40 text-center truncate mt-1 w-full px-1">{tile.name}</p>
                     </div>
                   );
                 })}
@@ -380,12 +384,13 @@ export function TileSelection({
                 {getRowTiles(1).map((tile) => {
                   const tileIdStr = `second-${tile.id}`;
                   return (
-                    <div key={tileIdStr} className="flex flex-col items-center border border-[#595959]/40">
+                    <div key={tileIdStr} className={cn("flex flex-col items-center border border-[#595959]/40", selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
+                    )}>
                       <button
                         onClick={() => handleTileSelect(tile)}
                         className={cn(
                           "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                          selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-primary" : "",
+                          selectedTile?.id === tile.id ? "scale-[0.98] " : "",
                         )}
                       >
                         <div
@@ -403,7 +408,10 @@ export function TileSelection({
                             }
 
                             return (
-                              <div key={`${tileIdStr}-${index}`} className="flex items-center justify-center">
+                              <div key={`${tileIdStr}-${index}`} className={cn(
+                                "flex items-center justify-center",
+                                tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
+                              )}>
                                 <div
                                   dangerouslySetInnerHTML={{
                                     __html: applyColorsToSvg(svgString, pathColors || {}),
@@ -421,7 +429,7 @@ export function TileSelection({
                           })}
                         </div>
                       </button>
-                      <p className="text-xs font-medium text-center truncate mt-1 w-full px-1">{tile.name}</p>
+                      <p className="text-xs font-medium border-t border-[#595959]/40 text-center truncate mt-1 w-full p-1">{tile.name}</p>
                     </div>
                   );
                 })}

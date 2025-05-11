@@ -84,7 +84,6 @@ export default function PreviewYourCustomTile() {
           if (parsedData.svgData) {
             renderTileGrid(tileGridRef.current, 1, 1, parsedData)
             renderTileGrid(patternGridRef.current, 30, 8, parsedData)
-
             if (parsedData.environment !== "none") {
               renderTileGrid(environmentPreviewRef.current, 32, 16, parsedData)
             }
@@ -291,9 +290,8 @@ export default function PreviewYourCustomTile() {
     if (!tileData || !tileData.svgData || !tileData.svgData.length) return ""
 
     const svg = tileData.svgData[0]
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${
-      svg.viewBox || "0 0 100 100"
-    }" width="500" height="500">`
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${svg.viewBox || "0 0 100 100"
+      }" width="500" height="500">`
 
     // Add defs section for patterns
     svgString += "<defs>"
@@ -337,9 +335,8 @@ export default function PreviewYourCustomTile() {
         fillAttribute = color
       }
 
-      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${
-        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
-      }/>`
+      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
+        }/>`
     })
 
     svgString += "</svg>"
@@ -347,7 +344,7 @@ export default function PreviewYourCustomTile() {
   }
 
   const handleDownloadSVG = () => {
-    console.log("Downloading SVG...")
+    console.log("Downloading SVG...",)
     const svgString = generateSvgString()
     if (!svgString) {
       console.error("Failed to generate SVG string")
@@ -459,7 +456,7 @@ export default function PreviewYourCustomTile() {
             },
           },
         ],
-        colors: Object.entries(tileData.pathColors).map(([ color], index) => ({
+        colors: Object.entries(tileData.pathColors).map(([color], index) => ({
           id: index + 1,
           name: typeof color === "string" && !color.startsWith("image:") ? color : `Color ${index + 1}`,
           value: typeof color === "string" && !color.startsWith("image:") ? color : null,
@@ -598,6 +595,7 @@ export default function PreviewYourCustomTile() {
 
         <div className="grid md:grid-cols-2 gap-[14px] md:gap-[18px]  lg:gap-[22px]  xl:gap-[26px] 2xl:gap-[30px]">
           <div className="border rounded-lg overflow-hidden w-[340px] h-[340px] md:w-[350px] lg:w-[550px] lg:h-[550px]">
+            {/* Customize Tile */}
             <div
               ref={tileGridRef}
               className={`grid aspect-square ${tileData.groutColor}-grout`}
@@ -641,13 +639,12 @@ export default function PreviewYourCustomTile() {
                       >
                         <div
                           ref={environmentPreviewRef}
-                          className={`grid gap-[${
-                            tileData.groutThickness === "none"
+                          className={`grid gap-[${tileData.groutThickness === "none"
                               ? "0"
                               : tileData.groutThickness === "thin"
                                 ? "1px"
                                 : "2px"
-                          }] bg-${tileData.groutColor}`}
+                            }] bg-${tileData.groutColor}`}
                           style={{
                             gridTemplateColumns: `repeat(${16}, 1fr)`,
                             width: "1150px",

@@ -47,7 +47,7 @@ export function ColorEditor({
     const fetchColors = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/colors?paginate_count=1000`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch colors");

@@ -38,10 +38,9 @@ export function ColorEditor({
   const [svgColors, setSvgColors] = useState<string[]>([]);
   const [apiColors, setApiColors] = useState<ColorItem[]>([]);
   const [loadingColors, setLoadingColors] = useState(true);
-
   console.log(loadingColors);
 
-  console.log("SVG color:", pathColors);
+  // console.log( "id",tileId);
 
   useEffect(() => {
     const fetchColors = async () => {
@@ -202,7 +201,7 @@ export function ColorEditor({
               />
             </div>
           ) : (
-            <div className="w-full h-full">
+            <div className="w-full h-full ">
               <SvgRenderer
                 svgArray={svgArray}
                 selectedPathId={selectedPathId}

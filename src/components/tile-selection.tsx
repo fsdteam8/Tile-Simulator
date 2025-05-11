@@ -36,6 +36,8 @@ export function TileSelection({
   const tilesPerRow = isSmallScreen ? 2 : isMediumScreen ? 4 : 9;
   const rowsPerPage = 2;
 
+  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -358,6 +360,7 @@ export function TileSelection({
                                 tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
                               )}>
                                 <div
+                                
                                   dangerouslySetInnerHTML={{
                                     __html: applyColorsToSvg(svgString, pathColors || {}),
                                   }}
@@ -367,7 +370,7 @@ export function TileSelection({
                                     transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
                                     transition: "transform 0.3s ease-in-out",
                                   }}
-                                  className="svg-container"
+                                  className="svg-container w-full h-full flex items-center justify-center"
                                 />
                               </div>
                             );
@@ -422,7 +425,7 @@ export function TileSelection({
                                     transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
                                     transition: "transform 0.3s ease-in-out",
                                   }}
-                                  className="svg-container"
+                                  className="svg-container w-full h-full flex items-center justify-center"
                                 />
                               </div>
                             );

@@ -6,6 +6,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Tile } from "./types/tiles";
 
 interface Props {
   currentSvg: SvgData[] | null;
@@ -16,9 +17,11 @@ interface Props {
   setGroutThickness: (groutThickness: string) => void;
   setGroutColor: (groutColor: string) => void;
   groutColor: string;
+  selectedTile?: Tile | null;
 }
 
 export default function ViewPanel({
+  selectedTile,
   currentSvg,
   pathColors = {},
   showBorders = false,
@@ -38,6 +41,7 @@ export default function ViewPanel({
     | "environment6"
   >();
 
+
   // const [groutColor, setGroutColor] = useState<"white" | "gray" | "black">("white")
   // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
   const tileGridRef = useRef<HTMLDivElement>(null);
@@ -49,6 +53,8 @@ export default function ViewPanel({
     transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
     height: "70%",
   });
+
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -87,6 +93,7 @@ export default function ViewPanel({
       groutThickness,
       gridSize,
       environment: environment || "none",
+      selectedTile
     };
 
     // Save to localStorage (as URL params would be too large)

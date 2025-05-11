@@ -23,6 +23,7 @@ export default function Tiles() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+
   const setGroutColorWrapper = (groutColor: string) => {
     setGroutColor(groutColor as "orange" | "green" | "turquoise" | "blue");
   };
@@ -170,6 +171,7 @@ export default function Tiles() {
                 rotations={
                   selectedTile ? tileRotations[selectedTile.id] : undefined
                 }
+                selectedTile={selectedTile}
                 groutThickness={groutThickness}
                 setGroutThickness={setGroutThicknessWrapper}
                 groutColor={groutColor}

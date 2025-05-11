@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import type { PathData, SvgData } from "@/components/svg-editor/types"
 // import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
 import { PiShareFatBold } from "react-icons/pi"
+import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
+import { Tile } from "@/components/types/tiles"
 
 interface TileData {
   svgData: SvgData[]
@@ -44,12 +46,16 @@ export default function PreviewYourCustomTile() {
     groutThickness: string
     gridSize: string
     environment: string
+    selectedTile: Tile
   } | null>(null)
+
+  console.log("tileData:", tileData);
 
   const [email, setEmail] = useState("")
   const tileGridRef = useRef<HTMLDivElement>(null)
   const patternGridRef = useRef<HTMLDivElement>(null)
   const environmentPreviewRef = useRef<HTMLDivElement>(null)
+  const [svgString, setSvgString] = useState("");
 
   const [openFormModal, setOpenFormModal] = useState(false)
   console.log("openFormModal:", openFormModal);
@@ -313,7 +319,7 @@ export default function PreviewYourCustomTile() {
 
           svgString += `
             <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
-              <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+              <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
             </pattern>
           `
           addedPatterns.add(patternId)
@@ -344,12 +350,13 @@ export default function PreviewYourCustomTile() {
   }
 
   const handleDownloadSVG = () => {
-    console.log("Downloading SVG...",)
-    const svgString = generateSvgString()
-    if (!svgString) {
-      console.error("Failed to generate SVG string")
-      return
+    console.log("Downloading SVG...");
+    const generatedSvgString = generateSvgString();
+    if (!generatedSvgString) {
+      console.error("Failed to generate SVG string");
+      return;
     }
+    setSvgString(generatedSvgString); // Save to state
 
     console.log("Generated SVG string:", svgString)
 
@@ -406,8 +413,13 @@ export default function PreviewYourCustomTile() {
 
   // Function to handle opening the form modal
   const handleOpenFormModal = () => {
-    // Log SVG and tile information before opening the modal
-    console.log("Opening Order Sample Form")
+    console.log("Opening Order Sample Form");
+
+    // Generate the SVG string before opening the modal
+    const generatedSvgString = generateSvgString();
+    if (generatedSvgString) {
+      setSvgString(generatedSvgString);
+    }
 
     if (tileData && tileData.svgData && tileData.svgData.length > 0) {
       // Get the first SVG (main tile)
@@ -476,6 +488,7 @@ export default function PreviewYourCustomTile() {
     const colors = new Set<string>()
     const imageColors = new Set<string>()
 
+    console.log("color", colors, imageColors)
     if (tileData.pathColors) {
       Object.values(tileData.pathColors).forEach((color) => {
         if (typeof color === "string") {
@@ -507,6 +520,8 @@ export default function PreviewYourCustomTile() {
   }
 
   const uniqueColors = getUniqueColors()
+
+  console.log("uniqueColors", uniqueColors)
 
   if (!tileData) {
     return <div className="p-8 text-center">Loading preview data...</div>
@@ -544,10 +559,10 @@ export default function PreviewYourCustomTile() {
         <div className="flex items-center justify-between shadow-[0px_0px_8px_0px_rgba(0,0,0,0.16)] rounded-[8px] p-4 mb-6">
           <div>
             <h2 className="text-xl font-medium leading-[120%] text-black mb-2">
-              Pattern: {tileData.svgData?.[0]?.name || "Custom Tile"}
+              Tile Name : {tileData?.selectedTile?.name}
             </h2>
-            <div className="">
-              <h3 className="text-xl font-medium leading-[120%] text-black mb-2">Colors:</h3>
+            <div className="w-full flex items-center gap-3">
+              <h3 className="text-xl font-medium leading-[120%] text-black">Colors:</h3>
               {uniqueColors.length > 0 ? (
                 <div defaultValue={uniqueColors[0]} className="flex gap-4 flex-wrap">
                   {uniqueColors.map((color, index) => (
@@ -640,10 +655,10 @@ export default function PreviewYourCustomTile() {
                         <div
                           ref={environmentPreviewRef}
                           className={`grid gap-[${tileData.groutThickness === "none"
-                              ? "0"
-                              : tileData.groutThickness === "thin"
-                                ? "1px"
-                                : "2px"
+                            ? "0"
+                            : tileData.groutThickness === "thin"
+                              ? "1px"
+                              : "2px"
                             }] bg-${tileData.groutColor}`}
                           style={{
                             gridTemplateColumns: `repeat(${16}, 1fr)`,
@@ -806,7 +821,7 @@ export default function PreviewYourCustomTile() {
       </div>
 
       {/* modal form  */}
-      {/* {openFormModal && <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} tileData={tileData } />} */}
+      {openFormModal && <SubmissionForm open={openFormModal} onOpenChange={setOpenFormModal} tileData={tileData} uniqueColors={uniqueColors} svgString={svgString} />}
 
       <style jsx>{`
         .tile-cell {

@@ -27,7 +27,7 @@ const TileSimulatorHeader = ({
 
   const { data, isLoading, isError } = useQuery<CategoriesApiResponse>({
     queryKey: ["all-tiles-categories"],
-    queryFn: () => fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`).then((res) => {
+    queryFn: () => fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=1000`).then((res) => {
       if (!res.ok) throw new Error('Failed to fetch categories');
       return res.json();
     }),
@@ -39,6 +39,8 @@ const TileSimulatorHeader = ({
     name: item.name,
     value: item.id.toString(),
   })) || [];
+
+  console.log(filterData);
 
   // Update parent component when search changes with debounce
   useEffect(() => {
@@ -60,7 +62,7 @@ const TileSimulatorHeader = ({
       <div className="relative">
         <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary" size={18} />
         <Input
-          type="search"
+          type="text"
           placeholder="Search for products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}

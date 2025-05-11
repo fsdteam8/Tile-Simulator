@@ -204,7 +204,7 @@ export function SvgRenderer({
             width={svg.width || "100px"}
             height={svg.height || "100px"}
             viewBox={svg.viewBox || "0 0 100 100"}
-            className={`border border-gray-300 rounded-lg shadow-md p-2 w-full h-full svg-container ${svgArray.length === 4 ? "smaller-size" : "w-full h-[400px]"
+            className={`border border-gray-300 rounded-lg shadow-md p-2 w-full svg-container ${svgArray.length === 4 ? "smaller-size" : "w-full h-[450px]"
               }`}
             style={{
               transform: `rotate(${rotations[index]}deg)`,
@@ -226,7 +226,7 @@ export function SvgRenderer({
                       height="100%"
                     >
                       <image
-                        href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`}
+                        xlinkHref={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`}  
                         x="0"
                         y="0"
                         width="100%"

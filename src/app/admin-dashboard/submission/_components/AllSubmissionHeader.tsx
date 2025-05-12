@@ -1,15 +1,15 @@
 "use client"
 import { RiArrowRightSLine } from "react-icons/ri"
 import Link from "next/link"
-import { useState } from "react"
 import { ListFilter, Search, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { useSearchTile } from "@/components/zustand/allTiles/allTiles"
 
 
 
 const AllSubmissionHeader = () => {
-  const [search, setSearch] = useState("")
+  const { search, setSearch } = useSearchTile();
 
   return (
     <div>

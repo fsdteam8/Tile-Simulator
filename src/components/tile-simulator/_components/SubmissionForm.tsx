@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft } from "lucide-react"
-import ReCAPTCHA from "react-google-recaptcha"
+import ReCAPTCHA from "react-google-recaptcha";
 import type { SvgData } from "@/components/svg-editor/types"
 
 interface SubmissionFormProps {
@@ -35,6 +35,7 @@ interface SubmissionFormProps {
 
 export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svgString }: SubmissionFormProps) {
   const [captchaVerified, setCaptchaVerified] = useState(false)
+  console.log(captchaVerified)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -240,14 +241,14 @@ export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svg
           </div>
 
           <div className="">
-            <ReCAPTCHA sitekey="6LfdxDYrAAAAAL5T2ghAsF0NGw3YPI9MA1tJT4oq" onChange={onChange} />
+            <ReCAPTCHA sitekey="6LcQ0zYrAAAAAOx9uuCLwJ8oGtfPYdmMAyW2wGFS" onChange={onChange} />
           </div>
 
           <div className="pt-4 flex justify-center">
             <Button
               type="submit"
               className="bg-red-500 hover:bg-red-600 text-base font-medium leading-[120%] text-white px-16 py-4 rounded-[8px]"
-              disabled={!captchaVerified}
+              // disabled={!captchaVerified}
             >
               Submit
             </Button>

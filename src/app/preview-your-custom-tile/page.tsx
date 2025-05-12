@@ -872,13 +872,7 @@ export default function PreviewYourCustomTile() {
           <div>
             <Image src="/assets/lili_tile_logo.png" alt="Logo" width={48} height={48} />
           </div>
-          {/* <div className="mb-6">
-          <h3 className="text-md font-medium mb-2">Grout:</h3>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm">Color: {tileData.groutColor}</span>
-            <span className="text-sm">Thickness: {tileData.groutThickness}</span>
-          </div>
-        </div> */}
+          
         </div>
 
         <div className="grid md:grid-cols-2 gap-[14px] md:gap-[18px]  lg:gap-[22px]  xl:gap-[26px] 2xl:gap-[30px]">
@@ -886,7 +880,7 @@ export default function PreviewYourCustomTile() {
             {/* Customize Tile */}
             <div
               ref={tileGridRef}
-              className={`grid aspect-square ${tileData.groutColor}-grout`}
+              className={`grid aspect-square !w-auto  ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(1, 1fr)`,
                 gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
@@ -898,7 +892,7 @@ export default function PreviewYourCustomTile() {
           <div className="border rounded-lg w-[340px] h-[340px] md:w-[350px] lg:w-[550px] lg:h-[550px] overflow-hidden">
             <div
               ref={patternGridRef}
-              className={`grid aspect-square ${tileData.groutColor}-grout`}
+              className={`grid aspect-square mt-[-30px] ml-[-30px] ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(8, 1fr)`,
                 gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",

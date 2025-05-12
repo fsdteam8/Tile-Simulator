@@ -55,14 +55,6 @@ export function SvgRenderer({
     }
   }, [externalRotations])
 
-  // Update related paths when selectedPathId changes
-  // useEffect(() => {
-  //   if (selectedPathId) {
-  //     findRelatedPaths(selectedPathId)
-  //   } else {
-  //     setRelatedPaths([])
-  //   }
-  // }, [selectedPathId])
 
   // Add a useEffect to log rotations when they change
   useEffect(() => {
@@ -71,25 +63,7 @@ export function SvgRenderer({
     }
   }, [rotations])
 
-  // const findRelatedPaths = (pathId: string) => {
-  //   // Extract the base identifier from the path ID
-  //   const pathIdParts = pathId.split("-")
-  //   const baseIdentifier = pathIdParts[pathIdParts.length - 1] // Get the last part which is likely the common identifier
-
-  //   // Find all paths with matching identifiers across all tiles
-  //   const related = svgArray.flatMap((svg) =>
-  //     svg.paths
-  //       .filter((path) => {
-  //         const parts = path.id.split("-")
-  //         const pathIdentifier = parts[parts.length - 1]
-  //         return pathIdentifier === baseIdentifier
-  //       })
-  //       .map((path) => path.id),
-  //   )
-
-  //   setRelatedPaths(related)
-  //   console.log("Related paths:", related)
-  // }
+ 
 
   const getPathColor = useCallback(
     (path: PathData) => {
@@ -187,11 +161,6 @@ export function SvgRenderer({
     }
   }
 
-  // Ensure the rotation transform is applied with !important to override any other styles
-  // const getRotationStyle = (index: number) => ({
-  //   transform: `rotate(${rotations[index]}deg) !important`,
-  //   transition: "transform 0.3s ease-in-out",
-  // })
 
   return (
     <div className={`grid ${svgArray.length === 4 ? "grid-cols-2" : "grid-cols-1"} gap-1`}>

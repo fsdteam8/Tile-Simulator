@@ -4,24 +4,45 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 const AllSubmissionContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const { search } = useSearchTile();
+
+  const dealy = 500;
+  const debounceValue = useDebounce(search, dealy);
+
+  const { data } = useQuery<SubmissionApiResponse>({
+    queryKey: ["all-submission", currentPage, debounceValue],
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/orders?paginate_count=8&page=${currentPage}&query=${debounceValue}`
+      ).then((res) => res.json()),
+  });
+
+  console.log(data);
+
   return (
-    <section className="w-full">
-    <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto  rounded-[24px] bg-white">
-    <TableContainer data={AllSubmissionData} columns={AllSubmissionColumn} />
-    </div>
-    <div className="mt-[30px]  w-full pb-[208px]  flex justify-between">
-      <p className="font-normal text-base leading-[120%] text-secondary-100">
-      Showing 1-10 from 100
-      </p>
-      <div>
-        <TilePagination
-          currentPage={currentPage}
-          totalPages={10}
-          onPageChange={(page) => setCurrentPage(page)}
+    <div className="w-full">
+      <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">
+        <TableContainer
+          data={data?.data?.data ?? []}
+          columns={AllSubmissionColumn}
         />
       </div>
+      {/* pagination  */}
+      {data && data?.total_pages > 1 && (
+        <div className="mt-[30px] w-full pb-[208px] flex justify-between">
+          <p className="font-normal text-base leading-[120%] text-secondary-100">
+            Showing {data?.current_page} from {data?.total_pages}
+          </p>
+          <div>
+            <TilePagination
+              currentPage={currentPage}
+              totalPages={data?.total_pages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </div>
+        </div>
+      )}
     </div>
-  </section>
   );
 };
 
@@ -30,10 +51,14 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import TilePagination from "@/components/ui/TilePagination";
-import { AllSubmissionData, AllSubmissionDataType } from "./AllSubmissionData";
 import { AllSubmissionColumn } from "./AllSubmissionColumn";
-
-
+import { useQuery } from "@tanstack/react-query";
+import {
+  Submission,
+  SubmissionApiResponse,
+} from "@/components/types/submissionAllDataType";
+import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const TableContainer = ({
   data,
@@ -41,7 +66,7 @@ const TableContainer = ({
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
-  columns: ColumnDef<AllSubmissionDataType>[];
+  columns: ColumnDef<Submission>[];
 }) => {
   const table = useReactTable({
     data,
@@ -50,7 +75,7 @@ const TableContainer = ({
   });
   return (
     <>
-      <DataTable table={table} columns={columns}/>
+      <DataTable table={table} columns={columns} />
     </>
   );
 };

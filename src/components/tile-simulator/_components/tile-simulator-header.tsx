@@ -1,6 +1,12 @@
 "use client";
 import { CategoriesApiResponse } from "@/components/types/all-tiles-categories";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/category_select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/category_select";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -27,18 +33,22 @@ const TileSimulatorHeader = ({
 
   const { data, isLoading, isError } = useQuery<CategoriesApiResponse>({
     queryKey: ["all-tiles-categories"],
-    queryFn: () => fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=1000`).then((res) => {
-      if (!res.ok) throw new Error('Failed to fetch categories');
-      return res.json();
-    }),
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=1000`
+      ).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        return res.json();
+      }),
     retry: 2,
   });
 
-  const filterData = data?.data?.data?.map((item) => ({
-    id: item.id,
-    name: item.name,
-    value: item.id.toString(),
-  })) || [];
+  const filterData =
+    data?.data?.data?.map((item) => ({
+      id: item.id,
+      name: item.name,
+      value: item.id.toString(),
+    })) || [];
 
   console.log(filterData);
 
@@ -60,7 +70,10 @@ const TileSimulatorHeader = ({
     <div className="w-full space-y-2 md:space-y-0 lg:space-y-0 md:flex lg:flex items-center gap-5">
       {/* Search input */}
       <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary" size={18} />
+        <SearchIcon
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary"
+          size={18}
+        />
         <Input
           type="text"
           placeholder="Search for products..."
@@ -70,7 +83,7 @@ const TileSimulatorHeader = ({
             "pl-10 pr-10 2xl:h-[52px] w-[243px]",
             "border-primary",
             "placeholder:text-sm placeholder:text-[#F0C1C1] placeholder:leading-[120%] placeholder:font-normal",
-            "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none",
+            "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none"
           )}
         />
         {search && (
@@ -89,18 +102,30 @@ const TileSimulatorHeader = ({
       <div>
         <Select value={selectedCategory} onValueChange={onCategoryChange}>
           <SelectTrigger className="w-full md:w-[268px] xl:h-[44px] 2xl:h-[52px] py-2 xl:py-[10px] 2xl:py-4 px-[12px] xl:px-[16px] 2xl:px-[20px] font-medium">
-            <SelectValue placeholder={isLoading ? "Loading..." : isError ? "Error loading" : "Select a category"} />
+            <SelectValue
+              placeholder={
+                isLoading
+                  ? "Loading..."
+                  : isError
+                  ? "Error loading"
+                  : "Select a category"
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {isLoading ? (
-              <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+              <SelectItem value="loading" disabled>
+                Loading categories...
+              </SelectItem>
             ) : isError ? (
-              <SelectItem value="error" disabled>Error loading categories</SelectItem>
+              <SelectItem value="error" disabled>
+                Error loading categories
+              </SelectItem>
             ) : (
               <>
                 <SelectItem value="all">All Categories</SelectItem>
                 {filterData.map((item) => (
-                  <SelectItem key={item.id} value={item.value}>
+                  <SelectItem key={item.id} value={item.name}>
                     {item.name}
                   </SelectItem>
                 ))}

@@ -24,7 +24,7 @@ const AllTilesContainer = ({search}:{search:string}) => {
 
   return (
     <section className="w-full">
-      <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto  rounded-[24px] bg-white">
+      <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">
         <TableContainer
           data={data?.data?.data ?? []}
           columns={AllTilesColumn}

@@ -7,7 +7,7 @@ import { Category } from "@/components/types/all-tiles-categories";
 import DeleteModal from "@/components/shared/modal/DeleteConfirmationModal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { toast } from "react-toastify";
+import { toast } from "react-toastify";  
 
 interface ActionsButtonProps {
   row: {

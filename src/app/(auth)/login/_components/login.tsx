@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { FaRegEye } from "react-icons/fa6";
 import { FaRegEyeSlash } from "react-icons/fa6";
@@ -35,6 +35,20 @@ export function LoginForm() {
   //eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  // Check if the user already has a session token
+  useEffect(() => {
+    // Check if the user already has a session token
+    const token = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("next-auth.session-token="))
+      ?.split("=")[1];
+
+    // If a token exists, redirect them to the admin dashboard
+    if (token) {
+      router.push("/admin-dashboard");
+    }
+  }, [router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,7 +70,6 @@ export function LoginForm() {
       if (result?.error) {
         throw new Error(result.error);
       }
-      console.log("Login successful:", values);
       toast.success("Login successful");
       router.push("/admin-dashboard");
     } catch (error) {
@@ -107,15 +120,19 @@ export function LoginForm() {
                 <FormLabel>Password</FormLabel>
                 <FormControl>
                   <div className="relative">
-                  <Input
-                    placeholder="Enter your password"
-                    type={showPassword ? "text" : "password"}
-                    {...field}
-                    className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-secondary-100 focus-visible:outline-none"
-                  />
-                  <button className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700" type="button" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
-                  </button>
+                    <Input
+                      placeholder="Enter your password"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                      className="focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-secondary-100 focus-visible:outline-none"
+                    />
+                    <button
+                      className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage />

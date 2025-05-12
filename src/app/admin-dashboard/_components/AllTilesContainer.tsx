@@ -2,22 +2,25 @@
 
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
-const AllTilesContainer = () => {
+const AllTilesContainer = ({search}:{search:string}) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // const session = useSession();
   // const token = (session?.data?.user as { token: string })?.token;
   // console.log(token);
 
+  const delay = 500;
+
+  const debounceValue = useDebounce(search, delay);
+
   const { data } = useQuery<TileAllResponse>({
-    queryKey: ["all tiles", currentPage],
+    queryKey: ["all tiles", currentPage, debounceValue],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?page=${currentPage}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?search=${debounceValue}&paginate_count=8&page=${currentPage}`
       ).then((res) => res.json()),
+      
   });
-
-  console.log(data?.data);
 
   return (
     <section className="w-full">
@@ -27,11 +30,11 @@ const AllTilesContainer = () => {
           columns={AllTilesColumn}
         />
       </div>
-      <div className="pb-[208px]">
+      <div className="pb-[208px] ">
         {data && data?.total_pages > 1 && (
           <div className="mt-[30px]  w-full   flex justify-between">
             <p className="font-normal text-base leading-[120%] text-secondary-100">
-              Showing {data?.current_page} from {data?.total_pages}
+              Showing {data?.data?.current_page} from {data?.total_pages}
             </p>
             <div>
               <TilePagination
@@ -56,6 +59,7 @@ import { Tile, TileAllResponse } from "./AllTilesData";
 // import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import TilePagination from "@/components/ui/TilePagination";
+import { useDebounce } from "@/hooks/useDebounce";
 // import { useSession } from "next-auth/react";
 
 const TableContainer = ({

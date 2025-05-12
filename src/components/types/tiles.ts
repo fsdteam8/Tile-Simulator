@@ -1,20 +1,4 @@
-
-export type Tile = {
-  id: number;
-  name: string;
-  description: string;
-  grid_category: string;
-  image: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  categories: Category[];
-  colors: Color[];
-  image_svg_text: string;
-
-};
-
-export type Category = {
+export type TileCategory = {
   id: number;
   name: string;
   description: string;
@@ -30,16 +14,37 @@ export type Category = {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Color = any[];
+export type Color = {
+  id: number;
+  name: string;
+  code: string | null;
+  image: string | null;
+  status: 'draft' | 'published';
+  created_at: string;
+  updated_at: string;
+};
+export type Tile = {
+  id: number;
+  name: string;
+  description: string;
+  grid_category: string;
+  image: string;
+  image_svg_text?: string; // Make it optional with the ? modifier
+  status: string;
+  created_at: string;
+  updated_at: string;
+  categories: TileCategory[];
+  colors: Color[];
+  svg: string[];
+};
 
-export type PaginationLink = {
+export type TilePaginationLink = {
   url: string | null;
   label: string;
   active: boolean;
 };
 
-export type TileAllResponse = {
+export type TileApiResponse = {
   success: boolean;
   message: string;
   data: {
@@ -49,7 +54,7 @@ export type TileAllResponse = {
     from: number;
     last_page: number;
     last_page_url: string;
-    links: PaginationLink[];
+    links: TilePaginationLink[];
     next_page_url: string | null;
     path: string;
     per_page: number;
@@ -57,9 +62,4 @@ export type TileAllResponse = {
     to: number;
     total: number;
   };
-  current_page: number;
-  total_pages: number;
-  per_page: number;
-  total: number;
 };
-

@@ -1,60 +1,37 @@
-"use client";
+"use client"
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
-// Add the missing imports
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Save, Check } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandItem,
-  CommandGroup,
-} from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import SVGUpload from "../add-new-tile/_components/SVGUpload";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Save, Check } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandInput, CommandList, CommandEmpty, CommandItem, CommandGroup } from "@/components/ui/command"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { useCallback, useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { toast } from "react-toastify"
+import SVGUpload from "../add-new-tile/_components/SVGUpload"
 
 interface TileResponse {
-  data: Tile;
+  data: Tile
 }
 
 interface Tile {
-  name: string;
-  description: string;
-  grid_category: string;
-  categories: { name: string }[];
-  image: string;
+  name: string
+  description: string
+  grid_category: string
+  categories: { name: string }[]
+  image: string
+  image_svg_text?: string // Add this field to match your API response
 }
 
 // Form Schema with zod
@@ -71,20 +48,20 @@ const formSchema = z.object({
   grid_category: z.string().min(2, {
     message: "Grid Selection must be at least 2 characters.",
   }),
-});
+})
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof formSchema>
 
-const gridSelectionData = ["1x1", "2x2"];
+const gridSelectionData = ["1x1", "2x2"]
 
 const EditNewTile = ({ id }: { id: number | string }) => {
-  const [image, setSvgData] = useState<File | null>(null);
-  const [open, setOpen] = useState(false);
-  const session = useSession();
-  const token = (session?.data?.user as { token: string })?.token;
-  console.log(token);
+  const [image, setSvgData] = useState<File | null>(null)
+  const [open, setOpen] = useState(false)
+  const session = useSession()
+  const token = (session?.data?.user as { token: string })?.token
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
+  const router = useRouter()
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -95,33 +72,37 @@ const EditNewTile = ({ id }: { id: number | string }) => {
       categories: [],
       grid_category: "",
     },
-  });
+  })
 
   // Fetch categories from the API
   const { data: categoriesData, error } = useQuery({
     queryKey: ["allTilesCategories"],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`)
       if (!response.ok) {
-        throw new Error("Failed to fetch categories");
+        throw new Error("Failed to fetch categories")
       }
-      return response.json();
+      return response.json()
     },
-  });
+  })
 
   const { data: tileSingleData } = useQuery<TileResponse>({
     queryKey: ["single-tile", id],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`
-      );
-      return response.json();
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`)
+      const data = await response.json()
+      console.log("Tile data:", data)
+      return data
     },
-  });
+  })
 
-  //   console.log(tileSingleData?.data?.image);
+  // Debug log for SVG data
+  useEffect(() => {
+    if (tileSingleData?.data) {
+      console.log("Tile image:", tileSingleData.data.image)
+      console.log("Tile SVG text:", tileSingleData.data.image_svg_text?.substring(0, 50))
+    }
+  }, [tileSingleData])
 
   useEffect(() => {
     if (tileSingleData) {
@@ -130,14 +111,14 @@ const EditNewTile = ({ id }: { id: number | string }) => {
         description: tileSingleData?.data?.description,
         grid_category: tileSingleData?.data?.grid_category,
         categories: tileSingleData?.data?.categories.map((c) => c?.name),
-      });
+      })
     }
-  }, [tileSingleData, form]);
+  }, [tileSingleData, form])
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["updateTile", id],
     mutationFn: (formData: FormData) => {
-      formData.append("_method", "PUT");
+      formData.append("_method", "PUT")
 
       return fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`, {
         method: "POST",
@@ -146,78 +127,67 @@ const EditNewTile = ({ id }: { id: number | string }) => {
         },
         body: formData,
       }).then(async (res) => {
-        const data = await res.json();
+        const data = await res.json()
         if (!res.ok) {
-          throw new Error(data.message || "Failed to update tile");
+          throw new Error(data.message || "Failed to update tile")
         }
-        return data;
-      });
+        return data
+      })
     },
     onSuccess: (data) => {
-      toast.success(data.message || "Tile updated successfully", {
-        position: "top-right",
-        richColors: true,
-      });
+      toast.success(data.message || "Tile updated successfully")
+      router.push("/admin-dashboard")
 
-      queryClient.invalidateQueries({ queryKey: ["all tiles"] });
+      queryClient.invalidateQueries({ queryKey: ["all tiles"] })
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Failed to update tile", {
-        position: "top-right",
-        richColors: true,
-      });
+      toast.error(error.message || "Failed to update tile")
     },
-  });
+  })
 
   const handleSvgChange = useCallback((newSvgData: File | null) => {
-    setSvgData(newSvgData);
-  }, []);
+    setSvgData(newSvgData)
+  }, [])
 
   if (error) {
-    toast.error("Failed to load categories", {
-      description: error.message,
-    });
+    toast.error("Failed to load categories")
   }
 
   const onSubmit = async (data: FormValues) => {
-    // if (!image) {
-    //   toast.error("Missing SVG", {
-    //     description: "Please upload an SVG file",
-    //   });
-    //   return;
-    // }
-
     // Find selected category IDs
     const selectedCategoryIds = data.categories
       .map((categoryName) => {
-        const category = categoriesData?.data?.data?.find(
-          (item: { name: string }) => item.name === categoryName
-        );
-        return category ? String(category.id) : null;
+        const category = categoriesData?.data?.data?.find((item: { name: string }) => item.name === categoryName)
+        return category ? String(category.id) : null
       })
-      .filter(Boolean) as string[];
+      .filter(Boolean) as string[]
 
     if (selectedCategoryIds.length === 0) {
-      toast.error("Invalid Categories", {
-        description: "Please select at least one valid category",
-      });
-      return;
+      toast.error("Invalid Categories")
+      return
     }
 
-    const formData: FormData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("grid_category", data.grid_category);
+    const formData: FormData = new FormData()
+    formData.append("name", data.name)
+    formData.append("description", data.description)
+    formData.append("grid_category", data.grid_category)
     selectedCategoryIds.forEach((id) => {
-      formData.append("category_id[]", id.toString());
-    });
+      formData.append("category_id[]", id.toString())
+    })
 
     if (image) {
-      formData.append("image", image);
+      formData.append("image", image)
     }
 
-    mutate(formData);
-  };
+    mutate(formData)
+  }
+
+  // Determine image URL and SVG base64 data
+  const imageUrl = tileSingleData?.data?.image
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/${tileSingleData.data.image}`
+    : undefined
+
+  const svgBase64 = tileSingleData?.data?.image_svg_text
 
   return (
     <div className="pb-14">
@@ -231,9 +201,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium text-secondary-200">
-                        Tile Name
-                      </FormLabel>
+                      <FormLabel className="text-base font-medium text-secondary-200">Tile Name</FormLabel>
                       <FormControl>
                         <Input
                           className="h-[40px] placeholder:text-secondary-100 focus-visible:ring-0"
@@ -253,9 +221,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium text-secondary-200">
-                        Description
-                      </FormLabel>
+                      <FormLabel className="text-base font-medium text-secondary-200">Description</FormLabel>
                       <FormControl>
                         <Textarea
                           className="h-[156px] placeholder:text-secondary-100 focus-visible:ring-0"
@@ -276,9 +242,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                     name="categories"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel className="text-base font-medium text-secondary-200">
-                          Categories
-                        </FormLabel>
+                        <FormLabel className="text-base font-medium text-secondary-200">Categories</FormLabel>
                         <Popover open={open} onOpenChange={setOpen}>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -288,18 +252,13 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                                 aria-expanded={open}
                                 className={cn(
                                   "w-full h-[40px] justify-between",
-                                  !field.value.length && "text-muted-foreground"
+                                  !field.value.length && "text-muted-foreground",
                                 )}
                               >
-                                {field.value.length
-                                  ? `${field.value.length} selected`
-                                  : "Select categories"}
+                                {field.value.length ? `${field.value.length} selected` : "Select categories"}
                                 <div className="ml-2 flex gap-1 flex-wrap">
                                   {field.value.length > 0 && (
-                                    <Badge
-                                      variant="secondary"
-                                      className="rounded-sm px-1 font-normal"
-                                    >
+                                    <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                                       {field.value.length}
                                     </Badge>
                                   )}
@@ -311,18 +270,14 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                             <Command>
                               <CommandInput placeholder="Search categories..." />
                               <CommandList>
-                                <CommandEmpty>
-                                  No categories found.
-                                </CommandEmpty>
+                                <CommandEmpty>No categories found.</CommandEmpty>
                                 <CommandGroup className="max-h-64 overflow-auto">
                                   {categoriesData?.data?.data?.map(
                                     (category: {
-                                      id: number;
-                                      name: string;
+                                      id: number
+                                      name: string
                                     }) => {
-                                      const isSelected = field.value.includes(
-                                        category.name
-                                      );
+                                      const isSelected = field.value.includes(category.name)
                                       return (
                                         <CommandItem
                                           key={category.id}
@@ -330,16 +285,10 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                                             if (isSelected) {
                                               form.setValue(
                                                 "categories",
-                                                field.value.filter(
-                                                  (value) =>
-                                                    value !== category.name
-                                                )
-                                              );
+                                                field.value.filter((value) => value !== category.name),
+                                              )
                                             } else {
-                                              form.setValue("categories", [
-                                                ...field.value,
-                                                category.name,
-                                              ]);
+                                              form.setValue("categories", [...field.value, category.name])
                                             }
                                           }}
                                         >
@@ -348,15 +297,15 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                                               "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
                                               isSelected
                                                 ? "bg-primary text-primary-foreground"
-                                                : "opacity-50 [&_svg]:invisible"
+                                                : "opacity-50 [&_svg]:invisible",
                                             )}
                                           >
                                             <Check className={cn("h-4 w-4")} />
                                           </div>
                                           <span>{category.name}</span>
                                         </CommandItem>
-                                      );
-                                    }
+                                      )
+                                    },
                                   )}
                                 </CommandGroup>
                               </CommandList>
@@ -375,24 +324,15 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                     name="grid_category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-medium text-secondary-200">
-                          Grid Selection
-                        </FormLabel>
+                        <FormLabel className="text-base font-medium text-secondary-200">Grid Selection</FormLabel>
                         <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
+                          <Select onValueChange={field?.onChange} value={field?.value}>
                             <SelectTrigger className="w-full h-[40px] focus-visible:outline-none focus-visible:ring-0">
                               <SelectValue placeholder="Select a grid" />
                             </SelectTrigger>
                             <SelectContent className="focus:outline-none focus:ring-0">
                               {gridSelectionData.map((item) => (
-                                <SelectItem
-                                  key={item}
-                                  value={item}
-                                  className="focus:outline-none focus:ring-0"
-                                >
+                                <SelectItem key={item} value={item} className="focus:outline-none focus:ring-0">
                                   {item}
                                 </SelectItem>
                               ))}
@@ -408,14 +348,13 @@ const EditNewTile = ({ id }: { id: number | string }) => {
             </div>
 
             <div className="md:grid-cols-1">
-              <h3 className="text-xl font-semibold text-[#1A1C21] leading-[120%] mb-[14px]">
-                Add Photo
-              </h3>
+              <h3 className="text-xl font-semibold text-[#1A1C21] leading-[120%] mb-[14px]">Add Photo</h3>
               <div className="pt-[14px]">
                 <SVGUpload
                   onUpload={handleSvgChange}
                   maxSizeKB={11500}
-                  initialImage={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${tileSingleData?.data?.image}`}
+                  initialImage={imageUrl}
+                  initialSvgBase64={svgBase64}
                 />
               </div>
 
@@ -443,7 +382,7 @@ const EditNewTile = ({ id }: { id: number | string }) => {
         </form>
       </Form>
     </div>
-  );
-};
+  )
+}
 
-export default EditNewTile;
+export default EditNewTile

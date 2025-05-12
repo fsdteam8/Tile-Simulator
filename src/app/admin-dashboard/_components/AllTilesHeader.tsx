@@ -2,13 +2,17 @@
 import { RiArrowRightSLine } from "react-icons/ri";
 import { FaPlus } from "react-icons/fa6";
 import Link from "next/link";
-import React, { useState } from "react";
 import { ListFilter, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-const AllTilesHeader = () => {
-  const [search, setSearch] = useState("");
+const AllTilesHeader = ({
+  search,
+  setSearch,
+}: {
+  search: string;
+  setSearch: (value: string) => void;
+}) => {
   return (
     <div>
       <div className="flex items-center justify-between pb-[20px]">
@@ -36,10 +40,12 @@ const AllTilesHeader = () => {
           </div>
         </div>
         <div>
-          <Link href="/admin-dashboard/add-new-tile"><button className="flex items-center gap-2 text-white bg-primary py-4 px-8 text-base font-medium leading-[120%] rounded-[8px]">
-            {" "}
-            <FaPlus /> Add New Tile
-          </button></Link>
+          <Link href="/admin-dashboard/add-new-tile">
+            <button className="flex items-center gap-2 text-white bg-primary py-4 px-8 text-base font-medium leading-[120%] rounded-[8px]">
+              {" "}
+              <FaPlus /> Add New Tile
+            </button>
+          </Link>
         </div>
       </div>
       <div className="pb-10">

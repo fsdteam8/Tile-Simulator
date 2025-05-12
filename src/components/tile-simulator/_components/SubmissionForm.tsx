@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,16 +15,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ChevronLeft } from "lucide-react";
-
-//eslint
 import ReCAPTCHA from "react-google-recaptcha";
+import { SvgData } from "@/components/svg-editor/types";
 
 interface SubmissionFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  tileData?: {
+    svgData: SvgData[] | null;
+    pathColors: Record<string, string>;
+    showBorders: boolean;
+    rotations: number[];
+    groutColor: string;
+    groutThickness: string;
+    gridSize: string;
+    environment: string;
+    selectedTile?: {
+      name: string;
+      grid_category?: string;
+    };
+  };
+  uniqueColors?: string[];
+  svgString?: string;
 }
 
-export function SubmissionForm({ open, onOpenChange }: SubmissionFormProps) {
+export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svgString }: SubmissionFormProps) {
+
+
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,7 +52,34 @@ export function SubmissionForm({ open, onOpenChange }: SubmissionFormProps) {
     quantityUnit: "Sqft.",
     otherSpecify: "",
     message: "",
+    groutColor: tileData?.groutColor || "",
+    groutThickness: tileData?.groutThickness || "",
+    rotations: tileData?.rotations || [],
+    gridCategory: tileData?.selectedTile?.grid_category || "",
+    tileName: tileData?.selectedTile?.name || "",
+    svgBase64: "" // Added svgBase64 field
   });
+
+  // Convert SVG string to base64 when component mounts or svgString changes
+  useEffect(() => {
+    if (svgString) {
+      try {
+        // Convert SVG string to base64
+        const base64Svg = btoa(unescape(encodeURIComponent(svgString)));
+        setFormData(prev => ({
+          ...prev,
+          svgBase64: base64Svg
+        }));
+        console.log("SVG converted to base64");
+      } catch (error) {
+        console.error("Error converting SVG to base64:", error);
+      }
+    }
+  }, [svgString]);
+
+  console.log("Tile Data unique color:", uniqueColors);
+  console.log("All Tile Data", tileData);
+  console.log("Form Data with SVG Base64:", formData);
 
   function onChange(value: string | null) {
     console.log("Captcha value:", value);
@@ -52,28 +96,53 @@ export function SubmissionForm({ open, onOpenChange }: SubmissionFormProps) {
     setFormData((prev) => ({ ...prev, quantityUnit: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Log each field individually for clarity
-    console.log("========== FORM DATA SUBMISSION ==========");
-    console.log("Name:", formData.name);
-    console.log("Email:", formData.email);
-    console.log("Phone Number:", formData.phoneNumber);
-    console.log("Referred By:", formData.referredBy);
-    console.log("Quantity:", formData.quantityNeeded, formData.quantityUnit);
-    console.log("Other Specification:", formData.otherSpecify);
-    console.log("Message:", formData.message);
-    console.log("==========================================");
+    try {
+      // Prepare the data to be sent to the API
+      const submissionData = {
+        name: formData.name,
+        email: formData.email,
+        phone_number: formData.phoneNumber,
+        referred_by: formData.referredBy,
+        quantity_needed: formData.quantityNeeded,
+        quantity_unit: formData.quantityUnit,
+        other_specify: formData.otherSpecify,
+        message: formData.message,
+        grout_color: formData.groutColor,
+        grout_thickness: formData.groutThickness,
+        rotations: formData.rotations,
+        grid_category: formData.gridCategory,
+        tile_name: formData.tileName,
+        svg_base64: formData.svgBase64,
+      };
 
-    // Log the complete object as well
-    console.log("Complete Form Data Object:", formData);
+      console.log("Submitting data:", submissionData);
 
-    // Close the modal after submission
-    onOpenChange(false);
+      const response = await fetch("https://tilecustomizer.scaleupdevagency.com/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData)
+      });
 
-    // You could add form validation and submission logic here
-    alert("Form submitted! Check the console for the data.");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Success:", result);
+
+      // Close the modal after successful submission
+      onOpenChange(false);
+      alert("Your submission has been received successfully!");
+
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("There was an error submitting your form. Please try again.");
+    }
   };
 
   return (
@@ -184,7 +253,7 @@ export function SubmissionForm({ open, onOpenChange }: SubmissionFormProps) {
 
           <div className="">
             <ReCAPTCHA
-              sitekey="6LdJTCErAAAAAN2PcYOPlqK_a7W409uexqQ6kJLD"
+              sitekey="6Lewci4rAAAAACN2I3hdbY1U1Bt_5Tz-57UwbyYJ"
               onChange={onChange}
             />
           </div>

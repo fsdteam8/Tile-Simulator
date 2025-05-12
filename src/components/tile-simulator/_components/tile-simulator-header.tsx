@@ -25,6 +25,9 @@ const TileSimulatorHeader = ({
 }: TileSimulatorHeaderProps) => {
   const [search, setSearch] = useState(searchQuery);
 
+ 
+
+
   const { data, isLoading, isError } = useQuery<CategoriesApiResponse>({
     queryKey: ["all-tiles-categories"],
     queryFn: () => fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=1000`).then((res) => {
@@ -37,10 +40,11 @@ const TileSimulatorHeader = ({
   const filterData = data?.data?.data?.map((item) => ({
     id: item.id,
     name: item.name,
-    value: item.id.toString(),
+    value: item.id.toString()
   })) || [];
 
-  console.log(filterData);
+
+   
 
   // Update parent component when search changes with debounce
   useEffect(() => {

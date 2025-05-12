@@ -32,11 +32,11 @@ export function TileSelection({
   const [error, setError] = useState<string | null>(null);
 
   const isSmallScreen = useMediaQuery("(max-width: 767px)");
-  const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+  const isMediumScreen = useMediaQuery(
+    "(min-width: 768px) and (max-width: 1023px)"
+  );
   const tilesPerRow = isSmallScreen ? 2 : isMediumScreen ? 4 : 9;
   const rowsPerPage = 2;
-
-  
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -50,9 +50,17 @@ export function TileSelection({
       setError(null);
 
       try {
-        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${tilesPerRow * rowsPerPage}&page=${currentPage}`;
+        let url = `${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+        }/api/tiles?paginate_count=${
+          tilesPerRow * rowsPerPage
+        }&page=${currentPage}&category=${selectedCategory}`;
 
-        if (selectedCategory && selectedCategory !== "all") {
+        if (selectedCategory == "all") {
+          url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${
+          tilesPerRow * rowsPerPage
+        }&page=${currentPage}`;
+        } else {
           url += `&category_id=${selectedCategory}`;
         }
 
@@ -74,27 +82,35 @@ export function TileSelection({
 
                 try {
                   if (apiTile.image_svg_text) {
-                    const decodedSvg = decodeSvgFromBase64(apiTile.image_svg_text);
-                    svgContent = apiTile.grid_category === "2x2"
-                      ? [decodedSvg, decodedSvg, decodedSvg, decodedSvg]
-                      : [decodedSvg];
+                    const decodedSvg = decodeSvgFromBase64(
+                      apiTile.image_svg_text
+                    );
+                    svgContent =
+                      apiTile.grid_category === "2x2"
+                        ? [decodedSvg, decodedSvg, decodedSvg, decodedSvg]
+                        : [decodedSvg];
                   } else if (apiTile.image) {
                     const svgUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${apiTile.image}`;
                     const svgResponse = await fetch(svgUrl);
                     if (!svgResponse.ok) throw new Error("Failed to fetch SVG");
                     const svgText = await svgResponse.text();
-                    svgContent = apiTile.grid_category === "2x2"
-                      ? [svgText, svgText, svgText, svgText]
-                      : [svgText];
+                    svgContent =
+                      apiTile.grid_category === "2x2"
+                        ? [svgText, svgText, svgText, svgText]
+                        : [svgText];
                   } else {
                     throw new Error("No SVG content available");
                   }
                 } catch (error) {
-                  console.error(`Error processing SVG for tile ${apiTile.id}:`, error);
+                  console.error(
+                    `Error processing SVG for tile ${apiTile.id}:`,
+                    error
+                  );
                   const fallbackSvg = createFallbackSvg(apiTile.id.toString());
-                  svgContent = apiTile.grid_category === "2x2"
-                    ? [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg]
-                    : [fallbackSvg];
+                  svgContent =
+                    apiTile.grid_category === "2x2"
+                      ? [fallbackSvg, fallbackSvg, fallbackSvg, fallbackSvg]
+                      : [fallbackSvg];
                 }
 
                 return {
@@ -126,14 +142,16 @@ export function TileSelection({
 
           if (selectedCategory && selectedCategory !== "all") {
             filteredTiles = filteredTiles.filter(
-              (tile) => tile.collection.toLowerCase() === selectedCategory.toLowerCase()
+              (tile) =>
+                tile.collection.toLowerCase() === selectedCategory.toLowerCase()
             );
           }
 
           if (searchQuery) {
             const query = searchQuery.toLowerCase();
             filteredTiles = filteredTiles.filter(
-              (tile) => tile.name.toLowerCase().includes(query) ||
+              (tile) =>
+                tile.name.toLowerCase().includes(query) ||
                 tile.collection.toLowerCase().includes(query)
             );
           }
@@ -155,7 +173,9 @@ export function TileSelection({
           }));
 
           setTiles(transformedTiles);
-          setTotalPages(Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage)));
+          setTotalPages(
+            Math.ceil(filteredTiles.length / (tilesPerRow * rowsPerPage))
+          );
         }
       } catch (err) {
         console.error("Error fetching tiles:", err);
@@ -175,7 +195,10 @@ export function TileSelection({
     onTileSelect(tile);
   };
 
-  const applyColorsToSvg = (svgString: string, colors: Record<string, string>) => {
+  const applyColorsToSvg = (
+    svgString: string,
+    colors: Record<string, string>
+  ) => {
     if (!svgString || typeof svgString !== "string") {
       return createFallbackSvg("error");
     }
@@ -194,7 +217,10 @@ export function TileSelection({
       paths.forEach((path) => {
         const pathId = path.id || path.getAttribute("d")?.substring(0, 20);
         Object.keys(colors).forEach((colorPathId) => {
-          if (pathId && (colorPathId.includes(pathId) || pathId.includes(colorPathId))) {
+          if (
+            pathId &&
+            (colorPathId.includes(pathId) || pathId.includes(colorPathId))
+          ) {
             path.setAttribute("fill", colors[colorPathId]);
             modified = true;
           }
@@ -219,7 +245,9 @@ export function TileSelection({
       const decodedString = atob(base64String);
       return decodeURIComponent(
         Array.from(decodedString)
-          .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
+          .map(
+            (char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2)
+          )
           .join("")
       );
     } catch (error) {
@@ -258,7 +286,10 @@ export function TileSelection({
 
   const renderSkeletons = () => {
     return Array.from({ length: tilesPerRow * rowsPerPage }).map((_, index) => (
-      <div key={`skeleton-${index}`} className="flex flex-col items-center border border-[#595959]/40">
+      <div
+        key={`skeleton-${index}`}
+        className="flex flex-col items-center border border-[#595959]/40"
+      >
         <Skeleton className="w-full aspect-square" />
         <Skeleton className="h-4 w-3/4 mt-1" />
       </div>
@@ -277,7 +308,9 @@ export function TileSelection({
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <p className="text-lg font-medium text-gray-600">No tiles found</p>
           <p className="text-sm text-gray-500 mt-2">
-            {searchQuery ? `No results for "${searchQuery}"` : "Try selecting a different category"}
+            {searchQuery
+              ? `No results for "${searchQuery}"`
+              : "Try selecting a different category"}
           </p>
         </div>
       )}
@@ -319,7 +352,7 @@ export function TileSelection({
               disabled={currentPage === 1}
               className={cn(
                 "bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100",
-                currentPage === 1 && "opacity-50 cursor-not-allowed",
+                currentPage === 1 && "opacity-50 cursor-not-allowed"
               )}
               aria-label="Previous page"
             >
@@ -331,43 +364,67 @@ export function TileSelection({
                 {getRowTiles(0).map((tile) => {
                   const tileIdStr = String(tile.id);
                   return (
-                    <div key={tileIdStr} className={cn("flex flex-col items-center border border-[#595959]/40", selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
-                    )}>
+                    <div
+                      key={tileIdStr}
+                      className={cn(
+                        "flex flex-col items-center border border-[#595959]/40",
+                        selectedTile?.id === tile.id
+                          ? "scale-[0.98] ring-2 ring-[#595959]"
+                          : ""
+                      )}
+                    >
                       <button
                         onClick={() => handleTileSelect(tile)}
                         className={cn(
                           "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                          selectedTile?.id === tile.id ? "scale-[0.98] " : "",
+                          selectedTile?.id === tile.id ? "scale-[0.98] " : ""
                         )}
                       >
                         <div
                           className="grid gap-[1px]"
                           style={{
-                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                            gridTemplateColumns: `repeat(${
+                              tile.grid_category === "2x2" ? 2 : 1
+                            }, 1fr)`,
+                            gridTemplateRows: `repeat(${
+                              tile.grid_category === "2x2" ? 2 : 1
+                            }, 1fr)`,
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {
                             let rotation = 0;
                             if (tile.grid_category === "2x2") {
-                              const defaultRotation = [0, 90, 270, 180][index] || 0;
-                              rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation;
+                              const defaultRotation =
+                                [0, 90, 270, 180][index] || 0;
+                              rotation =
+                                tileRotations[tileIdStr]?.[index] ??
+                                defaultRotation;
                             }
 
                             return (
-                              <div key={`${tileIdStr}-${index}`} className={cn(
-                                "flex items-center justify-center",
-                                tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
-                              )}>
+                              <div
+                                key={`${tileIdStr}-${index}`}
+                                className={cn(
+                                  "flex items-center justify-center",
+                                  tile.grid_category === "2x2"
+                                    ? "w-full h-full"
+                                    : "w-full h-[110px]"
+                                )}
+                              >
                                 <div
-                                
                                   dangerouslySetInnerHTML={{
-                                    __html: applyColorsToSvg(svgString, pathColors || {}),
+                                    __html: applyColorsToSvg(
+                                      svgString,
+                                      pathColors || {}
+                                    ),
                                   }}
                                   style={{
                                     width: "100%",
                                     height: "100%",
-                                    transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
+                                    transform:
+                                      tile.grid_category === "2x2"
+                                        ? `rotate(${rotation}deg)`
+                                        : "none",
                                     transition: "transform 0.3s ease-in-out",
                                   }}
                                   className="svg-container w-full h-full flex items-center justify-center"
@@ -377,7 +434,9 @@ export function TileSelection({
                           })}
                         </div>
                       </button>
-                      <p className="text-[12px] font-normal border-t border-[#595959]/40 text-center truncate mt-1 w-full px-1">{tile.name}</p>
+                      <p className="text-[12px] font-normal border-t border-[#595959]/40 text-center truncate mt-1 w-full px-1">
+                        {tile.name}
+                      </p>
                     </div>
                   );
                 })}
@@ -387,42 +446,67 @@ export function TileSelection({
                 {getRowTiles(1).map((tile) => {
                   const tileIdStr = `second-${tile.id}`;
                   return (
-                    <div key={tileIdStr} className={cn("flex flex-col items-center border border-[#595959]/40", selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
-                    )}>
+                    <div
+                      key={tileIdStr}
+                      className={cn(
+                        "flex flex-col items-center border border-[#595959]/40",
+                        selectedTile?.id === tile.id
+                          ? "scale-[0.98] ring-2 ring-[#595959]"
+                          : ""
+                      )}
+                    >
                       <button
                         onClick={() => handleTileSelect(tile)}
                         className={cn(
                           "relative w-full aspect-square overflow-hidden transition-all bg-white",
-                          selectedTile?.id === tile.id ? "scale-[0.98] " : "",
+                          selectedTile?.id === tile.id ? "scale-[0.98] " : ""
                         )}
                       >
                         <div
                           className="grid gap-[1px]"
                           style={{
-                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
-                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
+                            gridTemplateColumns: `repeat(${
+                              tile.grid_category === "2x2" ? 2 : 1
+                            }, 1fr)`,
+                            gridTemplateRows: `repeat(${
+                              tile.grid_category === "2x2" ? 2 : 1
+                            }, 1fr)`,
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {
                             let rotation = 0;
                             if (tile.grid_category === "2x2") {
-                              const defaultRotation = [0, 90, 270, 180][index] || 0;
-                              rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation;
+                              const defaultRotation =
+                                [0, 90, 270, 180][index] || 0;
+                              rotation =
+                                tileRotations[tileIdStr]?.[index] ??
+                                defaultRotation;
                             }
 
                             return (
-                              <div key={`${tileIdStr}-${index}`} className={cn(
-                                "flex items-center justify-center",
-                                tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
-                              )}>
+                              <div
+                                key={`${tileIdStr}-${index}`}
+                                className={cn(
+                                  "flex items-center justify-center",
+                                  tile.grid_category === "2x2"
+                                    ? "w-full h-full"
+                                    : "w-full h-[110px]"
+                                )}
+                              >
                                 <div
                                   dangerouslySetInnerHTML={{
-                                    __html: applyColorsToSvg(svgString, pathColors || {}),
+                                    __html: applyColorsToSvg(
+                                      svgString,
+                                      pathColors || {}
+                                    ),
                                   }}
                                   style={{
                                     width: "100%",
                                     height: "100%",
-                                    transform: tile.grid_category === "2x2" ? `rotate(${rotation}deg)` : "none",
+                                    transform:
+                                      tile.grid_category === "2x2"
+                                        ? `rotate(${rotation}deg)`
+                                        : "none",
                                     transition: "transform 0.3s ease-in-out",
                                   }}
                                   className="svg-container w-full h-full flex items-center justify-center"
@@ -432,7 +516,9 @@ export function TileSelection({
                           })}
                         </div>
                       </button>
-                      <p className="text-xs font-medium border-t border-[#595959]/40 text-center truncate mt-1 w-full p-1">{tile.name}</p>
+                      <p className="text-xs font-medium border-t border-[#595959]/40 text-center truncate mt-1 w-full p-1">
+                        {tile.name}
+                      </p>
                     </div>
                   );
                 })}
@@ -444,7 +530,7 @@ export function TileSelection({
               disabled={currentPage === totalPages}
               className={cn(
                 "bg-white border border-black rounded-full shadow-md p-1 hover:bg-gray-100",
-                currentPage === totalPages && "opacity-50 cursor-not-allowed",
+                currentPage === totalPages && "opacity-50 cursor-not-allowed"
               )}
               aria-label="Next page"
             >

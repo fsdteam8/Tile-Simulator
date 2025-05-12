@@ -530,7 +530,7 @@ export default function ViewPanel({
                   className="h-[60px] w-[100px] md:w-[130px] lg:h-[90px] lg:w-[110px] py-1"
                 >
                   <Image
-                    src="/assets/env_bathroom_icon.png"
+                    src="/assets/bathroom2.png"
                     alt="ketchen"
                     width={100}
                     height={100}

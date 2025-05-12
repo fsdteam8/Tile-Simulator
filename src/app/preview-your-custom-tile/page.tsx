@@ -58,6 +58,7 @@ export default function PreviewYourCustomTile() {
   const [svgString, setSvgString] = useState("");
 
   const [openFormModal, setOpenFormModal] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false);
   console.log("openFormModal:", openFormModal);
 
   // Add isSmallScreen state and useEffect for responsive behavior
@@ -350,42 +351,190 @@ export default function PreviewYourCustomTile() {
   }
 
   const handleDownloadSVG = () => {
-    console.log("Downloading SVG...");
-    const generatedSvgString = generateSvgString();
-    if (!generatedSvgString) {
-      console.error("Failed to generate SVG string");
-      return;
+  console.log("Downloading SVG...");
+  setIsDownloading(true);
+
+  try {
+    if (!tileData || !tileData.svgData || !tileData.svgData.length) {
+      throw new Error("No tile data available");
     }
-    setSvgString(generatedSvgString); // Save to state
 
-    console.log("Generated SVG string:", svgString)
+    // Determine if we're using a quad pattern (2x2)
+    const isQuadPattern = tileData.svgData.length === 4;
+    const gridCategory = isQuadPattern ? "2x2" : "1x1";
+    
+    // Get the main tile SVG (first in array)
+    // const svg = tileData.svgData[0];
+    
+    // Create the complete HTML document with embedded SVG
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Tile Design - ${tileData?.selectedTile?.name || "Untitled"}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .tile-info {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .svg-container {
+            width: ${isQuadPattern ? '500px' : '250px'};
+            height: ${isQuadPattern ? '500px' : '250px'};
+            border: 1px solid #ddd;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .tile-grid {
+            display: grid;
+            grid-template-columns: ${isQuadPattern ? 'repeat(2, 1fr)' : '1fr'};
+            gap: ${tileData.groutThickness === "none" ? "0px" : 
+                 tileData.groutThickness === "thin" ? "1px" : "2px"};
+            background-color: ${getGroutColor(tileData.groutColor)};
+            width: 100%;
+            height: 100%;
+        }
+        .tile-cell {
+            position: relative;
+            background-color: white;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="tile-info">
+        <h1>${tileData?.selectedTile?.name || "Custom Tile"}</h1>
+        <p>Layout: ${gridCategory} | Grout: ${tileData.groutColor} (${tileData.groutThickness})</p>
+    </div>
+    
+    <div class="svg-container">
+        <div class="tile-grid">
+            ${generateTileGridHTML()}
+        </div>
+    </div>
+</body>
+</html>`;
 
-    try {
-      // Create a temporary DOM element to properly format the SVG
-      const parser = new DOMParser()
-      const svgDoc = parser.parseFromString(svgString, "image/svg+xml")
+    // Create blob and download
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${tileData?.selectedTile?.name || "custom-tile"}-design.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
-      // Format the SVG with proper XML declaration
-      const serializer = new XMLSerializer()
-      const formattedSvgString = serializer.serializeToString(svgDoc)
-
-      // Create a blob with the formatted SVG
-      const blob = new Blob([formattedSvgString], { type: "image/svg+xml" })
-      const url = URL.createObjectURL(blob)
-
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "custom-tile.svg"
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      console.log("SVG download complete")
-    } catch (error) {
-      console.error("Error downloading SVG:", error)
-    }
+    console.log("HTML file with tile design downloaded successfully");
+  } catch (error) {
+    console.error("Error downloading:", error);
+  } finally {
+    setIsDownloading(false);
   }
+};
+
+// Helper function to generate the tile grid HTML
+const generateTileGridHTML = () => {
+  if (!tileData || !tileData.svgData) return '';
+  
+  const isQuadPattern = tileData.svgData.length === 4;
+  
+  if (isQuadPattern) {
+    // Generate 2x2 grid
+    return tileData.svgData.map((svg, index) => {
+      const rotation = tileData.rotations[index] || 0;
+      return `
+        <div class="tile-cell">
+          ${generateSingleSVG(svg, rotation)}
+        </div>
+      `;
+    }).join('');
+  }
+  // Generate single tile
+  const rotation = tileData.rotations[0] || 0;
+  return `
+    <div class="tile-cell">
+      ${generateSingleSVG(tileData.svgData[0], rotation)}
+    </div>
+  `;
+};
+
+// Helper function to generate SVG with proper styling
+const generateSingleSVG = (svg: SvgData, rotation: number) => {
+  let svgString = `<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink" 
+     viewBox="${svg.viewBox || "0 0 100 100"}"
+     style="transform: rotate(${rotation}deg)">`;
+
+  // Add defs for patterns
+  svgString += "<defs>";
+  const addedPatterns = new Set();
+
+  svg.paths.forEach((path) => {
+    const color = tileData?.pathColors[path.id] || path.fill || "#000000";
+    if (color && color.startsWith("image:")) {
+      const patternId = `pattern-${path.id}`;
+      if (!addedPatterns.has(patternId)) {
+        const imageUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${color.replace("image:", "")}`;
+        svgString += `
+          <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
+            <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+          </pattern>`;
+        addedPatterns.add(patternId);
+      }
+    }
+  });
+  svgString += "</defs>";
+
+  // Add paths
+  svg.paths.forEach((path) => {
+    const color = tileData?.pathColors[path.id] || path.fill || "#000000";
+    const fillAttribute = color.startsWith("image:") 
+      ? `url(#pattern-${path.id})` 
+      : color;
+
+    svgString += `<path d="${path.d}" fill="${fillAttribute}"`;
+    if (tileData?.showBorders) {
+      svgString += ' stroke="#000000" stroke-width="1"';
+    }
+    svgString += '/>';
+  });
+
+  svgString += "</svg>";
+  return svgString;
+};
+
+// Helper function to get CSS color for grout
+const getGroutColor = (colorName: string) => {
+  const colors: Record<string, string> = {
+    'orange': 'orange',
+    'green': 'green',
+    'turquoise': 'turquoise',
+    'blue': 'blue',
+    'white': 'white',
+    'gray': '#808080',
+    'black': '#000000'
+  };
+  return colors[colorName] || '#808080'; // default to gray
+};
 
   const handleShare = () => {
     // Implement share functionality
@@ -548,9 +697,10 @@ export default function PreviewYourCustomTile() {
           <button
             className="flex flex-col items-center justify-center gap-[8px] text-base font-medium text-black leading-[120%]"
             onClick={handleDownloadSVG}
+            disabled={isDownloading}
           >
             <Download className="mr-2 h-6 w-6" />
-            Download SVG
+            {isDownloading ? "Downloading..." : "Download"}
           </button>
         </div>
       </div>

@@ -37,7 +37,14 @@ export const AllTilesColumn: ColumnDef<Tile>[] = [
 
       if (svgBase64) {
         try {
-          const decodedSvg = decodeURIComponent(escape(atob(svgBase64)));
+          let decodedSvg = decodeURIComponent(escape(atob(svgBase64)));
+
+          // Option 1: Modify SVG attributes directly
+          decodedSvg = decodedSvg.replace(
+            /<svg([^>]*)>/,
+            `<svg$1 width="75" height="75" preserveAspectRatio="xMidYMid meet">`
+          );
+
           return (
             <div
               className="w-[75px] h-[75px] flex items-center justify-center border border-gray-200 rounded"

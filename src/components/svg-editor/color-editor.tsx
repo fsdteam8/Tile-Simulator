@@ -38,9 +38,8 @@ export function ColorEditor({
   const [svgColors, setSvgColors] = useState<string[]>([]);
   const [apiColors, setApiColors] = useState<ColorItem[]>([]);
   const [loadingColors, setLoadingColors] = useState(true);
-  console.log(loadingColors);
 
-  // console.log( "id",tileId);
+  console.log( loadingColors);
 
   useEffect(() => {
     const fetchColors = async () => {
@@ -57,7 +56,6 @@ export function ColorEditor({
           (color: ColorItem) => color.status === "published"
         );
         setApiColors(publishedColors);
-        console.log("published colors", publishedColors);
       } catch (error) {
         console.error("Error fetching colors:", error);
       } finally {

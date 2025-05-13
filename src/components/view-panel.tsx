@@ -31,7 +31,8 @@ export default function ViewPanel({
   setGroutColor,
   groutColor,
 }: Props) {
-  const [gridSize, setGridSize] = useState<"20x20" | "45x20">("45x20");
+  const [gridSize, setGridSize] = useState<"200x100">("200x100");
+  console.log(setGridSize);
   const [environment, setEnvironment] = useState<
     | "environment1"
     | "environment2"
@@ -42,12 +43,13 @@ export default function ViewPanel({
   >();
 
 
-  // const [groutColor, setGroutColor] = useState<"white" | "gray" | "black">("white")
-  // const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
+  console.log("selectedTile", selectedTile?.name);
+
   const tileGridRef = useRef<HTMLDivElement>(null);
   const [showTilePreview, setShowTilePreview] = useState(true);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
+  console.log( setShowTilePreview);
   const [tileTransform, setTileTransform] = useState({
     marginTop: isSmallScreen ? "18px" : "0px",
     transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
@@ -65,11 +67,11 @@ export default function ViewPanel({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  
 
-  console.log(showTilePreview);
-  console.log(setShowTilePreview);
-  console.log(setGridSize);
+
+  // console.log(showTilePreview);
+  // console.log(setShowTilePreview);
+  // console.log(setGridSize);
 
   const router = useRouter();
 
@@ -108,7 +110,7 @@ export default function ViewPanel({
   console.log(setGroutColor, setGroutThickness);
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = gridSize === "20x20" ? 20 : 45;
+  const gridDimensions = 65;
 
 
 
@@ -123,12 +125,59 @@ export default function ViewPanel({
     container.innerHTML = "";
 
     // Define this function outside the loop or at the top of the useEffect
-    function style(i: number) {
-      return {
-        marginLeft: i % 2 !== 0 ? "31.5px" : "0px", // Apply marginLeft if i is odd
-        marginTop: i >= 1 && i <= 45 ? "-32px" : "0px", // Apply marginTop if i is between 1 and 30
-      };
+    function style(i: number, j: number, tileName?: string) {
+      // if (tileName === "Rectangle2x8") {
+      //   // Special styling for Tiffany pattern
+      //   return {
+      //     marginBottom: i >= 1 && i <= 0 ? "20px" : "0px"
+      //   };
+      // }
+
+      if (tileName === "Rectangle2x8") {
+        // Special styling for Tiffany pattern
+        return {
+          marginLeft: i % 2 !== 0 ? "20px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
+        };
+      } else if(tileName === "Rectangle4x8"){
+        return {
+          marginLeft: i % 2 !== 0 ? "20px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
+        };
+      } else if(tileName === "Tiffany"){
+        return {
+          marginLeft: i % 2 !== 0 ? "21px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-20px" : "-7px",
+        };
+      } else if(tileName === "Fiori"){
+        return {
+          marginLeft: i % 2 !== 0 ? "21.4px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-12px" : "-7px",
+        };
+      } else if(tileName === "Gio"){
+        return {
+          marginLeft: i % 2 !== 0 ? "20.5px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-6px" : "-7px",
+          transform: "rotate(30deg)",
+        };
+      } else if(tileName === "Indie"){
+        return {
+          marginLeft: i % 2 !== 0 ? "20.7px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-21.2px" : "-7px",
+          transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
+        };
+      } else {
+        return {
+          marginLeft: i % 2 !== 0 ? "22px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-22px" : "-7px",
+        };
+      }
+
+      
+
     }
+
+
 
     // Determine if we should use a 2x2 pattern (for 4 SVGs)
     const useQuadPattern = currentSvg.length === 4;
@@ -226,8 +275,8 @@ export default function ViewPanel({
 
           cell.appendChild(innerGrid);
         } else {
-          console.log("row", i);
-          console.log("coll", j);
+          // console.log("row", i);
+          // console.log("coll", j);
 
           const svgIndex = (i * gridDimensions + j) % currentSvg.length;
           const svg = currentSvg[svgIndex];
@@ -238,7 +287,8 @@ export default function ViewPanel({
           wrapper.className = "relative w-full h-full";
 
           // Apply styled margins based on i and j
-          Object.assign(wrapper.style, style(i));
+          // Then in your useEffect where you create the grid cells, modify the style application:
+          Object.assign(wrapper.style, style(i, j, selectedTile?.name));
 
           const svgElement = document.createElementNS(
             "http://www.w3.org/2000/svg",
@@ -247,7 +297,7 @@ export default function ViewPanel({
           svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100");
           svgElement.style.transform = `rotate(${rotation}deg)`;
 
-          svgElement.style.padding = `2px`; // Add padding to all SVG elements
+          svgElement.style.padding = `2px 1px`; // Add padding to all SVG elements
           svgElement.setAttribute("data-rotation", rotation.toString());
 
           // Add paths
@@ -259,7 +309,7 @@ export default function ViewPanel({
             pathElement.setAttribute("d", path.d);
 
 
-           
+
 
             const color = pathColors[path.id] || path.fill || "#000000"
 
@@ -333,7 +383,7 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="lg:flex gap-[78px] ">
-            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] rounded-lg border overflow-hidden  border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
@@ -348,19 +398,19 @@ export default function ViewPanel({
                 <div>
                   {showTilePreview && (
                     <div
-                      className={`absolute  ${groutColor}-grout z-0 parrr`}
+                      className={`absolute  ${groutColor}-grout z-0 parrr `}
                       style={{
                         top: "0",
                         left: "0",
                         width: "100%",
                         height: "100%",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                        gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                        padding: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
                       }}
                     >
                       <div
                         ref={tileGridRef}
-                        className={`grid !mt-[-30px]  gap-[${groutThickness === "none"
+                        className={`grid mt-[-5px] gap-[${groutThickness === "none"
                           ? "0"
                           : groutThickness === "thin"
                             ? "1px"
@@ -373,6 +423,7 @@ export default function ViewPanel({
                           height: tileTransform.height,
                           marginTop: tileTransform.marginTop,
                           transform: tileTransform.transform,
+
                         }}
                       ></div>
                     </div>
@@ -384,7 +435,7 @@ export default function ViewPanel({
 
               {environment === "environment1" && (
                 <Image
-                  src="/assets/environment1.png"
+                  src="/assets/environment.png"
                   alt="Bathroom"
                   fill
                   className=" object-cover z-10"
@@ -601,7 +652,6 @@ export default function ViewPanel({
         </TabsContent>
 
         <TabsContent value="grid-view" className="space-y-4">
-          {/* Tile Grid */}
           <div
             className={`grid gap-[${groutThickness === "none"
               ? "0"

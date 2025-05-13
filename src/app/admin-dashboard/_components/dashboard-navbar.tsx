@@ -19,7 +19,7 @@ const DashboardNavbar = async () => {
           <Image src="/assets/user.png" alt="user" width={32} height={32} />
           <div>
             <h4 className="text-sm font-medium leading-[20px] text-black">
-              {user?.name || "Kongkon"}
+              {user?.name}
             </h4>
             <p className="text-xs font-medium leading-[18px] text-black">
               Admin

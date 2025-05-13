@@ -110,13 +110,7 @@ export default function ViewPanel({
   // Calculate grid dimensions based on selected size
   const gridDimensions = gridSize === "20x20" ? 20 : 45;
 
-  // Define the tile area for each environment
-  // const tileAreas = {
-  //   bedroom: { top: "60%", left: "10%", width: "40%", height: "40%" },
-  //   bathroom: { top: "20%", left: "30%", width: "40%", height: "60%" },
-  //   kitchen: { top: "70%", left: "20%", width: "60%", height: "30%" },
-  //   commercial: { top: "70%", left: "30%", width: "40%", height: "30%" },
-  // }
+
 
   // Update grid when SVG or settings change
   useEffect(() => {
@@ -265,10 +259,7 @@ export default function ViewPanel({
             pathElement.setAttribute("d", path.d);
 
 
-            // pathElement.setAttribute(
-            //   "fill",
-            //   pathColors[path.id] || path.fill || "#000000"
-            // );
+           
 
             const color = pathColors[path.id] || path.fill || "#000000"
 
@@ -342,11 +333,11 @@ export default function ViewPanel({
       <Tabs defaultValue="room-view" className="w-full">
         <TabsContent value="room-view">
           <div className="lg:flex gap-[78px] ">
-            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] aspect-[4/3] rounded-lg overflow-hidden border border-gray-200">
+            <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] rounded-lg overflow-hidden border border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
 
               {currentSvg?.length === 0 ? (
-                <div className="flex items-center justify-center bg-black/20 w-full h-full relative">
+                <div className="flex items-center justify-center  w-full h-full relative">
                   <Image
                     src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746168040/image_piti7e.png"
                     fill
@@ -357,20 +348,19 @@ export default function ViewPanel({
                 <div>
                   {showTilePreview && (
                     <div
-                      className={`absolute ${groutColor}-grout z-0 parrr`}
+                      className={`absolute  ${groutColor}-grout z-0 parrr`}
                       style={{
                         top: "0",
                         left: "0",
                         width: "100%",
                         height: "100%",
-                        // display: "flex",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                        // gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                        gap: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
                       }}
                     >
                       <div
                         ref={tileGridRef}
-                        className={`grid  gap-[${groutThickness === "none"
+                        className={`grid !mt-[-30px]  gap-[${groutThickness === "none"
                           ? "0"
                           : groutThickness === "thin"
                             ? "1px"
@@ -380,7 +370,6 @@ export default function ViewPanel({
                           gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
                           width: "2800px",
                           marginLeft: "-50px",
-                          // marginTop: "-30px",
                           height: tileTransform.height,
                           marginTop: tileTransform.marginTop,
                           transform: tileTransform.transform,

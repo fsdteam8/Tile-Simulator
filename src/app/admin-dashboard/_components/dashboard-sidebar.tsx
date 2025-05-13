@@ -5,7 +5,7 @@ import DashboardSidebarItem from "./dashboard-sidebar-item";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import LogoutModal from "@/components/shared/modal/LogoutModal";
 import { toast } from "react-toastify";
@@ -47,12 +47,6 @@ const DashboardSidebar = () => {
           </div>
         </div>
         <div className="mt-auto pb-10">
-          <Button
-            variant="ghost"
-            className="w-full flex items-center justify-start gap-4 text-lg font-medium text-black leading-[120%] shadow-none border-none mb-4"
-          >
-            <Settings /> Setting
-          </Button>
           <Button
             onClick={() => setIsOpen(true)}
             variant="ghost"

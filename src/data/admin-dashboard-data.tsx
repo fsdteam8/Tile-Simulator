@@ -1,9 +1,9 @@
-import { MdOutlineShoppingBag } from "react-icons/md";
+
 import { FiUsers } from "react-icons/fi";
-import { IoCartOutline } from "react-icons/io5";
 import { AiOutlineBars } from "react-icons/ai";
 
 import { ReactNode } from "react";
+import { GalleryHorizontalEnd, Palette } from "lucide-react";
 
 export type SidebarContentType = {
     id: number;
@@ -16,7 +16,7 @@ export const Sidebarcontents: SidebarContentType[] = [
     {
         id: 1,
         name: "All Tiles",
-        icon: <MdOutlineShoppingBag className="w-4 h-4"/>, 
+        icon: <GalleryHorizontalEnd className="w-4 h-4"/>, 
         href: "/admin-dashboard",
     },
     {
@@ -28,7 +28,7 @@ export const Sidebarcontents: SidebarContentType[] = [
     {
         id: 3,
         name: "tile Color",
-        icon: <IoCartOutline className="w-4 h-4"/>, 
+        icon: <Palette  className="w-4 h-4"/>, 
         href: "/admin-dashboard/tile-color",
     },
     {

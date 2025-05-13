@@ -3,7 +3,8 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import axios from "axios"
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -31,7 +32,7 @@ interface Tile {
   grid_category: string
   categories: { name: string }[]
   image: string
-  image_svg_text?: string // Add this field to match your API response
+  image_svg_text?: string
 }
 
 // Form Schema with zod
@@ -57,13 +58,13 @@ const gridSelectionData = ["1x1", "2x2"]
 const EditNewTile = ({ id }: { id: number | string }) => {
   const [image, setSvgData] = useState<File | null>(null)
   const [open, setOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const session = useSession()
   const token = (session?.data?.user as { token: string })?.token
 
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  // Initialize form with react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,7 +97,6 @@ const EditNewTile = ({ id }: { id: number | string }) => {
     },
   })
 
-  // Debug log for SVG data
   useEffect(() => {
     if (tileSingleData?.data) {
       console.log("Tile image:", tileSingleData.data.image)
@@ -115,36 +115,6 @@ const EditNewTile = ({ id }: { id: number | string }) => {
     }
   }, [tileSingleData, form])
 
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["updateTile", id],
-    mutationFn: (formData: FormData) => {
-      formData.append("_method", "PUT")
-
-      return fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }).then(async (res) => {
-        const data = await res.json()
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to update tile")
-        }
-        return data
-      })
-    },
-    onSuccess: (data) => {
-      toast.success(data.message || "Tile updated successfully")
-      router.push("/admin-dashboard")
-
-      queryClient.invalidateQueries({ queryKey: ["all tiles"] })
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to update tile")
-    },
-  })
-
   const handleSvgChange = useCallback((newSvgData: File | null) => {
     setSvgData(newSvgData)
   }, [])
@@ -154,33 +124,70 @@ const EditNewTile = ({ id }: { id: number | string }) => {
   }
 
   const onSubmit = async (data: FormValues) => {
-    // Find selected category IDs
-    const selectedCategoryIds = data.categories
-      .map((categoryName) => {
-        const category = categoriesData?.data?.data?.find((item: { name: string }) => item.name === categoryName)
-        return category ? String(category.id) : null
-      })
-      .filter(Boolean) as string[]
+    try {
+      setIsSubmitting(true);
 
-    if (selectedCategoryIds.length === 0) {
-      toast.error("Invalid Categories")
-      return
+      // Find selected category IDs
+      const selectedCategoryIds = data.categories
+        .map((categoryName) => {
+          const category = categoriesData?.data?.data?.find((item: { name: string }) => item.name === categoryName);
+          return category ? String(category.id) : null;
+        })
+        .filter(Boolean) as string[];
+
+      if (selectedCategoryIds.length === 0) {
+        toast.error("Invalid Categories");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("grid_category", data.grid_category);
+      formData.append("_method", "PUT");
+
+      selectedCategoryIds.forEach((id) => {
+        formData.append("category_id[]", id.toString());
+      });
+
+      // Handle both file upload and SVG text
+      if (image) {
+        // If a new file was uploaded
+        formData.append("image", image);
+
+        // Also extract and encode the SVG content
+        const svgText = await image.text();
+        const svgPathEncoded = btoa(unescape(encodeURIComponent(svgText)));
+        formData.append("image_svg_text", svgPathEncoded);
+      } else if (svgBase64) {
+        // If no new file but we have existing SVG data
+        formData.append("image_svg_text", svgBase64);
+      }
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success(response.data.message || "Tile updated successfully");
+      router.push("/admin-dashboard");
+      queryClient.invalidateQueries({ queryKey: ["all tiles"] });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Failed to update tile");
+      } else {
+        toast.error("Failed to update tile");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const formData: FormData = new FormData()
-    formData.append("name", data.name)
-    formData.append("description", data.description)
-    formData.append("grid_category", data.grid_category)
-    selectedCategoryIds.forEach((id) => {
-      formData.append("category_id[]", id.toString())
-    })
-
-    if (image) {
-      formData.append("image", image)
-    }
-
-    mutate(formData)
-  }
+  };
 
   // Determine image URL and SVG base64 data
   const imageUrl = tileSingleData?.data?.image
@@ -363,9 +370,9 @@ const EditNewTile = ({ id }: { id: number | string }) => {
                 <Button
                   type="submit"
                   className="flex items-center gap-2 text-white bg-primary py-3 px-8 text-base font-medium leading-[120%] rounded-[8px]"
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
-                  {isPending ? (
+                  {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Saving...

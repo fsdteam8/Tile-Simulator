@@ -50,16 +50,13 @@ export function TileSelection({
       setError(null);
 
       try {
-        let url = `${
-          process.env.NEXT_PUBLIC_BACKEND_URL
-        }/api/tiles?paginate_count=${
-          tilesPerRow * rowsPerPage
-        }&page=${currentPage}&category=${selectedCategory}`;
+        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL
+          }/api/tiles?paginate_count=${tilesPerRow * rowsPerPage
+          }&page=${currentPage}&category=${selectedCategory}`;
 
         if (selectedCategory == "all") {
-          url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${
-          tilesPerRow * rowsPerPage
-        }&page=${currentPage}`;
+          url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=${tilesPerRow * rowsPerPage
+            }&page=${currentPage}`;
         } else {
           url += `&category_id=${selectedCategory}`;
         }
@@ -299,21 +296,14 @@ export function TileSelection({
   return (
     <div className="p-4 space-y-4">
       {error && (
-        <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
-          Error: {error}
+        <div className="container ml-4 absolute">
+          <div className=" text-red-500 text-center p-4 bg-red-50 rounded-lg">
+            Error: {error}
+          </div>
         </div>
       )}
 
-      {!loading && tiles.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <p className="text-lg font-medium text-gray-600">No tiles found</p>
-          <p className="text-sm text-gray-500 mt-2">
-            {searchQuery
-              ? `No results for "${searchQuery}"`
-              : "Try selecting a different category"}
-          </p>
-        </div>
-      )}
+
 
       {loading ? (
         <div className="relative">
@@ -383,12 +373,10 @@ export function TileSelection({
                         <div
                           className="grid gap-[1px]"
                           style={{
-                            gridTemplateColumns: `repeat(${
-                              tile.grid_category === "2x2" ? 2 : 1
-                            }, 1fr)`,
-                            gridTemplateRows: `repeat(${
-                              tile.grid_category === "2x2" ? 2 : 1
-                            }, 1fr)`,
+                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1
+                              }, 1fr)`,
+                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1
+                              }, 1fr)`,
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {
@@ -465,12 +453,10 @@ export function TileSelection({
                         <div
                           className="grid gap-[1px]"
                           style={{
-                            gridTemplateColumns: `repeat(${
-                              tile.grid_category === "2x2" ? 2 : 1
-                            }, 1fr)`,
-                            gridTemplateRows: `repeat(${
-                              tile.grid_category === "2x2" ? 2 : 1
-                            }, 1fr)`,
+                            gridTemplateColumns: `repeat(${tile.grid_category === "2x2" ? 2 : 1
+                              }, 1fr)`,
+                            gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1
+                              }, 1fr)`,
                           }}
                         >
                           {tile.svg.map((svgString: string, index: number) => {

@@ -6,7 +6,8 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 2 * 60 * 60, // 2 hours in seconds
+    updateAge: 24 * 60 * 60, // 24 hours in seconds
   },
   providers: [
     CredentialsProvider({
@@ -48,8 +49,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Authentication failed. Please try again.");
         }
       },
-
-      
     }),
   ],
   callbacks: {

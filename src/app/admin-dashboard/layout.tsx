@@ -8,7 +8,7 @@ const AdminDashboardLayout = ({ children }: { children: ReactNode }) => {
     <AuthWrapper>
       <div className="bg-white w-full ">
         <DashboardNavbar />
-        <div className="w-full h-full flex justify-start items-start ">
+        <div className="w-full h-full flex justify-start items-start">
           <DashboardSidebar />
           <div className="w-full pl-7 pr-8 pt-6">{children}</div>
         </div>

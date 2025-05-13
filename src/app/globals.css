@@ -10,8 +10,7 @@
 
 .parrr {
   perspective: 1000px;
-  align-items: baseline;
-
+  align-items: end;
 }
 
 

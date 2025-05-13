@@ -117,11 +117,14 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
       <div className="flex flex-col items-center justify-center w-full h-[300px] border-2 border-dashed border-[#B0B0B0] rounded-[8px] relative bg-gray-50">
         {svgContent ? (
           <>
+          
             {/* Direct SVG rendering for better compatibility */}
-            <div
-              className="w-[300px] h-[300px] p-4 flex items-center justify-center"
-              dangerouslySetInnerHTML={{ __html: svgContent }}
-            />
+            <div className="w-full h-[300px] flex items-center justify-center p-4">
+          <div 
+            className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full"
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+          />
+        </div>
             <Button
               type="button"
               variant="ghost"
@@ -140,7 +143,7 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
               alt="SVG Preview"
               width={300}
               height={300}
-              className="max-w-full max-h-full object-contain p-4"
+              className="max-w-full h-[200px] border border-red-600 object-contain p-4"
             />
             <Button
               type="button"

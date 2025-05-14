@@ -11,6 +11,10 @@ const AllTilesContainer = ({search}:{search:string}) => {
 
   const debounceValue = useDebounce(search, delay);
 
+  useEffect(() =>{
+    setCurrentPage(1);
+  }, [debounceValue])
+
   const { data } = useQuery<TileAllResponse>({
     queryKey: ["all tiles", currentPage, debounceValue],
     queryFn: () =>
@@ -21,14 +25,14 @@ const AllTilesContainer = ({search}:{search:string}) => {
   });
 
   return (
-    <section className="w-full">
+    <section className="w-full overflow-hidden">
       <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">
         <TableContainer
           data={data?.data?.data ?? []}
           columns={AllTilesColumn}
         />
       </div>
-      <div className="pb-[208px] ">
+      <div className="pb-[208px]">
         {data && data?.total_pages > 1 && (
           <div className="mt-[30px] w-full flex justify-between">
             <p className="font-normal text-base leading-[120%] text-secondary-100">
@@ -51,7 +55,7 @@ const AllTilesContainer = ({search}:{search:string}) => {
 export default AllTilesContainer;
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AllTilesColumn } from "./AllTilesColumn";
 import { Tile, TileAllResponse } from "./AllTilesData";
 // import { useSession } from "next-auth/react";

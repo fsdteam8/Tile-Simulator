@@ -1,13 +1,13 @@
-"use client"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import Image from "next/image"
-import moment from "moment"
+"use client";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Image from "next/image";
+import moment from "moment";
 
 interface TileDetailsProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   //eslint-disable-next-line @typescript-eslint/no-explicit-any
-  row: any
+  row: any;
 }
 
 const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
@@ -19,7 +19,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
           <ul className="space-y-2">
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Name:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Name:
+                </strong>
               </div>
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
                 {row?.original?.name}
@@ -27,13 +29,17 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Image:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Image:
+                </strong>
               </div>
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
                 {row?.original?.svg_base64 ? (
                   (() => {
                     try {
-                      const decodedSvg = decodeURIComponent(escape(atob(row.original.svg_base64)))
+                      const decodedSvg = decodeURIComponent(
+                        escape(atob(row.original.svg_base64))
+                      );
 
                       // Create a container with proper styling
                       return (
@@ -46,7 +52,7 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                           {/* Add a button to view the SVG in full size */}
                           <button
                             onClick={() => {
-                              const svgWindow = window.open("", "_blank")
+                              const svgWindow = window.open("", "_blank");
                               if (svgWindow) {
                                 svgWindow.document.write(`
                   <!DOCTYPE html>
@@ -62,8 +68,8 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                       <div class="svg-container">${decodedSvg}</div>
                     </body>
                   </html>
-                `)
-                                svgWindow.document.close()
+                `);
+                                svgWindow.document.close();
                               }
                             }}
                             className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 transition-colors"
@@ -72,10 +78,10 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                             View Full SVG
                           </button>
                         </div>
-                      )
+                      );
                     } catch (error) {
-                      console.error("SVG parsing error:", error)
-                      return <span className="text-red-500">Invalid SVG</span>
+                      console.error("SVG parsing error:", error);
+                      return <span className="text-red-500">Invalid SVG</span>;
                     }
                   })()
                 ) : row?.original?.image ? (
@@ -95,47 +101,65 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">SVG use color:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  SVG use color:
+                </strong>
               </div>
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
                 {row?.original?.svg_base64 ? (
                   (() => {
                     try {
-                      const decodedSvg = decodeURIComponent(escape(atob(row.original.svg_base64)))
+                      const decodedSvg = decodeURIComponent(
+                        escape(atob(row.original.svg_base64))
+                      );
 
                       // Extract color information from SVG
-                      const colorMatches = decodedSvg.match(/fill="#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"/g) || []
+                      const colorMatches =
+                        decodedSvg.match(
+                          /fill="#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"/g
+                        ) || [];
                       const colors = [
-                        ...new Set(colorMatches.map((match) => {
-                          const colorMatch = match.match(/#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/);
-                          return colorMatch ? colorMatch[0] : null;
-                        }).filter(Boolean)),
-                      ]
+                        ...new Set(
+                          colorMatches
+                            .map((match) => {
+                              const colorMatch = match.match(
+                                /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/
+                              );
+                              return colorMatch ? colorMatch[0] : null;
+                            })
+                            .filter(Boolean)
+                        ),
+                      ];
 
                       // Improved image URL extraction
                       const extractImageUrl = (svg: string) => {
                         // First try standard xlink:href
-                        let imageMatch = svg.match(/xlink:href=["']([^"']+)["']/i)
+                        let imageMatch = svg.match(
+                          /xlink:href=["']([^"']+)["']/i
+                        );
                         if (imageMatch && imageMatch[1]) {
-                          return decodeURIComponent(imageMatch[1])
+                          return decodeURIComponent(imageMatch[1]);
                         }
 
                         // Then try modern href (without xlink:)
-                        imageMatch = svg.match(/href=["']([^"']+)["']/i)
+                        imageMatch = svg.match(/href=["']([^"']+)["']/i);
                         if (imageMatch && imageMatch[1]) {
-                          return decodeURIComponent(imageMatch[1])
+                          return decodeURIComponent(imageMatch[1]);
                         }
 
                         // Finally try camelCase version (xlinkHref)
-                        imageMatch = svg.match(/xlinkHref=["']([^"']+)["']/i)
+                        imageMatch = svg.match(/xlinkHref=["']([^"']+)["']/i);
                         if (imageMatch && imageMatch[1]) {
-                          return decodeURIComponent(imageMatch[1])
+                          return decodeURIComponent(imageMatch[1]);
                         }
 
-                        return null
-                      }
+                        return null;
+                      };
 
-                      const imageUrl = extractImageUrl(decodedSvg)
+
+                      const imageUrl = extractImageUrl(decodedSvg);
+                      console.log("Extracted Image URL:", imageUrl);
+
 
                       return (
                         <div className="flex items-center gap-2">
@@ -145,12 +169,14 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                                 <div
                                   key={index}
                                   className="w-6 h-6 rounded-full border border-gray-300"
-                                  style={{ backgroundColor: color || '' }}
+                                  style={{ backgroundColor: color || "" }}
                                   title={color ?? undefined}
                                 />
                               ))
                             ) : (
-                              <span className="text-gray-500">No colors detected</span>
+                              <span className="text-gray-500">
+                                No colors detected
+                              </span>
                             )}
                           </div>
                           <div>
@@ -170,14 +196,20 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                                 />
                               </div>
                             ) : (
-                              <span className="text-gray-500">No pattern image found</span>
+                              <span className="text-gray-500">
+                                No pattern image found
+                              </span>
                             )}
                           </div>
                         </div>
-                      )
+                      );
                     } catch (error) {
-                      console.error("Error parsing SVG:", error)
-                      return <span className="text-red-500">Unable to parse SVG details</span>
+                      console.error("Error parsing SVG:", error);
+                      return (
+                        <span className="text-red-500">
+                          Unable to parse SVG details
+                        </span>
+                      );
                     }
                   })()
                 ) : (
@@ -188,7 +220,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
 
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Publish Date:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Publish Date:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -197,7 +231,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Email:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Email:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -206,7 +242,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Phone Number:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Phone Number:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -215,7 +253,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Message:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Message:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -224,7 +264,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Tile Name:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Tile Name:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -233,7 +275,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Quantity Unit:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Quantity Unit:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -242,7 +286,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Quantity Needed:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Quantity Needed:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -251,7 +297,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Status:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Status:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -260,7 +308,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Referred By:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Referred By:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -269,7 +319,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Ohter Specify:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Ohter Specify:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -278,7 +330,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Grout Color:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Grout Color:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -287,7 +341,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Grout Thickness:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Grout Thickness:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -296,7 +352,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Grid Category:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Grid Category:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -305,7 +363,9 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
             </li>
             <li className="grid grid-cols-1 md:grid-cols-3">
               <div className="md:col-span-1">
-                <strong className="text-lg font-medium text-black leading-[120%]">Rotations:</strong>
+                <strong className="text-lg font-medium text-black leading-[120%]">
+                  Rotations:
+                </strong>
               </div>
 
               <div className="md:col-span-2 text-base font-normal leading-[120%] text-secondary-300">
@@ -316,7 +376,7 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
-export default ViewSubmission
+export default ViewSubmission;

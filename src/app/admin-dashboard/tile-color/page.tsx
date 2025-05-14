@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AllTilesColorsCotainer from "./_components/AllTilesColorContainer";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -12,8 +12,8 @@ import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
 const TileColors = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
-  // search color 
- const { search, setSearch } = useSearchTile();
+  // search color
+  const { search, setSearch } = useSearchTile();
 
   const session = useSession();
   const token = (session?.data?.user as { token?: string })?.token;
@@ -52,10 +52,13 @@ const TileColors = () => {
     // router.push(`/colors/edit/${color.id}`);
   };
 
-
   const delay = 200;
-  
-    const debounceValue = useDebounce(search, delay);
+
+  const debounceValue = useDebounce(search, delay);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debounceValue]);
 
   const { data, isLoading, isError, error } = useQuery<ColorApiResponse>({
     queryKey: ["allTilesColor", debounceValue, currentPage],
@@ -71,6 +74,7 @@ const TileColors = () => {
   });
 
 
+
   if (!token) {
     return (
       <div className="p-4 text-red-600">
@@ -81,7 +85,7 @@ const TileColors = () => {
 
   return (
     <div>
-      <TileColorsHeader search={search} setSearch={setSearch}/>
+      <TileColorsHeader search={search} setSearch={setSearch} />
       <div>
         <AllTilesColorsCotainer
           onEdit={handleEdit}

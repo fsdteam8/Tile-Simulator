@@ -12,9 +12,9 @@ import { ColorPicker } from "./color-picker"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import axios from "axios"
-import { toast } from "sonner"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
+import { toast } from "react-toastify"
 
 interface ColorFormModalProps {
   open: boolean
@@ -158,7 +158,7 @@ export const ColorFormModal = ({ open, onOpenChange }: ColorFormModalProps) => {
                 Image
               </TabsTrigger>
             </TabsList>
-
+  
             <TabsContent value="color" className="mt-0">
               <ColorPicker
                 selectedColor={selectedColor}

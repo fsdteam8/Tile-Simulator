@@ -9,6 +9,10 @@ const AllSubmissionContainer = () => {
   const dealy = 500;
   const debounceValue = useDebounce(search, dealy);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debounceValue]);
+
   const { data } = useQuery<SubmissionApiResponse>({
     queryKey: ["all-submission", currentPage, debounceValue],
     queryFn: () =>
@@ -50,7 +54,7 @@ const AllSubmissionContainer = () => {
 export default AllSubmissionContainer;
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TilePagination from "@/components/ui/TilePagination";
 import { AllSubmissionColumn } from "./AllSubmissionColumn";
 import { useQuery } from "@tanstack/react-query";

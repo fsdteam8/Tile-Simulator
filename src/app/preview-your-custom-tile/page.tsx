@@ -120,7 +120,7 @@ export default function PreviewYourCustomTile() {
 
     // Define styling function for hexagonal grid positioning
     function style(i: number, j: number, tileName?: string) {
-     
+
 
       if (tileName === "Rectangle2x8") {
         // Special styling for Tiffany pattern
@@ -728,7 +728,7 @@ export default function PreviewYourCustomTile() {
       // Get the first SVG (main tile)
       const svg = tileData.svgData[0]
 
-      
+
 
       // Generate and log the SVG string
       const svgString = generateSvgString()
@@ -948,10 +948,10 @@ export default function PreviewYourCustomTile() {
                         <div
                           ref={environmentPreviewRef}
                           className={`grid gap-[${tileData.groutThickness === "none"
-                              ? "0"
-                              : tileData.groutThickness === "thin"
-                                ? "1px"
-                                : "2px"
+                            ? "0"
+                            : tileData.groutThickness === "thin"
+                              ? "1px"
+                              : "2px"
                             }] bg-${tileData.groutColor}`}
                           style={{
                             gridTemplateColumns: `repeat(${tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
@@ -1079,18 +1079,18 @@ export default function PreviewYourCustomTile() {
       </div>
 
       <div className="mt-8">
-        <div className="space-y-[10px]">
-          <h1 className="text-base font-medium text-black leading-[120%]">Send yourself a copy</h1>
-          <div className="flex items-center gap-[30px] overflow-hidden w-full">
+        <div className="space-y-2 md:space-y-[10px]">
+          <h1 className="text-sm sm:text-base font-medium text-black leading-[120%]">Send yourself a copy</h1>
+          <div className="flex gap-4 w-full">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="flex-1 px-4 py-2 2xl:py-3 outline-none border border-[#5A5A5A] rounded-md placeholder:text-[#737373] placeholder:text-base placeholder:font-medium placeholder:leading-[120%]"
+              className="flex-1 px-4 py-2 sm:py-2 2xl:py-3 outline-none border border-[#5A5A5A] rounded-md placeholder:text-[#737373] placeholder:text-sm sm:placeholder:text-base placeholder:font-medium placeholder:leading-[120%]"
             />
             <Button
-              className="text-base font-medium leading-[120%] rounded-[8px] text-white py-[26px] px-[46px]"
+              className="text-sm sm:text-base font-medium leading-[120%] rounded-[8px] text-white py-3 sm:py-[26px] px-6 sm:px-[46px] w-full sm:w-auto text-center"
               onClick={handleSaveEmail}
             >
               Send

@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Header from "@/components/shared/Header/header";
-import Footer from "@/components/shared/footer/footer";
 import AppProvider from "@/components/provider/AppProvider";
 import AuthProvider from "@/components/provider/SessionProvider";
 import { ToastContainer } from "react-toastify";
@@ -30,7 +29,6 @@ export default function RootLayout({
             {children}
             <ToastContainer position="top-right" autoClose={3000} />
             <Toaster position="top-right" />
-            <Footer />
           </AppProvider>
         </AuthProvider>
       </body>

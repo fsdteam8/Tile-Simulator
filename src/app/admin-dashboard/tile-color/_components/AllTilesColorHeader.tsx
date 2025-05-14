@@ -30,6 +30,8 @@ export function TileColorsHeader({ search, setSearch }: TileColorsHeaderProps) {
 
   console.log(currentColor)
 
+
+
   const handleAddNew = () => {
     setCurrentColor(null)
     setIsModalOpen(true)

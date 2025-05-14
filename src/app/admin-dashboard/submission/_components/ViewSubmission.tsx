@@ -156,8 +156,10 @@ const ViewSubmission = ({ open, onOpenChange, row }: TileDetailsProps) => {
                         return null;
                       };
 
+
                       const imageUrl = extractImageUrl(decodedSvg);
                       console.log("Extracted Image URL:", imageUrl);
+
 
                       return (
                         <div className="flex items-center gap-2">

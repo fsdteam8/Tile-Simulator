@@ -21,6 +21,7 @@ const AllSubmissionContainer = () => {
       ).then((res) => res.json()),
   });
 
+
   return (
     <div className="w-full">
       <div className="w-full shadow-[0px_0px_22px_8px_#C1C9E4] h-auto rounded-[24px] bg-white">

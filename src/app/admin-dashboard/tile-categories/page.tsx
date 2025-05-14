@@ -36,9 +36,7 @@ const TileCategories = () => {
     setSelectedCategory(null);
   };
 
-  // const session = useSession();
-  // const token = (session?.data?.user as { token: string })?.token;
-  // console.log(token);
+ 
 
   const delay = 200;
 

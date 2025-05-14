@@ -27,9 +27,7 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
 
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
-  console.log(token);
-
-  console.log({ row });
+ 
 
   const { mutate } = useMutation({
     mutationKey: ["delete-category"],
@@ -58,7 +56,6 @@ function ActionsButton({ row, onEdit }: ActionsButtonProps) {
 
   const handleDeleteConfirm = () => {
     if (!selectedTileId) return;
-    console.log("Deleting tile with ID:", selectedTileId);
     mutate(row?.original?.id);
   };
   return (

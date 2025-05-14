@@ -75,6 +75,7 @@ const AddNewTile = () => {
 
   console.log(formError);
 
+
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

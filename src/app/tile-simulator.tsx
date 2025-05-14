@@ -42,7 +42,6 @@ export default function Tiles() {
 
   const handleAddBorder = () => {
     // Your border adding logic here
-    console.log("Add border clicked");
     setShowBorders(!showBorders);
   };
 
@@ -78,7 +77,6 @@ export default function Tiles() {
         [tile.id]: initialRotations,
       }));
 
-      console.log(`Applied initial rotations for ${tile.id}:`, initialRotations);
     } else {
       setCurrentSvg(null);
     }
@@ -99,7 +97,6 @@ export default function Tiles() {
     index: number,
     newRotation: number
   ) => {
-    console.log(`[APP] Rotating tile ${tileId}, SVG ${index} to ${newRotation}°`);
 
     setTileRotations((prev) => {
       const currentRotations = [
@@ -107,8 +104,6 @@ export default function Tiles() {
       ];
       currentRotations[index] = newRotation % 360;
 
-      // Log the updated rotations
-      console.log(`[APP] Updated rotations for ${tileId}:`, currentRotations);
 
       return {
         ...prev,

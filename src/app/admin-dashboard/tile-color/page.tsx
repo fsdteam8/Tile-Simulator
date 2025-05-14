@@ -47,7 +47,7 @@ const TileColors = () => {
   const handleEdit = (color: ColorItem) => {
     // Implement your edit logic here
     // For example, you might want to open a modal with a form to edit the color
-    console.log("Editing color:", color);
+    console.log(color);
     // Or navigate to an edit page:
     // router.push(`/colors/edit/${color.id}`);
   };
@@ -73,7 +73,7 @@ const TileColors = () => {
       ).then((res) => res.json()),
   });
 
-  console.log(data);
+
 
   if (!token) {
     return (

@@ -17,6 +17,7 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialImage || null)
   const [svgContent, setSvgContent] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
   console.log(file)
   // Debug logs
   useEffect(() => {
@@ -30,11 +31,9 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
   useEffect(() => {
     if (initialSvgBase64) {
       try {
-        console.log("Processing base64 SVG data")
         // Decode the base64 SVG
         const decodedSvg = decodeURIComponent(escape(atob(initialSvgBase64)))
         setSvgContent(decodedSvg)
-        console.log("SVG content set from base64")
       } catch (error) {
         console.error("Error decoding SVG base64:", error)
       }
@@ -44,12 +43,10 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
   // Process initialImage if it's an SVG URL
   useEffect(() => {
     if (initialImage && initialImage.toLowerCase().endsWith(".svg")) {
-      console.log("Fetching SVG from URL:", initialImage)
       fetch(initialImage)
         .then((response) => response.text())
         .then((svgText) => {
           setSvgContent(svgText)
-          console.log("SVG content set from URL")
         })
         .catch((error) => {
           console.error("Error fetching SVG:", error)

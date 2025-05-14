@@ -33,7 +33,7 @@ interface SubmissionFormProps {
   svgString?: string
 }
 
-export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svgString }: SubmissionFormProps) {
+export function SubmissionForm({ open, onOpenChange, tileData, svgString }: SubmissionFormProps) {
   const [captchaVerified, setCaptchaVerified] = useState(false)
   console.log(captchaVerified)
 
@@ -64,19 +64,14 @@ export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svg
           ...prev,
           svgBase64: base64Svg,
         }))
-        console.log("SVG converted to base64")
       } catch (error) {
         console.error("Error converting SVG to base64:", error)
       }
     }
   }, [svgString])
 
-  console.log("Tile Data unique color:", uniqueColors)
-  console.log("All Tile Data", tileData)
-  console.log("Form Data with SVG Base64:", formData)
 
   function onChange(value: string | null) {
-    console.log("Captcha value:", value)
     setCaptchaVerified(!!value)
   }
 
@@ -125,8 +120,7 @@ export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svg
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
-      console.log("Success:", result)
+      // const result = await response.json()
 
       // Close the modal after successful submission
       onOpenChange(false)
@@ -241,7 +235,7 @@ export function SubmissionForm({ open, onOpenChange, tileData, uniqueColors, svg
           </div>
 
           <div className="">
-            <ReCAPTCHA sitekey="6LcQ0zYrAAAAAOx9uuCLwJ8oGtfPYdmMAyW2wGFS" onChange={onChange} />
+            <ReCAPTCHA sitekey="6LcC0zkrAAAAAPwpt42t9m2vDubfYWBRnPrvG56j" onChange={onChange} />
           </div>
 
           <div className="pt-4 flex justify-center">

@@ -41,8 +41,6 @@ export default function ViewPanel({
   >();
 
 
-  console.log("selectedTile", selectedTile?.name);
-
   const tileGridRef = useRef<HTMLDivElement>(null);
   const [showTilePreview, setShowTilePreview] = useState(true);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -67,9 +65,6 @@ export default function ViewPanel({
 
 
 
-  // console.log(showTilePreview);
-  // console.log(setShowTilePreview);
-  // console.log(setGridSize);
 
   const router = useRouter();
 
@@ -103,9 +98,6 @@ export default function ViewPanel({
     router.push("/preview-your-custom-tile");
   };
 
-  // console.log(handleSaveAndShare);
-
-  // console.log(setGroutColor, setGroutThickness);
 
   // Calculate grid dimensions based on selected size
   const gridDimensions = 75;
@@ -116,7 +108,6 @@ export default function ViewPanel({
   useEffect(() => {
     if (!currentSvg || !currentSvg.length || !tileGridRef.current) return;
 
-    console.log("[VIEW PANEL] Rotations:", rotations);
 
     // Clear existing grid
     const container = tileGridRef.current;
@@ -274,8 +265,6 @@ export default function ViewPanel({
 
           cell.appendChild(innerGrid);
         } else {
-          // console.log("row", i);
-          // console.log("coll", j);
 
           const svgIndex = (i * gridDimensions + j) % currentSvg.length;
           const svg = currentSvg[svgIndex];

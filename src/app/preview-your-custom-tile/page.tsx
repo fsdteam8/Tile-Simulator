@@ -1081,7 +1081,7 @@ export default function PreviewYourCustomTile() {
       <div className="mt-8">
         <div className="space-y-[10px]">
           <h1 className="text-base font-medium text-black leading-[120%]">Send yourself a copy</h1>
-          <div className="flex items-center gap-[30px] overflow-hidden">
+          <div className="flex items-center gap-[30px] overflow-hidden w-full">
             <input
               type="email"
               value={email}

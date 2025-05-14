@@ -40,19 +40,6 @@ export default function SubmissionForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Log each field individually for clarity
-    console.log("========== FORM DATA SUBMISSION ==========")
-    console.log("Name:", formData.name)
-    console.log("Email:", formData.email)
-    console.log("Phone Number:", formData.phoneNumber)
-    console.log("Referred By:", formData.referredBy)
-    console.log("Quantity:", formData.quantityNeeded, formData.quantityUnit)
-    console.log("Other Specification:", formData.otherSpecify)
-    console.log("Message:", formData.message)
-    console.log("==========================================")
-
-    // Log the complete object as well
-    console.log("Complete Form Data Object:", formData)
 
     // You could add form validation and submission logic here
     alert("Form submitted! Check the console for the data.")
@@ -61,11 +48,11 @@ export default function SubmissionForm() {
   return (
     <div className="min-h-screen bg-white p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <Button variant="ghost" className="p-0 hover:bg-transparent" onClick={() => console.log("Back clicked")}>
+        <Button variant="ghost" className="p-0 hover:bg-transparent">
           <ArrowLeft className="h-5 w-5 mr-2 text-red-500" />
           <span className="text-red-500">Back</span>
         </Button>
-        <Button variant="ghost" className="p-1 hover:bg-transparent" onClick={() => console.log("Close clicked")}>
+        <Button variant="ghost" className="p-1 hover:bg-transparent" >
           <X className="h-5 w-5" />
         </Button>
       </div>

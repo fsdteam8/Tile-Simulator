@@ -78,6 +78,8 @@ const AddNewTile = () => {
   const token = (session?.data?.user as { token: string })?.token;
   const router = useRouter();
 
+  console.log(formError)
+
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -220,7 +222,6 @@ const AddNewTile = () => {
     });
 
     // Log all FormData entries
-    console.log("=== FORM DATA ENTRIES ===");
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }

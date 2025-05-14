@@ -20,7 +20,6 @@ const AuctionButton = ({ row }: any) => {
 
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
-  // console.log(token);
 
 
   const handleEditTiles = (id: number) => {
@@ -54,7 +53,6 @@ const AuctionButton = ({ row }: any) => {
 
   const handleDeleteConfirm = () => {
     if (!selectedTileId) return;
-    console.log("Deleting tile with ID:", selectedTileId);
     mutate(row?.original?.id);
   };
 

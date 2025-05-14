@@ -19,7 +19,6 @@ interface ActionsButtonProps {
 function ActionsSubmissionButton({ row }: ActionsButtonProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTileId, setSelectedTileId] = useState<number | null>(null);
-  console.log(selectedTileId);
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
   const queryClient = useQueryClient();

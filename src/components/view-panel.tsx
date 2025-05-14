@@ -27,8 +27,6 @@ export default function ViewPanel({
   showBorders = false,
   rotations = [0, 0, 0, 0],
   groutThickness,
-  setGroutThickness,
-  setGroutColor,
   groutColor,
 }: Props) {
   const [gridSize, setGridSize] = useState<"200x100">("200x100");
@@ -105,12 +103,12 @@ export default function ViewPanel({
     router.push("/preview-your-custom-tile");
   };
 
-  console.log(handleSaveAndShare);
+  // console.log(handleSaveAndShare);
 
-  console.log(setGroutColor, setGroutThickness);
+  // console.log(setGroutColor, setGroutThickness);
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = 65;
+  const gridDimensions = 75;
 
 
 
@@ -126,12 +124,7 @@ export default function ViewPanel({
 
     // Define this function outside the loop or at the top of the useEffect
     function style(i: number, j: number, tileName?: string) {
-      // if (tileName === "Rectangle2x8") {
-      //   // Special styling for Tiffany pattern
-      //   return {
-      //     marginBottom: i >= 1 && i <= 0 ? "20px" : "0px"
-      //   };
-      // }
+      
 
       if (tileName === "Rectangle2x8") {
         // Special styling for Tiffany pattern
@@ -141,17 +134,17 @@ export default function ViewPanel({
         };
       } else if(tileName === "Rectangle4x8"){
         return {
-          marginLeft: i % 2 !== 0 ? "20px" : "0px",
+          marginLeft: i % 2 !== 0 ? "22px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
         };
       } else if(tileName === "Tiffany"){
         return {
-          marginLeft: i % 2 !== 0 ? "21px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-20px" : "-7px",
+          marginLeft: i % 2 !== 0 ? "19px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-18px" : "-7px",
         };
       } else if(tileName === "Fiori"){
         return {
-          marginLeft: i % 2 !== 0 ? "21.4px" : "0px",
+          marginLeft: i % 2 !== 0 ? "18.4px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-12px" : "-7px",
         };
       } else if(tileName === "Gio"){
@@ -162,14 +155,20 @@ export default function ViewPanel({
         };
       } else if(tileName === "Indie"){
         return {
-          marginLeft: i % 2 !== 0 ? "20.7px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-21.2px" : "-7px",
+          marginLeft: i % 2 !== 0 ? "20px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-20.5px" : "-7px",
+          transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
+        };
+      } else if(tileName === "Triangle"){
+        return {
+          marginLeft: i % 2 !== 0 ? "18.8px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-19px" : "-7px",
           transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
         };
       } else {
         return {
-          marginLeft: i % 2 !== 0 ? "22px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-22px" : "-7px",
+          marginLeft: i % 2 !== 0 ? "19px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-19.5px" : "-7px",
         };
       }
 
@@ -435,7 +434,7 @@ export default function ViewPanel({
 
               {environment === "environment1" && (
                 <Image
-                  src="/assets/environment.png"
+                  src="/assets/environment1.png"
                   alt="Bathroom"
                   fill
                   className=" object-cover z-10"

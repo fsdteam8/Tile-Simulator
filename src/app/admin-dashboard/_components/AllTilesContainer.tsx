@@ -5,9 +5,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 const AllTilesContainer = ({search}:{search:string}) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // const session = useSession();
-  // const token = (session?.data?.user as { token: string })?.token;
-  // console.log(token);
+  
 
   const delay = 500;
 

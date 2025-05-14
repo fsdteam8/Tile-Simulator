@@ -17,7 +17,6 @@ const AllSubmissionContainer = () => {
       ).then((res) => res.json()),
   });
 
-  console.log(data);
 
   return (
     <div className="w-full">

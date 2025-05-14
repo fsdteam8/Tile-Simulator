@@ -78,7 +78,6 @@ export const createAllTilesCategoriesColumn = ({
       );
       const session = useSession();
       const token = (session?.data?.user as { token: string })?.token;
-      console.log(token);
 
       const handleStatusChange = async (newStatus: "Published" | "draft") => {
         setStatus(newStatus); // Immediate UI update

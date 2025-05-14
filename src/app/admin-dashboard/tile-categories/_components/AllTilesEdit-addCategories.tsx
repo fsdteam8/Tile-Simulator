@@ -46,7 +46,6 @@ export default function AddTileEditAndAddCategories({
   const isEditing = !!category;
   const session = useSession();
   const token = (session?.data?.user as { token: string })?.token;
-  console.log(token);
   const queryClient = useQueryClient();
 
   const router = useRouter();

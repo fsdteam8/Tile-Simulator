@@ -13,7 +13,6 @@ interface Category {
   name: string;
 }
 const TileDetails = ({ open, onOpenChange, row }: TileDetailsProps) => {
-  console.log({ row });
   return (
     <div className="p-10">
       <Dialog open={open} onOpenChange={onOpenChange}>

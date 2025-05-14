@@ -49,7 +49,8 @@ const AddNewTile = () => {
   const token = (session?.data?.user as { token: string })?.token
   const router = useRouter()
 
-  console.log(formError)
+  console.log(formError);
+
 
   // Initialize form with react-hook-form
   const form = useForm<FormValues>({
@@ -181,18 +182,9 @@ const AddNewTile = () => {
     const svgPathEncoded = btoa(unescape(encodeURIComponent(svgPath)))
     formData.append("image_svg_text", svgPathEncoded)
 
-    // Log FormData contents
-    console.log("=== FORM DATA SUBMISSION ===")
-    console.log("Form Values:", {
-      name: data.name,
-      description: data.description,
-      categories: data.categories,
-      grid_category: data.grid_category,
-      svg_path: svgPathEncoded,
-    })
+
 
     // Log all FormData entries
-    console.log("=== FORM DATA ENTRIES ===")
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value)
     }

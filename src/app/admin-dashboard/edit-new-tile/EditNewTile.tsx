@@ -92,17 +92,16 @@ const EditNewTile = ({ id }: { id: number | string }) => {
     queryFn: async () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles/${id}`)
       const data = await response.json()
-      console.log("Tile data:", data)
       return data
     },
   })
 
-  useEffect(() => {
-    if (tileSingleData?.data) {
-      console.log("Tile image:", tileSingleData.data.image)
-      console.log("Tile SVG text:", tileSingleData.data.image_svg_text?.substring(0, 50))
-    }
-  }, [tileSingleData])
+  // useEffect(() => {
+  //   if (tileSingleData?.data) {
+  //     console.log("Tile image:", tileSingleData.data.image)
+  //     console.log("Tile SVG text:", tileSingleData.data.image_svg_text?.substring(0, 50))
+  //   }
+  // }, [tileSingleData])
 
   useEffect(() => {
     if (tileSingleData) {

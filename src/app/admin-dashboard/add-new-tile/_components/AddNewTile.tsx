@@ -210,7 +210,6 @@ const AddNewTile = () => {
     const svgPathEncoded = btoa(unescape(encodeURIComponent(svgPath)));
     formData.append("image_svg_text", svgPathEncoded);
 
-
     // Log FormData contents
     console.log("Form Values:", {
       name: data.name,

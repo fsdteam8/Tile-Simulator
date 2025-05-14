@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import {  useState } from "react";
+import {  useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { FaRegEye } from "react-icons/fa6";
 import { FaRegEyeSlash } from "react-icons/fa6";
@@ -37,18 +37,18 @@ export function LoginForm() {
   const router = useRouter();
 
   // Check if the user already has a session token
-  // useEffect(() => {
-  //   // Check if the user already has a session token
-  //   const token = document.cookie
-  //     .split("; ")
-  //     .find((cookie) => cookie.startsWith("next-auth.session-token="))
-  //     ?.split("=")[1];
+  useEffect(() => {
+    // Check if the user already has a session token
+    const token = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith("next-auth.session-token="))
+      ?.split("=")[1];
 
-  //   // If a token exists, redirect them to the admin dashboard
-  //   if (token) {
-  //     router.push("/admin-dashboard");
-  //   }
-  // }, [router]);
+    // If a token exists, redirect them to the admin dashboard
+    if (token) {
+      router.push("/admin-dashboard");
+    }
+  }, [router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

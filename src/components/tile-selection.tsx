@@ -383,7 +383,7 @@ export function TileSelection({
                       ref={index === 0 ? firstTileRef : undefined}
                       onClick={() => handleTileSelect(tile)}
                       className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-0  ",
                         selectedTile?.id === tile.id ? "scale-[0.98]" : "",
                       )}
                     >
@@ -448,7 +448,7 @@ export function TileSelection({
                     <button
                       onClick={() => handleTileSelect(tile)}
                       className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white",
+                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-0",
                         selectedTile?.id === tile.id ? "scale-[0.98] " : "",
                       )}
                     >

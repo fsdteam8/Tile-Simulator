@@ -157,7 +157,7 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
           </>
         ) : (
           <FileUploader handleChange={handleChange} name="file" types={["SVG"]} maxSize={maxSizeKB} minSize={0}>
-            <div className="flex flex-col items-center justify-center gap-3 p-6 text-center">
+            <div className="flex flex-col items-center justify-center gap-3 p-6 text-center outline-none focus:outline-none border-norne focus:border-none">
               <Upload className="h-8 w-8 text-gray-400" />
               <div className="space-y-1">
                 <p className="text-sm font-medium text-gray-600">Drag and drop SVG here</p>
@@ -165,8 +165,8 @@ const SVGUpload = ({ onUpload, maxSizeKB, initialImage, initialSvgBase64 }: SVGU
               </div>
               <Button
                 type="button"
-                variant="outline"
-                className="bg-primary text-white border-primary hover:bg-primary/10"
+                variant="ghost"
+                className="bg-primary text-white hover:bg-primary hover:text-white"
               >
                 Add SVG
               </Button>

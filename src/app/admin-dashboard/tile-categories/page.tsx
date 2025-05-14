@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AllTilesCategoriesHeader from "./_components/AllTilesCategoriesHeader";
 import AllTilesCategoriesCotainer from "./_components/AllTilesCategoriesCotainer";
 import AddTileEditAndAddCategories from "./_components/AllTilesEdit-addCategories";
@@ -20,8 +20,6 @@ const TileCategories = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
-
-
 
   const handleAddNew = () => {
     setSelectedCategory(null);
@@ -46,11 +44,15 @@ const TileCategories = () => {
 
   const debounceValue = useDebounce(search, delay);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debounceValue]);
+
   const { data, isLoading, isError, error } = useQuery<CategoriesApiResponse>({
     queryKey: ["allTilesCategories", debounceValue, currectPage],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?search=${debounceValue}&paginate_count=10&page=${currectPage}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories?paginate_count=10&page=${currectPage}&search=${debounceValue}`
       ).then((res) => res.json()),
   });
 

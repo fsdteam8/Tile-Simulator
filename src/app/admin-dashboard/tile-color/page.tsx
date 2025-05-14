@@ -74,7 +74,6 @@ const TileColors = () => {
   });
 
 
-
   if (!token) {
     return (
       <div className="p-4 text-red-600">

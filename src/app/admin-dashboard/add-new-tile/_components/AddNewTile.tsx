@@ -3,6 +3,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
+
+
+
+
+
 import {
   Form,
   FormControl,
@@ -73,7 +78,7 @@ const AddNewTile = () => {
   const token = (session?.data?.user as { token: string })?.token;
   const router = useRouter();
 
-  console.log(formError);
+  console.log(formError)
 
 
   // Initialize form with react-hook-form
@@ -208,7 +213,6 @@ const AddNewTile = () => {
     formData.append("image_svg_text", svgPathEncoded);
 
     // Log FormData contents
-    console.log("=== FORM DATA SUBMISSION ===");
     console.log("Form Values:", {
       name: data.name,
       description: data.description,
@@ -218,7 +222,6 @@ const AddNewTile = () => {
     });
 
     // Log all FormData entries
-    console.log("=== FORM DATA ENTRIES ===");
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }

@@ -150,7 +150,6 @@ export function ColorEditor({
           name: `Color ${color}`,
         };
 
-        console.log(`Setting color for path ${pathId} to ${color}`);
 
         setPathColors((prev) => ({
           ...prev,
@@ -167,7 +166,6 @@ export function ColorEditor({
 
 
   const handleRotationChange = (index: number, newRotation: number) => {
-    console.log(`[COLOR EDITOR] Rotating SVG ${index} to ${newRotation}°`);
 
     // Pass the rotation to the parent via the onRotate function
     onRotate(tileId, index, newRotation);

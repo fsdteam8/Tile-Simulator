@@ -10,7 +10,6 @@ import html2canvas from "html2canvas"
  */
 export async function captureViewportScreenshot(elementId: string, fileName = "tile-screenshot"): Promise<boolean> {
   try {
-    console.log(`Starting viewport screenshot for element: ${elementId}`)
 
     // Find the element to focus on
     const element = document.getElementById(elementId)
@@ -37,8 +36,6 @@ export async function captureViewportScreenshot(elementId: string, fileName = "t
       console.log("Element not fully visible in viewport, capturing entire visible area")
     }
 
-    // Use html2canvas to capture the entire document body
-    console.log("Initializing html2canvas for viewport capture...")
     const canvas = await html2canvas(document.body, {
       // Improve quality with these options
       scale: 2, // Higher scale for better quality
@@ -56,8 +53,6 @@ export async function captureViewportScreenshot(elementId: string, fileName = "t
       height: window.innerHeight,
     })
 
-    console.log(`Canvas created, dimensions: ${canvas.width}x${canvas.height}`)
-
     // Convert canvas to blob
     return new Promise((resolve) => {
       try {
@@ -68,7 +63,6 @@ export async function captureViewportScreenshot(elementId: string, fileName = "t
             return
           }
 
-          console.log(`Blob created, size: ${blob.size} bytes`)
 
           // Create a download link
           const url = URL.createObjectURL(blob)
@@ -78,18 +72,14 @@ export async function captureViewportScreenshot(elementId: string, fileName = "t
 
           // Trigger download
           document.body.appendChild(link)
-          console.log("Download link created and appended to body")
           link.click()
-          console.log("Download link clicked")
 
           // Clean up
           setTimeout(() => {
             document.body.removeChild(link)
             URL.revokeObjectURL(url)
-            console.log("Cleanup completed")
           }, 100)
 
-          console.log(`Screenshot saved as ${fileName}.png`)
           resolve(true)
         }, "image/png")
       } catch (blobError) {
@@ -110,7 +100,6 @@ export async function captureViewportScreenshot(elementId: string, fileName = "t
  */
 export async function captureVisibleArea(fileName = "viewport-screenshot"): Promise<boolean> {
   try {
-    console.log("Starting visible area screenshot capture")
 
     // Use html2canvas to capture the visible area
     const canvas = await html2canvas(document.documentElement, {
@@ -129,7 +118,6 @@ export async function captureVisibleArea(fileName = "viewport-screenshot"): Prom
       scrollY: window.scrollY,
     })
 
-    console.log(`Canvas created, dimensions: ${canvas.width}x${canvas.height}`)
 
     // Convert canvas to blob
     return new Promise((resolve) => {
@@ -157,7 +145,6 @@ export async function captureVisibleArea(fileName = "viewport-screenshot"): Prom
             URL.revokeObjectURL(url)
           }, 100)
 
-          console.log(`Viewport screenshot saved as ${fileName}.png`)
           resolve(true)
         }, "image/png")
       } catch (blobError) {

@@ -11,7 +11,7 @@ import { ColorPicker } from "./color-picker"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import axios, { AxiosError } from "axios"
-import { toast } from "sonner"
+
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import Image from "next/image"
 import { ColorItem } from "../AllTilesColorData"
+import { toast } from "react-toastify"
 
 interface EditColorFormProps {
   open: boolean
@@ -128,7 +129,7 @@ export const EditColorForm = ({
     formData.append("name", name.trim())
     
     if (selectedColor) {
-      formData.append("hex_code", selectedColor)
+      formData.append("code", selectedColor)
     }
     
     if (selectedImage) {

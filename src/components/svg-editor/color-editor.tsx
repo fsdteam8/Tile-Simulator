@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import { useCallback, useEffect, useState } from "react";
 import { ColorPicker } from "./color-picker";
 import { ColorItem } from "./colortype";
@@ -190,11 +190,7 @@ export function ColorEditor({
         <div className="w-full h-full flex justify-center items-start">
           {svgArray.length === 0 ? (
             <div className=" flex items-center justify-center bg-black/20 w-full h-[300px] md:h-[500px] lg:h-[400px] relative">
-              <Image
-                src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746167200/image_2x_fb6njy.png"
-                fill
-                alt="empty tile"
-              />
+                No SVG data available
             </div>
           ) : (
             <div className="w-full h-full ">

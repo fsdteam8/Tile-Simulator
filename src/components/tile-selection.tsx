@@ -69,7 +69,7 @@ export function TileSelection({
         if (process.env.NEXT_PUBLIC_BACKEND_URL) {
           const response = await fetch(url)
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            throw new Error(`No tiles available`)
           }
           const data = await response.json()
 
@@ -161,7 +161,7 @@ export function TileSelection({
           setTotalPages(calculateTotalPages(transformedTiles))
         }
       } catch (err) {
-        console.error("Error fetching tiles:", err)
+        console.error("No tiles available :", err)
         setError(err instanceof Error ? err.message : "Failed to load tiles")
         // Fallback to empty array to prevent crashes
         setTiles([])
@@ -306,7 +306,7 @@ export function TileSelection({
     <div className=" space-y-2 md:space-y-4">
       {error && (
         <div className="container absolute ml-[30px]">
-          <div className=" text-red-500 text-center p-4 bg-red-50 rounded-lg">Error: {error}</div>
+          <div className=" text-red-500 text-center p-4 bg-red-50 rounded-lg">{error}</div>
         </div>
       )}
 

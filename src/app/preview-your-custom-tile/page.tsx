@@ -22,20 +22,6 @@ interface TileData {
   selectedTile: Tile // Selected tile data
 }
 
-// interface SubmissionFormProps {
-//   open: boolean;
-//   onOpenChange: (open: boolean) => void;
-//   tileData?: {
-//     svgData: SvgData[] | null;
-//     pathColors: Record<string, string>;
-//     showBorders: boolean;
-//     rotations: number[];
-//     groutColor: string;
-//     groutThickness: string;
-//     gridSize: string;
-//     environment: string;
-//   };
-// }
 
 export default function PreviewYourCustomTile() {
   const [tileData, setTileData] = useState<{
@@ -70,7 +56,7 @@ export default function PreviewYourCustomTile() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth <= 834)
+      setIsSmallScreen(window.innerWidth <= 300)
     }
     window.addEventListener("resize", handleResize)
     handleResize() // Initialize on mount
@@ -125,12 +111,12 @@ export default function PreviewYourCustomTile() {
       if (tileName === "Rectangle2x8") {
         // Special styling for Tiffany pattern
         return {
-          marginLeft: i % 2 !== 0 ? "20px" : "0px",
+          marginLeft: i % 2 !== 0 ? "37px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
         }
       } else if (tileName === "Rectangle4x8") {
         return {
-          marginLeft: i % 2 !== 0 ? "22px" : "0px",
+          marginLeft: i % 2 !== 0 ? "37px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
         }
       } else if (tileName === "Tiffany") {
@@ -152,19 +138,24 @@ export default function PreviewYourCustomTile() {
       } else if (tileName === "Indie") {
         return {
           marginLeft: i % 2 !== 0 ? "36px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-32px" : "-7px",
+          marginTop: i >= 1 && i <= 100 ? "-35px" : "-7px",
           transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
         }
       } else if (tileName === "Triangle") {
         return {
-          marginLeft: i % 2 !== 0 ? "36px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-33px" : "-7px",
+          marginLeft: i % 2 !== 0 ? "38px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-35.5px" : "-7px",
           transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
+        }
+      } else if (tileName === "Lola") {
+        return {
+          marginLeft: i % 2 !== 0 ? "38px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-36px" : "-12px",
         }
       } else {
         return {
-          marginLeft: i % 2 !== 0 ? "36px" : "0px",
-          marginTop: i >= 1 && i <= 100 ? "-33px" : "-7px",
+          marginLeft: i % 2 !== 0 ? "38px" : "0px",
+          marginTop: i >= 1 && i <= 100 ? "-35px" : "-7px",
         }
       }
     }
@@ -828,9 +819,11 @@ export default function PreviewYourCustomTile() {
   return (
     <div className="container mx-auto pt-6 px-4">
       <div className="md:flex lg:flex justify-between items-center mb-6 space-y-4 lg:space-y-0">
-        <button className="bg-white text-base font-medium leading-[120%] text-primary border border-primary px-[63px] py-4 rounded">
-          <Link href="/">Go Back</Link>
-        </button>
+
+        <div className="flex justify-center lg:justify-start">
+          <Link href="/" className="border border-primary text-primary leading-[120%] py-2 lg:py-4 px-12 rounded-[4px]">Go Back</Link>
+        </div>
+
         <h1 className="text-[18px] lg:text-[24px] xl:text-[28px] 2xl:text-[32px] font-normal text-center text-[#595959]">
           Preview Your Custom Tile
         </h1>
@@ -901,8 +894,8 @@ export default function PreviewYourCustomTile() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-[14px] md:gap-[18px]  lg:gap-[22px]  xl:gap-[26px] 2xl:gap-[30px]">
-          <div className="border rounded-lg overflow-hidden w-[340px] h-[340px] md:w-[350px] lg:w-[550px] lg:h-[550px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:grid-cols-2">
+          <div className="border rounded-lg overflow-hidden ">
             {/* Customize Tile */}
             <div
               ref={tileGridRef}
@@ -915,17 +908,50 @@ export default function PreviewYourCustomTile() {
               }}
             />
           </div>
-          <div className="border rounded-lg w-[340px] h-[340px] md:w-[350px] lg:w-[550px] lg:h-[550px] overflow-hidden">
-            <div
-              ref={patternGridRef}
-              className={`grid !w-auto mt-[-30px] ml-[-30px] ${tileData.groutColor}-grout`}
-              style={{
-                gridTemplateColumns: `repeat(8, 1fr)`,
-                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-                width: isSmallScreen ? "100%" : "auto",
-              }}
-            />
-          </div>
+
+          
+            <div className="overflow-hidden"
+            >
+              <div
+                ref={patternGridRef}
+                className={`grid  ${tileData.groutColor}-grout lg:!h-[580px]  !w-[620px]`}
+                style={{
+                  gridTemplateColumns: `repeat(8, 1fr)`,
+                  gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
+                  width: isSmallScreen ? "100%" : "562px",
+                  // width: "max-content", // only as wide as needed
+                  // height: "max-content",
+                  marginTop: "-30px",
+                  marginLeft: "-35px",
+                  
+                }}
+              />
+            </div>
+
+          {/* <div className="relative aspect-video  overflow-hidden">
+            <div className="aspect-video w-full h-full overflow-hidden">
+              <div
+                ref={patternGridRef}
+                className={`grid ${tileData.groutColor}-grout`}
+                style={{
+                  gridTemplateColumns: `repeat(8, 100px)`, // fixed column width
+                  gridAutoRows: "100px",                   // fixed row height (optional)
+                  gap:
+                    tileData.groutThickness === "none"
+                      ? "0px"
+                      : tileData.groutThickness === "thin"
+                        ? "1px"
+                        : "2px",
+                  width: "max-content", // only as wide as needed
+                  height: "max-content",
+                  marginTop: "-30px",
+                  marginLeft: "-30px",
+                }}
+              />
+            </div>
+          </div> */}
+
+
         </div>
 
         <div className="mt-8">

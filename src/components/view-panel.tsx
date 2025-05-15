@@ -413,7 +413,7 @@ export default function ViewPanel({
 
               {environment === "environment1" && (
                 <Image
-                  src="/assets/environment.png"
+                  src="/assets/environment1.png"
                   alt="Bathroom"
                   fill
                   className=" object-cover z-10"

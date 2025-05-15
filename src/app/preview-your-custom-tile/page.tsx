@@ -22,7 +22,6 @@ interface TileData {
   selectedTile: Tile // Selected tile data
 }
 
-
 export default function PreviewYourCustomTile() {
   const [tileData, setTileData] = useState<{
     svgData: SvgData[] | null
@@ -41,10 +40,12 @@ export default function PreviewYourCustomTile() {
   const patternGridRef = useRef<HTMLDivElement>(null)
   const environmentPreviewRef = useRef<HTMLDivElement>(null)
   const [svgString, setSvgString] = useState("")
+  const [cloudinaryLink, setCloudinaryLink] = useState("")
+
+  console.log(cloudinaryLink)
 
   const [openFormModal, setOpenFormModal] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
-
 
   // Add isSmallScreen state and useEffect for responsive behavior
   const [isSmallScreen, setIsSmallScreen] = useState(false)
@@ -106,8 +107,6 @@ export default function PreviewYourCustomTile() {
 
     // Define styling function for hexagonal grid positioning
     function style(i: number, j: number, tileName?: string) {
-
-
       if (tileName === "Rectangle2x8") {
         // Special styling for Tiffany pattern
         return {
@@ -330,8 +329,9 @@ export default function PreviewYourCustomTile() {
     if (!tileData || !tileData.svgData || !tileData.svgData.length) return ""
 
     const svg = tileData.svgData[0]
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${svg.viewBox || "0 0 100 100"
-      }" width="500" height="500">`
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${
+      svg.viewBox || "0 0 100 100"
+    }" width="500" height="500">`
 
     // Add defs section for patterns
     svgString += "<defs>"
@@ -353,7 +353,7 @@ export default function PreviewYourCustomTile() {
 
           svgString += `
             <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
-              <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+              <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
             </pattern>
           `
           addedPatterns.add(patternId)
@@ -375,8 +375,9 @@ export default function PreviewYourCustomTile() {
         fillAttribute = color
       }
 
-      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
-        }/>`
+      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${
+        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
+      }/>`
     })
 
     svgString += "</svg>"
@@ -473,7 +474,6 @@ export default function PreviewYourCustomTile() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-
     } catch (error) {
       console.error("Error downloading:", error)
     } finally {
@@ -528,7 +528,7 @@ export default function PreviewYourCustomTile() {
           const imageUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${color.replace("image:", "")}`
           svgString += `
           <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
-            <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+            <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
           </pattern>`
           addedPatterns.add(patternId)
         }
@@ -643,6 +643,7 @@ export default function PreviewYourCustomTile() {
 
       // Upload to Cloudinary
       const cloudinaryUrl = await uploadHtmlToCloudinary(htmlFile)
+      setCloudinaryLink(cloudinaryUrl)
 
       // Share the Cloudinary link
       if (navigator.share) {
@@ -702,13 +703,21 @@ export default function PreviewYourCustomTile() {
   }
 
   const handleSaveEmail = () => {
-    alert(`Design saved to email: ${email}`)
+    // Use the hardcoded example Cloudinary link instead of the dynamic one
+    const designLink =
+      "https://res.cloudinary.com/dupal36os/raw/upload/v1747301746/tile_designs/e1vaxxbcgfzitfdbwqrh.html"
+
+    console.log("Email:", email)
+    console.log("Cloudinary Link:", designLink)
+
+    // Here you would typically send this data to your backend
+    // For now, just show an alert with the information
+    alert(`Design link sent to ${email}`)
     setEmail("")
   }
 
   // Function to handle opening the form modal
   const handleOpenFormModal = () => {
-
     // Generate the SVG string before opening the modal
     const generatedSvgString = generateSvgString()
     if (generatedSvgString) {
@@ -718,8 +727,6 @@ export default function PreviewYourCustomTile() {
     if (tileData && tileData.svgData && tileData.svgData.length > 0) {
       // Get the first SVG (main tile)
       const svg = tileData.svgData[0]
-
-
 
       // Generate and log the SVG string
       const svgString = generateSvgString()
@@ -819,9 +826,10 @@ export default function PreviewYourCustomTile() {
   return (
     <div className="container mx-auto pt-6 px-4">
       <div className="md:flex lg:flex justify-between items-center mb-6 space-y-4 lg:space-y-0">
-
         <div className="flex justify-center lg:justify-start">
-          <Link href="/" className="border border-primary text-primary leading-[120%] py-2 lg:py-4 px-12 rounded-[4px]">Go Back</Link>
+          <Link href="/" className="border border-primary text-primary leading-[120%] py-2 lg:py-4 px-12 rounded-[4px]">
+            Go Back
+          </Link>
         </div>
 
         <h1 className="text-[18px] lg:text-[24px] xl:text-[28px] 2xl:text-[32px] font-normal text-center text-[#595959]">
@@ -899,58 +907,32 @@ export default function PreviewYourCustomTile() {
             {/* Customize Tile */}
             <div
               ref={tileGridRef}
-              className={`grid !w-auto h-full items-center justify-center  ${tileData.groutColor}-grout`}
+              className={`grid !w-auto lg:!h-[560px] items-center justify-center  ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(1, 1fr)`,
                 gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
                 // width: "562px",
                 width: isSmallScreen ? "100%" : "562px",
+                height: isSmallScreen ? "`100%" : "362px",
               }}
             />
           </div>
 
-          
-            <div className="overflow-hidden"
-            >
-              <div
-                ref={patternGridRef}
-                className={`grid  ${tileData.groutColor}-grout lg:!h-[580px]  !w-[620px]`}
-                style={{
-                  gridTemplateColumns: `repeat(8, 1fr)`,
-                  gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-                  width: isSmallScreen ? "100%" : "562px",
-                  // width: "max-content", // only as wide as needed
-                  // height: "max-content",
-                  marginTop: "-30px",
-                  marginLeft: "-35px",
-                  
-                }}
-              />
-            </div>
-
-          {/* <div className="relative aspect-video  overflow-hidden">
-            <div className="aspect-video w-full h-full overflow-hidden">
-              <div
-                ref={patternGridRef}
-                className={`grid ${tileData.groutColor}-grout`}
-                style={{
-                  gridTemplateColumns: `repeat(8, 100px)`, // fixed column width
-                  gridAutoRows: "100px",                   // fixed row height (optional)
-                  gap:
-                    tileData.groutThickness === "none"
-                      ? "0px"
-                      : tileData.groutThickness === "thin"
-                        ? "1px"
-                        : "2px",
-                  width: "max-content", // only as wide as needed
-                  height: "max-content",
-                  marginTop: "-30px",
-                  marginLeft: "-30px",
-                }}
-              />
-            </div>
-          </div> */}
-
+          <div className="overflow-hidden">
+            <div
+              ref={patternGridRef}
+              className={`grid  ${tileData.groutColor}-grout !h-[380px] lg:!h-[580px]  !w-[620px]`}
+              style={{
+                gridTemplateColumns: `repeat(8, 1fr)`,
+                gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
+                width: isSmallScreen ? "100%" : "562px",
+                // width: "max-content", // only as wide as needed
+                // height: "max-content",
+                marginTop: "-30px",
+                marginLeft: "-35px",
+              }}
+            />
+          </div>
 
         </div>
 
@@ -973,15 +955,17 @@ export default function PreviewYourCustomTile() {
                       >
                         <div
                           ref={environmentPreviewRef}
-                          className={`grid gap-[${tileData.groutThickness === "none"
-                            ? "0"
-                            : tileData.groutThickness === "thin"
-                              ? "1px"
-                              : "2px"
-                            }] bg-${tileData.groutColor}`}
+                          className={`grid gap-[${
+                            tileData.groutThickness === "none"
+                              ? "0"
+                              : tileData.groutThickness === "thin"
+                                ? "1px"
+                                : "2px"
+                          }] bg-${tileData.groutColor}`}
                           style={{
-                            gridTemplateColumns: `repeat(${tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
-                              }, 1fr)`,
+                            gridTemplateColumns: `repeat(${
+                              tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
+                            }, 1fr)`,
                             width: "1150px",
                             marginLeft: "-50px",
                             height: tileTransform.height,
@@ -1033,7 +1017,7 @@ export default function PreviewYourCustomTile() {
               />
             </div>
             <p className="text-xl lg:text-[22px] 2xl:text-[24px] font-medium text-black leading-[120%]">
-              Color chips sent to <br /> you
+              Color chips sent to <br className="hidden md:block"/> you
             </p>
           </div>
           <div className="text-center">

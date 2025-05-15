@@ -31,7 +31,7 @@ const TileSimulatorHeader = ({
 }: TileSimulatorHeaderProps) => {
   const [search, setSearch] = useState(searchQuery);
 
- 
+
 
 
   const { data, isLoading, isError } = useQuery<CategoriesApiResponse>({
@@ -56,7 +56,7 @@ const TileSimulatorHeader = ({
 
 
 
-   
+
 
   // Update parent component when search changes with debounce
   useEffect(() => {
@@ -73,39 +73,41 @@ const TileSimulatorHeader = ({
   };
 
   return (
-    <div className="w-full space-y-2 md:space-y-0 lg:space-y-0 md:flex lg:flex items-center gap-5">
+    <div className="grid grid-cols-4 gap-4">
       {/* Search input */}
-      <div className="relative">
-        <SearchIcon
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary"
-          size={18}
-        />
-        <Input
-          type="text"
-          placeholder="Search for products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className={cn(
-            "pl-10 pr-10 2xl:h-[52px] w-[243px]",
-            "border-primary",
-            "placeholder:text-sm placeholder:text-[#F0C1C1] placeholder:leading-[120%] placeholder:font-normal",
-            "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none"
+      <div className="col-span-4 md:col-span-1 lg:col-span-1">
+        <div className="relative">
+          <SearchIcon
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary"
+            size={18}
+          />
+          <Input
+            type="text"
+            placeholder="Search for products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className={cn(
+              "pl-10 pr-10 2xl:h-[52px]",
+              "border-primary",
+              "placeholder:text-sm placeholder:text-[#F0C1C1] placeholder:leading-[120%] placeholder:font-normal",
+              "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:outline-none"
+            )}
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
+              aria-label="Clear search"
+            >
+              <X size={18} />
+            </button>
           )}
-        />
-        {search && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors"
-            aria-label="Clear search"
-          >
-            <X size={18} />
-          </button>
-        )}
+        </div>
       </div>
 
       {/* Category dropdown */}
-      <div>
+      <div className="col-span-4 md:col-span-1 lg:col-span-1">
         <Select value={selectedCategory} onValueChange={onCategoryChange}>
           <SelectTrigger className="w-full md:w-[268px] xl:h-[44px] 2xl:h-[52px] py-2 xl:py-[10px] 2xl:py-4 px-[12px] xl:px-[16px] 2xl:px-[20px] font-medium">
             <SelectValue
@@ -113,8 +115,8 @@ const TileSimulatorHeader = ({
                 isLoading
                   ? "Loading..."
                   : isError
-                  ? "Error loading"
-                  : "Select a category"
+                    ? "Error loading"
+                    : "Select a category"
               }
             />
           </SelectTrigger>
@@ -142,16 +144,18 @@ const TileSimulatorHeader = ({
       </div>
 
       {/* Add border button */}
-      {onAddBorder && (
-        <div>
-          <button
-            className="flex w-full p-4 items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] py-2 xl:py-[10px] 2xl:h-[52px] px-[30px] md:px-[40px] lg:px-[50px] xl:px-[60px] 2xl:px-[70px]"
-            onClick={onAddBorder}
-          >
-            <FaPlus className="text-primary" /> Add Border
-          </button>
-        </div>
-      )}
+      <div className="col-span-4 md:col-span-1 lg:col-span-1">
+        {onAddBorder && (
+          <div>
+            <button
+              className="flex w-full p-4 items-center gap-[14px] text-base font-medium leading-[120%] text-primary border border-primary rounded-[8px] py-2 xl:py-[10px] 2xl:h-[52px] px-[30px] md:px-[40px] lg:px-[50px] xl:px-[60px] 2xl:px-[70px]"
+              onClick={onAddBorder}
+            >
+              <FaPlus className="text-primary" /> Add Border
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

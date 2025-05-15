@@ -29,7 +29,7 @@ export default function ViewPanel({
   groutThickness,
   groutColor,
 }: Props) {
-  const [gridSize, setGridSize] = useState<"200x100">("200x100");
+  const [gridSize, setGridSize] = useState<"200x50">("200x50");
   console.log(setGridSize);
   const [environment, setEnvironment] = useState<
     | "environment1"
@@ -40,12 +40,14 @@ export default function ViewPanel({
     | "environment6"
   >();
 
-
+  const [isLoading, setIsLoading] = useState(false)
   const tileGridRef = useRef<HTMLDivElement>(null);
   const [showTilePreview, setShowTilePreview] = useState(true);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  console.log( setShowTilePreview);
+  console.log(setIsLoading);
+
+  console.log(setShowTilePreview);
   const [tileTransform, setTileTransform] = useState({
     marginTop: isSmallScreen ? "18px" : "0px",
     transform: isSmallScreen ? "rotateX(0deg)" : "rotateX(0deg)",
@@ -115,7 +117,7 @@ export default function ViewPanel({
 
     // Define this function outside the loop or at the top of the useEffect
     function style(i: number, j: number, tileName?: string) {
-      
+
 
       if (tileName === "Rectangle2x8") {
         // Special styling for Tiffany pattern
@@ -123,34 +125,34 @@ export default function ViewPanel({
           marginLeft: i % 2 !== 0 ? "20px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
         };
-      } else if(tileName === "Rectangle4x8"){
+      } else if (tileName === "Rectangle4x8") {
         return {
           marginLeft: i % 2 !== 0 ? "22px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
         };
-      } else if(tileName === "Tiffany"){
+      } else if (tileName === "Tiffany") {
         return {
           marginLeft: i % 2 !== 0 ? "19px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-18px" : "-7px",
         };
-      } else if(tileName === "Fiori"){
+      } else if (tileName === "Fiori") {
         return {
           marginLeft: i % 2 !== 0 ? "18.4px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-12px" : "-7px",
         };
-      } else if(tileName === "Gio"){
+      } else if (tileName === "Gio") {
         return {
           marginLeft: i % 2 !== 0 ? "20.5px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-6px" : "-7px",
           transform: "rotate(30deg)",
         };
-      } else if(tileName === "Indie"){
+      } else if (tileName === "Indie") {
         return {
           marginLeft: i % 2 !== 0 ? "20px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-20.5px" : "-7px",
           transform: i % 2 !== 0 ? "rotate(180deg)" : "rotate(0deg)",
         };
-      } else if(tileName === "Triangle"){
+      } else if (tileName === "Triangle") {
         return {
           marginLeft: i % 2 !== 0 ? "18.8px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-19px" : "-7px",
@@ -163,7 +165,7 @@ export default function ViewPanel({
         };
       }
 
-      
+
 
     }
 
@@ -373,52 +375,40 @@ export default function ViewPanel({
           <div className="lg:flex gap-[78px] ">
             <div className="relative w-full h-[254px] md:h-[470px]  lg:h-[600px] rounded-lg border overflow-hidden  border-gray-200">
               {/* Tile Preview Area - Placed FIRST so it appears behind the image */}
-
-              {currentSvg?.length === 0 ? (
-                <div className="flex items-center justify-center  w-full h-full relative">
-                  <Image
-                    src="https://res.cloudinary.com/drdztqgcx/image/upload/v1746168040/image_piti7e.png"
-                    fill
-                    alt="default rom"
-                  />
-                </div>
-              ) : (
-                <div>
-                  {showTilePreview && (
+              <div>
+                {showTilePreview && (
+                  <div
+                    className={`absolute  ${groutColor}-grout z-0 parrr `}
+                    style={{
+                      top: "0",
+                      left: "0",
+                      width: "100%",
+                      height: "100%",
+                      gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
+                      padding: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                    }}
+                  >
                     <div
-                      className={`absolute  ${groutColor}-grout z-0 parrr `}
+                      ref={tileGridRef}
+                      className={`grid !mt-[-15px] gap-[${groutThickness === "none"
+                        ? "0"
+                        : groutThickness === "thin"
+                          ? "1px"
+                          : "2px"
+                        }]   bg-${groutColor}`}
                       style={{
-                        top: "0",
-                        left: "0",
-                        width: "100%",
-                        height: "100%",
                         gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                        padding: groutThickness === "none" ? "0px" : groutThickness === "thin" ? "1px" : "2px",
+                        width: "2800px",
+                        marginLeft: "-50px",
+                        height: tileTransform.height,
+                        marginTop: tileTransform.marginTop,
+                        transform: tileTransform.transform,
+
                       }}
-                    >
-                      <div
-                        ref={tileGridRef}
-                        className={`grid mt-[-5px] gap-[${groutThickness === "none"
-                          ? "0"
-                          : groutThickness === "thin"
-                            ? "1px"
-                            : "2px"
-                          }]   bg-${groutColor}`}
-                        style={{
-                          gridTemplateColumns: `repeat(${gridDimensions}, 1fr)`,
-                          width: "2800px",
-                          marginLeft: "-50px",
-                          height: tileTransform.height,
-                          marginTop: tileTransform.marginTop,
-                          transform: tileTransform.transform,
-
-                        }}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-              )}
-
+                    ></div>
+                  </div>
+                )}
+              </div>
               {/* Environment Images - Placed AFTER tiles so they appear on top */}
 
               {environment === "environment1" && (
@@ -673,8 +663,9 @@ export default function ViewPanel({
         <Button
           className="w-[288px] h-[51px] text-base font-medium leading-[120%] text-white"
           onClick={handleSaveAndShare}
+          disabled={isLoading || !currentSvg || currentSvg.length === 0}
         >
-          Save & Share
+          {isLoading ? "Saving..." : "Save & Share"}
         </Button>
       </div>
 

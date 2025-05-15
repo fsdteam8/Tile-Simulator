@@ -139,7 +139,7 @@ export default function Tiles() {
         <>
           {/* Blurred background overlay */}
           <motion.div
-            className="fixed inset-0 bg-white bg-black/50 backdrop-blur-md z-40"
+            className="fixed inset-0 bg-white bg-black/10 backdrop-blur-md z-40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

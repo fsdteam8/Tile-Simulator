@@ -353,7 +353,7 @@ export default function PreviewYourCustomTile() {
 
           svgString += `
             <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
-              <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+              <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
             </pattern>
           `
           addedPatterns.add(patternId)
@@ -528,7 +528,7 @@ export default function PreviewYourCustomTile() {
           const imageUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${color.replace("image:", "")}`
           svgString += `
           <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="100%" height="100%">
-            <image xlinkHref="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+            <image xlink:href="${imageUrl}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
           </pattern>`
           addedPatterns.add(patternId)
         }

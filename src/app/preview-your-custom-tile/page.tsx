@@ -11,6 +11,7 @@ import type { PathData, SvgData } from "@/components/svg-editor/types"
 import { PiShareFatBold } from "react-icons/pi"
 import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
 import type { Tile } from "@/components/types/tiles"
+import { toast } from "react-toastify"
 
 interface TileData {
   svgData: SvgData[]
@@ -42,7 +43,7 @@ export default function PreviewYourCustomTile() {
   const [svgString, setSvgString] = useState("")
   const [cloudinaryLink, setCloudinaryLink] = useState("")
 
-  console.log(cloudinaryLink)
+  console.log("dfvrresgavrrg", cloudinaryLink)
 
   const [openFormModal, setOpenFormModal] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -655,11 +656,11 @@ export default function PreviewYourCustomTile() {
       } else {
         // Fallback for browsers without Web Share API
         await navigator.clipboard.writeText(cloudinaryUrl)
-        alert("Design link copied to clipboard!")
+        toast.success("Design link copied to clipboard!")
       }
     } catch (error) {
       console.error("Error sharing design:", error)
-      alert("Failed to share design. Please try again.")
+      toast.error("Failed to share design. Please try again.")
     } finally {
       setIsDownloading(false)
     }
@@ -702,18 +703,129 @@ export default function PreviewYourCustomTile() {
     }
   }
 
-  const handleSaveEmail = () => {
-    // Use the hardcoded example Cloudinary link instead of the dynamic one
-    const designLink =
-      "https://res.cloudinary.com/dupal36os/raw/upload/v1747301746/tile_designs/e1vaxxbcgfzitfdbwqrh.html"
+  const handleSaveEmail = async () => {
+    try {
+      if (!email) {
+        toast.error("Please enter your email address")
+        return
+      }
 
-    console.log("Email:", email)
-    console.log("Cloudinary Link:", designLink)
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        toast.error("Invalid email format")
+        return
+      }
 
-    // Here you would typically send this data to your backend
-    // For now, just show an alert with the information
-    alert(`Design link sent to ${email}`)
-    setEmail("")
+      setIsDownloading(true)
+
+      // Generate the HTML content for upload
+      if (!tileData || !tileData.svgData || !tileData.svgData.length) {
+        throw new Error("No tile data available")
+      }
+
+      // Generate the HTML content (same as in handleDownloadSVG)
+      const isQuadPattern = tileData.svgData.length === 4
+      const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Tile Design - ${tileData?.selectedTile?.name || "Untitled"}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .tile-info {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .svg-container {
+            width: ${isQuadPattern ? "500px" : "250px"};
+            height: ${isQuadPattern ? "500px" : "250px"};
+            border: 1px solid #ddd;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .tile-grid {
+            display: grid;
+            grid-template-columns: ${isQuadPattern ? "repeat(2, 1fr)" : "1fr"};
+            gap: ${tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px"};
+            background-color: ${getGroutColor(tileData.groutColor)};
+            width: 100%;
+            height: 100%;
+        }
+        .tile-cell {
+            position: relative;
+            background-color: white;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="svg-container">
+        <div class="tile-grid">
+            ${generateTileGridHTML()}
+        </div>
+    </div>
+</body>
+</html>`
+
+      // Create a Blob and File from the HTML content
+      const blob = new Blob([htmlContent], { type: "text/html" })
+      const htmlFile = new File([blob], `${tileData?.selectedTile?.name || "custom-tile"}-design.html`, {
+        type: "text/html",
+      })
+
+      // Upload to Cloudinary
+      const cloudinaryUrl = await uploadHtmlToCloudinary(htmlFile)
+      setCloudinaryLink(cloudinaryUrl)
+
+      // Log the email and file URL to console
+      console.log("Email:", email)
+      console.log("File URL:", cloudinaryUrl)
+
+      // Send the email using the API
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/send-cloud-mail`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          file_url: cloudinaryUrl,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to send email")
+      }
+
+      const result = await response.json()
+      console.log("Email sent successfully:", result)
+      toast(`Design link sent to email`)
+
+      setEmail("")
+    } catch (error) {
+      console.error("Error sending email:", error)
+      toast.error("Failed to send email")
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   // Function to handle opening the form modal
@@ -933,7 +1045,6 @@ export default function PreviewYourCustomTile() {
               }}
             />
           </div>
-
         </div>
 
         <div className="mt-8">
@@ -1017,7 +1128,7 @@ export default function PreviewYourCustomTile() {
               />
             </div>
             <p className="text-xl lg:text-[22px] 2xl:text-[24px] font-medium text-black leading-[120%]">
-              Color chips sent to <br className="hidden md:block"/> you
+              Color chips sent to <br className="hidden md:block" /> you
             </p>
           </div>
           <div className="text-center">

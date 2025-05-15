@@ -390,7 +390,7 @@ export default function ViewPanel({
                   >
                     <div
                       ref={tileGridRef}
-                      className={`grid !mt-[-15px] gap-[${groutThickness === "none"
+                      className={`grid gap-[${groutThickness === "none"
                         ? "0"
                         : groutThickness === "thin"
                           ? "1px"

@@ -330,9 +330,8 @@ export default function PreviewYourCustomTile() {
     if (!tileData || !tileData.svgData || !tileData.svgData.length) return ""
 
     const svg = tileData.svgData[0]
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${
-      svg.viewBox || "0 0 100 100"
-    }" width="500" height="500">`
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${svg.viewBox || "0 0 100 100"
+      }" width="500" height="500">`
 
     // Add defs section for patterns
     svgString += "<defs>"
@@ -376,9 +375,8 @@ export default function PreviewYourCustomTile() {
         fillAttribute = color
       }
 
-      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${
-        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
-      }/>`
+      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
+        }/>`
     })
 
     svgString += "</svg>"
@@ -1066,17 +1064,15 @@ export default function PreviewYourCustomTile() {
                       >
                         <div
                           ref={environmentPreviewRef}
-                          className={`grid gap-[${
-                            tileData.groutThickness === "none"
-                              ? "0"
-                              : tileData.groutThickness === "thin"
-                                ? "1px"
-                                : "2px"
-                          }] bg-${tileData.groutColor}`}
+                          className={`grid gap-[${tileData.groutThickness === "none"
+                            ? "0"
+                            : tileData.groutThickness === "thin"
+                              ? "1px"
+                              : "2px"
+                            }] bg-${tileData.groutColor}`}
                           style={{
-                            gridTemplateColumns: `repeat(${
-                              tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
-                            }, 1fr)`,
+                            gridTemplateColumns: `repeat(${tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
+                              }, 1fr)`,
                             width: "1150px",
                             marginLeft: "-50px",
                             height: tileTransform.height,
@@ -1209,12 +1205,41 @@ export default function PreviewYourCustomTile() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="flex-1 px-4 py-2 sm:py-2 2xl:py-3 outline-none border border-[#5A5A5A] rounded-md placeholder:text-[#737373] placeholder:text-sm sm:placeholder:text-base placeholder:font-medium placeholder:leading-[120%]"
+              disabled={isDownloading}
             />
             <Button
-              className="text-sm sm:text-base font-medium leading-[120%] rounded-[8px] text-white py-3 sm:py-[26px] px-6 sm:px-[46px] w-full sm:w-auto text-center"
+              className={`text-sm sm:text-base font-medium leading-[120%] rounded-[8px] text-white py-3 sm:py-[26px] px-6 sm:px-[46px] w-full sm:w-auto text-center flex items-center justify-center ${isDownloading ? "opacity-75 cursor-not-allowed" : ""
+                }`}
               onClick={handleSaveEmail}
+              disabled={isDownloading}
             >
-              Send
+              {isDownloading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                "Send"
+              )}
             </Button>
           </div>
         </div>

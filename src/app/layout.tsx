@@ -7,6 +7,7 @@ import AppProvider from "@/components/provider/AppProvider";
 import AuthProvider from "@/components/provider/SessionProvider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "@/components/shared/footer/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
             {children}
             <ToastContainer position="top-right" autoClose={3000} />
             <Toaster position="top-right" />
+            <Footer/>
           </AppProvider>
         </AuthProvider>
       </body>

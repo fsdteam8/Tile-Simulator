@@ -1,5 +1,8 @@
 import React from 'react'
-import Tiles from './tile-simulator'
+import dynamic from 'next/dynamic';
+const Tiles = dynamic(() => import('./tile-simulator'), {
+  ssr: false,
+});
 
 const page = () => {
   return (

@@ -1,6 +1,13 @@
 import React from 'react';
-import AddNewTile from './_components/AddNewTile';
-import AddNewTileHeader from './_components/AddNewTileHeader';
+const AddNewTile = dynamic(() => import('./_components/AddNewTile'), {
+    ssr: false,
+});
+// import AddNewTile from './_components/AddNewTile';
+const AddNewTileHeader = dynamic(() => import('./_components/AddNewTileHeader'), {
+    ssr: false,
+});
+// import AddNewTileHeader from './_components/AddNewTileHeader';
+import dynamic from 'next/dynamic';
 
 const Page = () => {
     return (

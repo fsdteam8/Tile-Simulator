@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AllTilesColorsCotainer from "./_components/AllTilesColorContainer";
+// import AllTilesColorsCotainer from "./_components/AllTilesColorContainer";
+const AllTilesColorsCotainer = dynamic(() => import("./_components/AllTilesColorContainer"), {
+  ssr: false,
+});
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { TileColorsHeader } from "./_components/AllTilesColorHeader";
+import  TileColorsHeader  from "./_components/AllTilesColorHeader";
 import { ColorApiResponse, ColorItem } from "./_components/AllTilesColorData";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
+import dynamic from "next/dynamic";
 
 const TileColors = () => {
   const [currentPage, setCurrentPage] = useState(1);

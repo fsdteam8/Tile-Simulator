@@ -3,14 +3,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TileSelection } from "@/components/tile-selection";
-import { ColorEditor } from "@/components/svg-editor/color-editor";
 import { parseSvgString } from "@/components/svg-editor/svg-parser";
 import type { SvgData } from "@/components/svg-editor/types";
-import ViewPanel from "@/components/view-panel";
 import TileSimulator from "@/components/tile-simulator/page";
 import type { Tile } from "@/components/types/tiles";
 import Image from "next/image";
 import Footer from "@/components/shared/footer/footer";
+import dynamic from "next/dynamic";
+const ViewPanel = dynamic(() => import("@/components/view-panel"), {
+  ssr: false,
+});
+const ColorEditor = dynamic(() => import("@/components/svg-editor/color-editor"), {
+  ssr: false,
+});
 
 export default function Tiles() {
   const [isLoading, setIsLoading] = useState(true);

@@ -102,7 +102,7 @@ export default function ViewPanel({
 
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = 75;
+  const gridDimensions = 75; 
 
 
 
@@ -413,7 +413,7 @@ export default function ViewPanel({
 
               {environment === "environment1" && (
                 <Image
-                  src="/assets/environment1.png"
+                  src="/assets/environment1.webp"
                   alt="Bathroom"
                   fill
                   className=" object-cover z-10"
@@ -424,7 +424,7 @@ export default function ViewPanel({
 
               {environment === "environment2" && (
                 <Image
-                  src="/assets/environment2.png"
+                  src="/assets/environment2.webp"
                   alt="Bathroom"
                   fill
                   className="object-cover z-10"
@@ -434,7 +434,7 @@ export default function ViewPanel({
               )}
               {environment === "environment3" && (
                 <Image
-                  src="/assets/environment3.png"
+                  src="/assets/environment3.webp"
                   alt="Bathroom"
                   fill
                   className="object-cover z-10"
@@ -444,7 +444,7 @@ export default function ViewPanel({
               )}
               {environment === "environment4" && (
                 <Image
-                  src="/assets/environment4.png"
+                  src="/assets/environment4.webp"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"
@@ -454,7 +454,7 @@ export default function ViewPanel({
               )}
               {environment === "environment5" && (
                 <Image
-                  src="/assets/environment5.png"
+                  src="/assets/environment5.webp"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"

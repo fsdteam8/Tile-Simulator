@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import AllTilesCategoriesHeader from "./_components/AllTilesCategoriesHeader";
-import AllTilesCategoriesCotainer from "./_components/AllTilesCategoriesCotainer";
+const AllTilesCategoriesCotainer = dynamic(
+  () => import("./_components/AllTilesCategoriesCotainer"),
+  {
+    ssr: false,
+  })
 import AddTileEditAndAddCategories from "./_components/AllTilesEdit-addCategories";
 import { useQuery } from "@tanstack/react-query";
-// import { useSession } from "next-auth/react";
 import {
   CategoriesApiResponse,
   Category,
 } from "@/components/types/all-tiles-categories";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSearchTile } from "@/components/zustand/allTiles/allTiles";
+import dynamic from "next/dynamic";
 
 const TileCategories = () => {
   const { search, setSearch } = useSearchTile();

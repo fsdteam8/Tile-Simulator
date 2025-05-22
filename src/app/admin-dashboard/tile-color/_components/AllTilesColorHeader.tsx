@@ -24,7 +24,7 @@ interface TileColorsHeaderProps {
   setSearch: (value: string) => void;
 }
 
-export function TileColorsHeader({ search, setSearch }: TileColorsHeaderProps) {
+export default function TileColorsHeader({ search, setSearch }: TileColorsHeaderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentColor, setCurrentColor] = useState<ColorData | null>(null)
 

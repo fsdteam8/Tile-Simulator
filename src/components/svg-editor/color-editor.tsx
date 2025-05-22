@@ -22,7 +22,7 @@ interface ColorEditorProps {
   setGroutColor: (groutColor: string) => void;
 }
 
-export function ColorEditor({
+export default function ColorEditor({
   svgArray,
   onColorSelect,
   onRotate,

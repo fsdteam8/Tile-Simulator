@@ -1082,7 +1082,7 @@ export default function PreviewYourCustomTile() {
                         ></div>
                       </div>
                       <Image
-                        src={`/assets/${tileData.environment}.png`}
+                        src={`/assets/${tileData.environment}.webp`}
                         alt="Environment Preview"
                         fill
                         className="object-cover z-10"

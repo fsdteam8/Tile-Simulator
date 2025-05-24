@@ -464,7 +464,7 @@ export default function ViewPanel({
               )}
               {environment === "environment6" && (
                 <Image
-                  src="/assets/environment6.png"
+                  src="/assets/environment6.webp"
                   alt="Commercial"
                   fill
                   className="object-cover z-10"

@@ -8,7 +8,6 @@ import type { SvgData } from "@/components/svg-editor/types"
 import TileSimulator from "@/components/tile-simulator/page"
 import type { Tile } from "@/components/types/tiles"
 import Image from "next/image"
-import Footer from "@/components/shared/footer/footer"
 import dynamic from "next/dynamic"
 const ViewPanel = dynamic(() => import("@/components/view-panel"), {
   ssr: false,
@@ -246,7 +245,7 @@ export default function Tiles() {
             />
           </div>
 
-          {selectedTile && (
+          {selectedTile && currentSvg && (
             <>
               <div className="container py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
                 <ColorEditor
@@ -266,7 +265,6 @@ export default function Tiles() {
                 />
               </div>
 
-              {svgProcessingComplete && currentSvg && (
                 <div className="container">
                   <ViewPanel
                     currentSvg={currentSvg}
@@ -280,13 +278,6 @@ export default function Tiles() {
                     setGroutColor={setGroutColorWrapper}
                   />
                 </div>
-              )}
-
-              {svgProcessingComplete && (
-                <div>
-                  <Footer />
-                </div>
-              )}
             </>
           )}
 

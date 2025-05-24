@@ -35,7 +35,11 @@ export function TileSelection({
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [hasAutoSelected, setHasAutoSelected] = useState(false)
   const firstTileRef = useRef<HTMLButtonElement>(null)
+
+  const [svgLoading, setSvgLoading] = useState(false)
+
   console.log(setIsTransitioning)
+  console.log(svgLoading)
 
   const isSmallScreen = useMediaQuery("(max-width: 767px)")
   const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
@@ -193,8 +197,15 @@ export function TileSelection({
   }, [selectedCategory, searchQuery])
 
   const handleTileSelect = (tile: Tile) => {
-    onTileSelect(tile)
+    // Only proceed if tile is valid and not already selected
+    if (tile && selectedTile?.id !== tile.id) {
+      setSvgLoading(true);
+      onTileSelect(tile);
+      setSvgLoading(false);
+    }
   }
+
+
 
   const applyColorsToSvg = (svgString: string, colors: Record<string, string>) => {
     if (!svgString || typeof svgString !== "string") {

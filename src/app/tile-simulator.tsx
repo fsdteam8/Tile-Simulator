@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { TileSelection } from "@/components/tile-selection"
-import { parseSvgString } from "@/components/svg-editor/svg-parser"
-import type { SvgData } from "@/components/svg-editor/types"
-import TileSimulator from "@/components/tile-simulator/page"
-import type { Tile } from "@/components/types/tiles"
-import Image from "next/image"
-import dynamic from "next/dynamic"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { TileSelection } from "@/components/tile-selection";
+import { parseSvgString } from "@/components/svg-editor/svg-parser";
+import type { SvgData } from "@/components/svg-editor/types";
+import TileSimulator from "@/components/tile-simulator/page";
+import type { Tile } from "@/components/types/tiles";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 const ViewPanel = dynamic(() => import("@/components/view-panel"), {
   ssr: false,
 })
@@ -263,7 +263,6 @@ export default function Tiles() {
                   svgLoading={svgLoading}
                   svgProcessingComplete={svgProcessingComplete}
                 />
-              </div>
 
                 <div className="container">
                   <ViewPanel
@@ -278,6 +277,7 @@ export default function Tiles() {
                     setGroutColor={setGroutColorWrapper}
                   />
                 </div>
+
             </>
           )}
 

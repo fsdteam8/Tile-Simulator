@@ -235,7 +235,7 @@ export function SubmissionForm({ open, onOpenChange, tileData, svgString }: Subm
           </div>
 
           <div className="">
-            <ReCAPTCHA sitekey="6LcC0zkrAAAAAPwpt42t9m2vDubfYWBRnPrvG56j" onChange={onChange} />
+            <ReCAPTCHA sitekey="6Ldxr0crAAAAALy5kiCpNAHSxZD00ZObEPP9Nnzl" onChange={onChange} />
           </div>
 
           <div className="pt-4 flex justify-center">

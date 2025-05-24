@@ -277,7 +277,7 @@ export default function Tiles() {
                     setGroutColor={setGroutColorWrapper}
                   />
                 </div>
-
+              </div>
             </>
           )}
 

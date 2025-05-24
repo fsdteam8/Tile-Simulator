@@ -264,7 +264,7 @@ export default function Tiles() {
                   svgProcessingComplete={svgProcessingComplete}
                 />
 
-                <div className="container">
+                <div className=" py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
                   <ViewPanel
                     currentSvg={currentSvg}
                     pathColors={pathColors}

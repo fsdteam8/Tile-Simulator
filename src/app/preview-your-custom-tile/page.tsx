@@ -7,7 +7,6 @@ import Link from "next/link"
 import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import type { PathData, SvgData } from "@/components/svg-editor/types"
-// import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
 import { PiShareFatBold } from "react-icons/pi"
 import { SubmissionForm } from "@/components/tile-simulator/_components/SubmissionForm"
 import type { Tile } from "@/components/types/tiles"
@@ -15,12 +14,12 @@ import { toast } from "react-toastify"
 
 interface TileData {
   svgData: SvgData[]
-  rotations: number[] // Rotations for each SVG in the grid
-  groutThickness: string // Class for grout thickness, e.g., 'grout-thick'
-  groutColor: string // Class for grout color, e.g., 'gray'
-  pathColors: Record<string, string> // Path color mapping by path ID
-  showBorders: boolean // Whether to show borders on paths
-  selectedTile: Tile // Selected tile data
+  rotations: number[]
+  groutThickness: string
+  groutColor: string
+  pathColors: Record<string, string>
+  showBorders: boolean
+  selectedTile: Tile
 }
 
 export default function PreviewYourCustomTile() {
@@ -46,9 +45,12 @@ export default function PreviewYourCustomTile() {
   console.log("dfvrresgavrrg", cloudinaryLink)
 
   const [openFormModal, setOpenFormModal] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
 
-  // Add isSmallScreen state and useEffect for responsive behavior
+  // Separate loading states for different actions
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+
   const [isSmallScreen, setIsSmallScreen] = useState(false)
   const [tileTransform, setTileTransform] = useState({
     marginTop: isSmallScreen ? "18px" : "0px",
@@ -61,19 +63,17 @@ export default function PreviewYourCustomTile() {
       setIsSmallScreen(window.innerWidth <= 300)
     }
     window.addEventListener("resize", handleResize)
-    handleResize() // Initialize on mount
+    handleResize()
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   useEffect(() => {
-    // Load data from localStorage
     const savedData = localStorage.getItem("tilePreviewData")
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData)
         setTileData(parsedData)
 
-        // Render the grids after data is loaded
         setTimeout(() => {
           if (parsedData.svgData) {
             renderTileGrid(tileGridRef.current, 1, 1, parsedData)
@@ -89,7 +89,6 @@ export default function PreviewYourCustomTile() {
     }
   }, [])
 
-  // Update the environment handling to set tileTransform when environment changes
   useEffect(() => {
     if (tileData?.environment && tileData.environment !== "none") {
       setTileTransform({
@@ -103,13 +102,10 @@ export default function PreviewYourCustomTile() {
   const renderTileGrid = (container: HTMLDivElement | null, rows: number, cols: number, data: TileData) => {
     if (!container || !data.svgData || !data.svgData.length) return
 
-    // Clear existing content
     container.innerHTML = ""
 
-    // Define styling function for hexagonal grid positioning
     function style(i: number, j: number, tileName?: string) {
       if (tileName === "Rectangle2x8") {
-        // Special styling for Tiffany pattern
         return {
           marginLeft: i % 2 !== 0 ? "37px" : "0px",
           marginTop: i >= 1 && i <= 100 ? "-2px" : "-7px",
@@ -162,18 +158,15 @@ export default function PreviewYourCustomTile() {
 
     const useQuadPattern = data.svgData.length === 4
 
-    // Create grid cells
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
         const cell = document.createElement("div")
         cell.className = `tile-cell ${data.groutThickness} ${data.groutColor}-grout`
 
         if (useQuadPattern) {
-          // Create a 2x2 grid inside each cell for 4 SVGs
           const innerGrid = document.createElement("div")
           innerGrid.className = "grid grid-cols-2 w-full h-full gap-[1px]"
 
-          // Add 4 SVGs in a 2x2 pattern
           for (let k = 0; k < 4; k++) {
             const svgIndex = k
             const svg = data.svgData[svgIndex]
@@ -186,7 +179,6 @@ export default function PreviewYourCustomTile() {
             svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100")
             svgElement.style.transform = `rotate(${rotation}deg)`
 
-            // Add paths
             svg.paths.forEach((path: PathData) => {
               const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path")
               pathElement.setAttribute("d", path.d)
@@ -194,18 +186,15 @@ export default function PreviewYourCustomTile() {
               const color = data.pathColors[path.id] || path.fill || "#000000"
 
               if (color && color.startsWith("image:")) {
-                // For image-based colors, create a pattern
                 const imagePath = color.replace("image:", "")
                 const patternId = `pattern-${path.id}-${i}-${j}-${k}`
 
-                // Create pattern definition
                 const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
                 patternDef.setAttribute("id", patternId)
                 patternDef.setAttribute("patternUnits", "userSpaceOnUse")
                 patternDef.setAttribute("width", "100%")
                 patternDef.setAttribute("height", "100%")
 
-                // Create image element
                 const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
                 imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
                 imageEl.setAttribute("x", "0")
@@ -214,10 +203,8 @@ export default function PreviewYourCustomTile() {
                 imageEl.setAttribute("height", "100%")
                 imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
 
-                // Add image to pattern
                 patternDef.appendChild(imageEl)
 
-                // Add pattern to defs
                 const defs =
                   svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
                 if (!svgElement.querySelector("defs")) {
@@ -225,10 +212,8 @@ export default function PreviewYourCustomTile() {
                 }
                 defs.appendChild(patternDef)
 
-                // Set fill to use pattern
                 pathElement.setAttribute("fill", `url(#${patternId})`)
               } else {
-                // For solid colors
                 pathElement.setAttribute("fill", color)
               }
 
@@ -245,25 +230,21 @@ export default function PreviewYourCustomTile() {
 
           cell.appendChild(innerGrid)
         } else {
-          // Original single SVG per cell logic
           const svgIndex = (i * cols + j) % data.svgData.length
           const svg = data.svgData[svgIndex]
           const rotation = data.rotations[svgIndex] || 0
 
-          // Create a wrapper div for the SVG
           const wrapper = document.createElement("div")
           wrapper.className = "relative w-full h-full"
 
-          // Apply styled margins based on i and j
           const tileName = data?.selectedTile?.name
           Object.assign(wrapper.style, style(i, j, tileName))
 
           const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg")
           svgElement.setAttribute("viewBox", svg.viewBox || "0 0 100 100")
           svgElement.style.transform = `rotate(${rotation}deg)`
-          svgElement.style.padding = `1px` // Add padding to all SVG elements
+          svgElement.style.padding = `1px`
 
-          // Add paths
           svg.paths.forEach((path: PathData) => {
             const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path")
             pathElement.setAttribute("d", path.d)
@@ -271,18 +252,15 @@ export default function PreviewYourCustomTile() {
             const color = data.pathColors[path.id] || path.fill || "#000000"
 
             if (color && color.startsWith("image:")) {
-              // For image-based colors, create a pattern
               const imagePath = color.replace("image:", "")
               const patternId = `pattern-${path.id}-${i}-${j}`
 
-              // Create pattern definition
               const patternDef = document.createElementNS("http://www.w3.org/2000/svg", "pattern")
               patternDef.setAttribute("id", patternId)
               patternDef.setAttribute("patternUnits", "userSpaceOnUse")
               patternDef.setAttribute("width", "100%")
               patternDef.setAttribute("height", "100%")
 
-              // Create image element
               const imageEl = document.createElementNS("http://www.w3.org/2000/svg", "image")
               imageEl.setAttribute("href", `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`)
               imageEl.setAttribute("x", "0")
@@ -291,10 +269,8 @@ export default function PreviewYourCustomTile() {
               imageEl.setAttribute("height", "100%")
               imageEl.setAttribute("preserveAspectRatio", "xMidYMid slice")
 
-              // Add image to pattern
               patternDef.appendChild(imageEl)
 
-              // Add pattern to defs
               const defs =
                 svgElement.querySelector("defs") || document.createElementNS("http://www.w3.org/2000/svg", "defs")
               if (!svgElement.querySelector("defs")) {
@@ -302,10 +278,8 @@ export default function PreviewYourCustomTile() {
               }
               defs.appendChild(patternDef)
 
-              // Set fill to use pattern
               pathElement.setAttribute("fill", `url(#${patternId})`)
             } else {
-              // For solid colors
               pathElement.setAttribute("fill", color)
             }
 
@@ -325,21 +299,18 @@ export default function PreviewYourCustomTile() {
     }
   }
 
-  // Generate SVG string for download
   const generateSvgString = () => {
     if (!tileData || !tileData.svgData || !tileData.svgData.length) return ""
 
     const svg = tileData.svgData[0]
-    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${svg.viewBox || "0 0 100 100"
-      }" width="500" height="500">`
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${
+      svg.viewBox || "0 0 100 100"
+    }" width="500" height="500">`
 
-    // Add defs section for patterns
     svgString += "<defs>"
 
-    // Create a map to track which patterns we've already added
     const addedPatterns = new Set()
 
-    // First pass: add all patterns needed for image-based colors
     svg.paths.forEach((path) => {
       const color = tileData.pathColors[path.id] || path.fill || "#000000"
 
@@ -348,7 +319,6 @@ export default function PreviewYourCustomTile() {
         const patternId = `pattern-${path.id}`
 
         if (!addedPatterns.has(patternId)) {
-          // Create a full URL for the image
           const imageUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/${imagePath}`
 
           svgString += `
@@ -363,7 +333,6 @@ export default function PreviewYourCustomTile() {
 
     svgString += "</defs>"
 
-    // Second pass: add all paths with appropriate fill references
     svg.paths.forEach((path) => {
       const color = tileData.pathColors[path.id] || path.fill || "#000000"
       let fillAttribute
@@ -375,15 +344,18 @@ export default function PreviewYourCustomTile() {
         fillAttribute = color
       }
 
-      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
-        }/>`
+      svgString += `<path d="${path.d}" fill="${fillAttribute}" ${
+        tileData.showBorders ? 'stroke="#000000" strokeWidth="1"' : ""
+      }/>`
     })
 
     svgString += "</svg>"
     return svgString
   }
 
-  const handleDownloadSVG = () => {
+  const handleDownloadSVG = async () => {
+    if (isDownloading) return
+
     setIsDownloading(true)
 
     try {
@@ -391,14 +363,12 @@ export default function PreviewYourCustomTile() {
         throw new Error("No tile data available")
       }
 
-      // Determine if we're using a quad pattern (2x2)
+      // Add processing delay to show loading state
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       const isQuadPattern = tileData.svgData.length === 4
       const gridCategory = isQuadPattern ? "2x2" : "1x1"
 
-      // Get the main tile SVG (first in array)
-      // const svg = tileData.svgData[0];
-
-      // Create the complete HTML document with embedded SVG
       const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -462,7 +432,6 @@ export default function PreviewYourCustomTile() {
 </body>
 </html>`
 
-      // Create blob and download
       const blob = new Blob([htmlContent], { type: "text/html" })
       const url = URL.createObjectURL(blob)
 
@@ -473,21 +442,22 @@ export default function PreviewYourCustomTile() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
+
+      toast.success("Design downloaded successfully!")
     } catch (error) {
       console.error("Error downloading:", error)
+      toast.error("Failed to download. Please try again.")
     } finally {
       setIsDownloading(false)
     }
   }
 
-  // Helper function to generate the tile grid HTML
   const generateTileGridHTML = () => {
     if (!tileData || !tileData.svgData) return ""
 
     const isQuadPattern = tileData.svgData.length === 4
 
     if (isQuadPattern) {
-      // Generate 2x2 grid
       return tileData.svgData
         .map((svg, index) => {
           const rotation = tileData.rotations[index] || 0
@@ -499,7 +469,6 @@ export default function PreviewYourCustomTile() {
         })
         .join("")
     }
-    // Generate single tile
     const rotation = tileData.rotations[0] || 0
     return `
     <div class="tile-cell">
@@ -508,14 +477,12 @@ export default function PreviewYourCustomTile() {
   `
   }
 
-  // Helper function to generate SVG with proper styling
   const generateSingleSVG = (svg: SvgData, rotation: number) => {
     let svgString = `<svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink" 
      viewBox="${svg.viewBox || "0 0 100 100"}"
      style="transform: rotate(${rotation}deg)">`
 
-    // Add defs for patterns
     svgString += "<defs>"
     const addedPatterns = new Set()
 
@@ -535,7 +502,6 @@ export default function PreviewYourCustomTile() {
     })
     svgString += "</defs>"
 
-    // Add paths
     svg.paths.forEach((path) => {
       const color = tileData?.pathColors[path.id] || path.fill || "#000000"
       const fillAttribute = color.startsWith("image:") ? `url(#pattern-${path.id})` : color
@@ -551,7 +517,6 @@ export default function PreviewYourCustomTile() {
     return svgString
   }
 
-  // Helper function to get CSS color for grout
   const getGroutColor = (colorName: string) => {
     const colors: Record<string, string> = {
       orange: "orange",
@@ -562,18 +527,22 @@ export default function PreviewYourCustomTile() {
       gray: "#808080",
       black: "#000000",
     }
-    return colors[colorName] || "#808080" // default to gray
+    return colors[colorName] || "#808080"
   }
 
   const handleShare = async () => {
-    try {
-      setIsDownloading(true)
+    if (isSharing) return
 
+    setIsSharing(true)
+
+    try {
       if (!tileData || !tileData.svgData || !tileData.svgData.length) {
         throw new Error("No tile data available")
       }
 
-      // Generate the HTML content (same as in handleDownloadSVG)
+      // Add processing delay
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
       const isQuadPattern = tileData.svgData.length === 4
       const htmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -634,17 +603,14 @@ export default function PreviewYourCustomTile() {
 </body>
 </html>`
 
-      // Create a Blob and File from the HTML content
       const blob = new Blob([htmlContent], { type: "text/html" })
       const htmlFile = new File([blob], `${tileData?.selectedTile?.name || "custom-tile"}-design.html`, {
         type: "text/html",
       })
 
-      // Upload to Cloudinary
       const cloudinaryUrl = await uploadHtmlToCloudinary(htmlFile)
       setCloudinaryLink(cloudinaryUrl)
 
-      // Share the Cloudinary link
       if (navigator.share) {
         await navigator.share({
           title: "My Custom Tile Design",
@@ -652,7 +618,6 @@ export default function PreviewYourCustomTile() {
           url: cloudinaryUrl,
         })
       } else {
-        // Fallback for browsers without Web Share API
         await navigator.clipboard.writeText(cloudinaryUrl)
         toast.success("Design link copied to clipboard!")
       }
@@ -660,14 +625,12 @@ export default function PreviewYourCustomTile() {
       console.error("Error sharing design:", error)
       toast.error("Failed to share design. Please try again.")
     } finally {
-      setIsDownloading(false)
+      setIsSharing(false)
     }
   }
 
-  // Cloudinary upload function
   const uploadHtmlToCloudinary = async (file: File) => {
     try {
-      // First get upload signature from your backend
       const res = await fetch("/api/resp", {
         method: "POST",
       })
@@ -676,16 +639,14 @@ export default function PreviewYourCustomTile() {
 
       const { signature, timestamp, apiKey, cloudName } = await res.json()
 
-      // Prepare form data for Cloudinary upload
       const formData = new FormData()
       formData.append("file", file)
       formData.append("api_key", apiKey)
       formData.append("timestamp", timestamp)
       formData.append("signature", signature)
       formData.append("resource_type", "raw")
-      formData.append("folder", "tile_designs") // Optional folder organization
+      formData.append("folder", "tile_designs")
 
-      // Upload to Cloudinary
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
         method: "POST",
         body: formData,
@@ -702,27 +663,29 @@ export default function PreviewYourCustomTile() {
   }
 
   const handleSaveEmail = async () => {
+    if (isSendingEmail) return
+
     try {
       if (!email) {
         toast.error("Please enter your email address")
         return
       }
 
-      // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(email)) {
         toast.error("Invalid email format")
         return
       }
 
-      setIsDownloading(true)
+      setIsSendingEmail(true)
 
-      // Generate the HTML content for upload
+      // Add processing delay
+      await new Promise((resolve) => setTimeout(resolve, 1200))
+
       if (!tileData || !tileData.svgData || !tileData.svgData.length) {
         throw new Error("No tile data available")
       }
 
-      // Generate the HTML content (same as in handleDownloadSVG)
       const isQuadPattern = tileData.svgData.length === 4
       const htmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -782,21 +745,17 @@ export default function PreviewYourCustomTile() {
 </body>
 </html>`
 
-      // Create a Blob and File from the HTML content
       const blob = new Blob([htmlContent], { type: "text/html" })
       const htmlFile = new File([blob], `${tileData?.selectedTile?.name || "custom-tile"}-design.html`, {
         type: "text/html",
       })
 
-      // Upload to Cloudinary
       const cloudinaryUrl = await uploadHtmlToCloudinary(htmlFile)
       setCloudinaryLink(cloudinaryUrl)
 
-      // Log the email and file URL to console
       console.log("Email:", email)
       console.log("File URL:", cloudinaryUrl)
 
-      // Send the email using the API
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/send-cloud-mail`, {
         method: "POST",
         headers: {
@@ -815,33 +774,28 @@ export default function PreviewYourCustomTile() {
 
       const result = await response.json()
       console.log("Email sent successfully:", result)
-      toast(`Design link sent to email`)
+      toast.success("Design link sent to email!")
 
       setEmail("")
     } catch (error) {
       console.error("Error sending email:", error)
       toast.error("Failed to send email")
     } finally {
-      setIsDownloading(false)
+      setIsSendingEmail(false)
     }
   }
 
-  // Function to handle opening the form modal
   const handleOpenFormModal = () => {
-    // Generate the SVG string before opening the modal
     const generatedSvgString = generateSvgString()
     if (generatedSvgString) {
       setSvgString(generatedSvgString)
     }
 
     if (tileData && tileData.svgData && tileData.svgData.length > 0) {
-      // Get the first SVG (main tile)
       const svg = tileData.svgData[0]
 
-      // Generate and log the SVG string
       const svgString = generateSvgString()
 
-      // If there's base64 encoded SVG data, decode and log it
       if (svg.image_svg_text) {
         try {
           const decodedSvg = atob(svg.image_svg_text)
@@ -851,7 +805,6 @@ export default function PreviewYourCustomTile() {
         }
       }
 
-      // Log the postman-like data structure
       console.log("Tile Data Structure:", {
         id: svg.id || Math.floor(Math.random() * 1000),
         name: svg.name || "Custom Tile",
@@ -886,11 +839,9 @@ export default function PreviewYourCustomTile() {
       })
     }
 
-    // Open the modal
     setOpenFormModal(true)
   }
 
-  // Extract color information for display
   const getUniqueColors = () => {
     if (!tileData || !tileData.svgData) return []
 
@@ -923,7 +874,6 @@ export default function PreviewYourCustomTile() {
       })
     }
 
-    // Combine regular colors and image colors
     return [...Array.from(colors), ...Array.from(imageColors)]
   }
 
@@ -948,20 +898,38 @@ export default function PreviewYourCustomTile() {
         <div className="flex items-center justify-center gap-[20px] 2xl:gap-[24px]">
           <button
             type="button"
-            className="flex flex-col justify-center items-center gap-2 text-base font-medium text-black leading-[120%]"
+            className="flex flex-col justify-center items-center gap-2 text-base font-medium text-black leading-[120%] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleShare}
-            disabled={isDownloading}
+            disabled={isSharing}
           >
-            <PiShareFatBold className="w-6 h-6" />
-            {isDownloading ? "Sharing..." : "Share"}
+            {isSharing ? (
+              <>
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                Sharing...
+              </>
+            ) : (
+              <>
+                <PiShareFatBold className="w-6 h-6" />
+                Share
+              </>
+            )}
           </button>
           <button
-            className="flex flex-col items-center justify-center gap-[8px] text-base font-medium text-black leading-[120%]"
+            className="flex flex-col items-center justify-center gap-[8px] text-base font-medium text-black leading-[120%] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleDownloadSVG}
             disabled={isDownloading}
           >
-            <Download className="mr-2 h-6 w-6" />
-            {isDownloading ? "Downloading..." : "Download"}
+            {isDownloading ? (
+              <>
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+                Downloading...
+              </>
+            ) : (
+              <>
+                <Download className="h-6 w-6" />
+                Download
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -1014,14 +982,12 @@ export default function PreviewYourCustomTile() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:grid-cols-2">
           <div className="border rounded-lg overflow-hidden ">
-            {/* Customize Tile */}
             <div
               ref={tileGridRef}
               className={`grid !w-auto lg:!h-[560px] items-center justify-center  ${tileData.groutColor}-grout`}
               style={{
                 gridTemplateColumns: `repeat(1, 1fr)`,
                 gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
-                // width: "562px",
                 width: isSmallScreen ? "100%" : "562px",
                 height: isSmallScreen ? "`100%" : "362px",
               }}
@@ -1036,8 +1002,6 @@ export default function PreviewYourCustomTile() {
                 gridTemplateColumns: `repeat(8, 1fr)`,
                 gap: tileData.groutThickness === "none" ? "0px" : tileData.groutThickness === "thin" ? "1px" : "2px",
                 width: isSmallScreen ? "100%" : "562px",
-                // width: "max-content", // only as wide as needed
-                // height: "max-content",
                 marginTop: "-30px",
                 marginLeft: "-35px",
               }}
@@ -1064,15 +1028,17 @@ export default function PreviewYourCustomTile() {
                       >
                         <div
                           ref={environmentPreviewRef}
-                          className={`grid gap-[${tileData.groutThickness === "none"
-                            ? "0"
-                            : tileData.groutThickness === "thin"
-                              ? "1px"
-                              : "2px"
-                            }] bg-${tileData.groutColor}`}
+                          className={`grid gap-[${
+                            tileData.groutThickness === "none"
+                              ? "0"
+                              : tileData.groutThickness === "thin"
+                                ? "1px"
+                                : "2px"
+                          }] bg-${tileData.groutColor}`}
                           style={{
-                            gridTemplateColumns: `repeat(${tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
-                              }, 1fr)`,
+                            gridTemplateColumns: `repeat(${
+                              tileData?.selectedTile?.name === "Rectangle2x8" ? 8 : 16
+                            }, 1fr)`,
                             width: "1150px",
                             marginLeft: "-50px",
                             height: tileTransform.height,
@@ -1205,15 +1171,16 @@ export default function PreviewYourCustomTile() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="flex-1 px-4 py-2 sm:py-2 2xl:py-3 outline-none border border-[#5A5A5A] rounded-md placeholder:text-[#737373] placeholder:text-sm sm:placeholder:text-base placeholder:font-medium placeholder:leading-[120%]"
-              disabled={isDownloading}
+              disabled={isSendingEmail}
             />
             <Button
-              className={`text-sm sm:text-base font-medium leading-[120%] rounded-[8px] text-white py-3 sm:py-[26px] px-6 sm:px-[46px] w-full sm:w-auto text-center flex items-center justify-center ${isDownloading ? "opacity-75 cursor-not-allowed" : ""
-                }`}
+              className={`text-sm sm:text-base font-medium leading-[120%] rounded-[8px] text-white py-3 sm:py-[26px] px-6 sm:px-[46px] w-full sm:w-auto text-center flex items-center justify-center ${
+                isSendingEmail ? "opacity-75 cursor-not-allowed" : ""
+              }`}
               onClick={handleSaveEmail}
-              disabled={isDownloading}
+              disabled={isSendingEmail}
             >
-              {isDownloading ? (
+              {isSendingEmail ? (
                 <>
                   <svg
                     className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -1254,7 +1221,6 @@ export default function PreviewYourCustomTile() {
         </Button>
       </div>
 
-      {/* modal form  */}
       {openFormModal && (
         <SubmissionForm
           open={openFormModal}

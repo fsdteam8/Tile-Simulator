@@ -7,7 +7,6 @@ const Tiles = dynamic(() => import('./tile-simulator'), {
 const page = () => {
   return (
     <div>
-
       <Tiles />
     </div>
   )

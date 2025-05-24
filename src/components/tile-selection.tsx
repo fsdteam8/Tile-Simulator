@@ -1,10 +1,10 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+
+import { useState, useEffect, useRef, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-mobile"
 import { Skeleton } from "@/components/ui/skeleton"
-import { TilesData } from "@/data/TilesData"
 import type { Tile } from "./types/tiles"
 
 interface TileSelectionProps {
@@ -35,7 +35,6 @@ export function TileSelection({
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [hasAutoSelected, setHasAutoSelected] = useState(false)
   const firstTileRef = useRef<HTMLButtonElement>(null)
-  console.log(setIsTransitioning)
 
   const isSmallScreen = useMediaQuery("(max-width: 767px)")
   const isMediumScreen = useMediaQuery("(min-width: 768px) and (max-width: 1023px)")
@@ -45,6 +44,7 @@ export function TileSelection({
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
+    setError(null)
   }, [selectedCategory, searchQuery])
 
   // Fetch tiles from API or use mock data
@@ -54,26 +54,26 @@ export function TileSelection({
       setError(null)
 
       try {
-        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=1000&category=${selectedCategory}`
+        let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=1000`
 
-        if (selectedCategory == "all") {
-          url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tiles?paginate_count=1000`
-        } else {
+        if (selectedCategory && selectedCategory !== "all") {
           url += `&category_id=${selectedCategory}`
         }
 
-        if (searchQuery) {
+        if (searchQuery?.trim()) {
           url += `&search=${encodeURIComponent(searchQuery.trim())}`
         }
 
         if (process.env.NEXT_PUBLIC_BACKEND_URL) {
           const response = await fetch(url)
+
           if (!response.ok) {
-            throw new Error(`No tiles available`)
+            throw new Error(`Failed to fetch tiles: ${response.status}`)
           }
+
           const data = await response.json()
 
-          if (data.success) {
+          if (data.success && data.data?.data) {
             const transformedTiles = await Promise.all(
               data.data.data.map(async (apiTile: Tile) => {
                 let svgContent: string[] = []
@@ -103,9 +103,9 @@ export function TileSelection({
 
                 return {
                   id: Number(apiTile.id),
-                  name: apiTile.name,
+                  name: apiTile.name || "Unnamed Tile",
                   description: apiTile.description || "",
-                  collection: apiTile.categories[0]?.name || "Uncategorized",
+                  collection: apiTile.categories?.[0]?.name || "Uncategorized",
                   svg: svgContent,
                   grid_category: apiTile.grid_category || "1x1",
                   status: apiTile.status || "",
@@ -122,48 +122,15 @@ export function TileSelection({
             setTiles(transformedTiles)
             setTotalPages(calculateTotalPages(transformedTiles))
           } else {
-            throw new Error(data.message || "Failed to fetch tiles")
+            throw new Error(data.message || "No tiles found")
           }
         } else {
-          // Fallback to mock data
-          let filteredTiles = [...TilesData]
-
-          if (selectedCategory && selectedCategory !== "all") {
-            filteredTiles = filteredTiles.filter(
-              (tile) => tile.collection.toLowerCase() === selectedCategory.toLowerCase(),
-            )
-          }
-
-          if (searchQuery) {
-            const query = searchQuery.toLowerCase()
-            filteredTiles = filteredTiles.filter(
-              (tile) => tile.name.toLowerCase().includes(query) || tile.collection.toLowerCase().includes(query),
-            )
-          }
-
-          const transformedTiles = filteredTiles.map((tile) => ({
-            id: Number.parseInt(tile.id, 10),
-            name: tile.name,
-            description: "",
-            grid_category: "1x1",
-            image: "",
-            status: "",
-            created_at: "",
-            updated_at: "",
-            categories: [],
-            colors: [],
-            collection: tile.collection,
-            svg: tile.svg,
-            image_svg_text: btoa(tile.svg[0] || "<svg></svg>"),
-          }))
-
-          setTiles(transformedTiles)
-          setTotalPages(calculateTotalPages(transformedTiles))
+          // No backend URL configured
+          throw new Error("Backend URL not configured")
         }
       } catch (err) {
-        console.error("No tiles available :", err)
+        console.error("Error fetching tiles:", err)
         setError(err instanceof Error ? err.message : "Failed to load tiles")
-        // Fallback to empty array to prevent crashes
         setTiles([])
         setTotalPages(1)
       } finally {
@@ -180,7 +147,6 @@ export function TileSelection({
       onTileSelect(tiles[0])
       setHasAutoSelected(true)
 
-      // Optionally focus the first tile button
       if (firstTileRef.current) {
         firstTileRef.current.focus()
       }
@@ -192,11 +158,16 @@ export function TileSelection({
     setHasAutoSelected(false)
   }, [selectedCategory, searchQuery])
 
-  const handleTileSelect = (tile: Tile) => {
-    onTileSelect(tile)
-  }
+  const handleTileSelect = useCallback(
+    (tile: Tile) => {
+      if (tile && selectedTile?.id !== tile.id) {
+        onTileSelect(tile)
+      }
+    },
+    [selectedTile?.id, onTileSelect],
+  )
 
-  const applyColorsToSvg = (svgString: string, colors: Record<string, string>) => {
+  const applyColorsToSvg = useCallback((svgString: string, colors: Record<string, string>) => {
     if (!svgString || typeof svgString !== "string") {
       return createFallbackSvg("error")
     }
@@ -231,7 +202,7 @@ export function TileSelection({
       console.error("Error applying colors to SVG:", error)
       return svgString
     }
-  }
+  }, [])
 
   const decodeSvgFromBase64 = (base64String: string): string => {
     if (!base64String) return createFallbackSvg("empty")
@@ -252,8 +223,8 @@ export function TileSelection({
   const createFallbackSvg = (id: string) => {
     return `<svg id="tile-${id}-error" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#f0f0f0"/>
-      <text x="50%" y="50%" textAnchor="middle" fill="red" fontSize="10">
-        SVG Error
+      <text x="50%" y="50%" textAnchor="middle" fill="#666" fontSize="10">
+        Tile Error
       </text>
     </svg>`
   }
@@ -263,14 +234,18 @@ export function TileSelection({
   }
 
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
+    if (currentPage < totalPages && !isTransitioning) {
+      setIsTransitioning(true)
       setCurrentPage(currentPage + 1)
+      setTimeout(() => setIsTransitioning(false), 300)
     }
   }
 
   const goToPrevPage = () => {
-    if (currentPage > 1) {
+    if (currentPage > 1 && !isTransitioning) {
+      setIsTransitioning(true)
       setCurrentPage(currentPage - 1)
+      setTimeout(() => setIsTransitioning(false), 300)
     }
   }
 
@@ -295,21 +270,35 @@ export function TileSelection({
     ))
   }
 
-  useEffect(() => {
-    // Reset loading state when tiles are updated
-    if (tiles.length > 0 && loading) {
-      setLoading(false)
-    }
-  }, [tiles, loading])
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load tiles</h3>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className=" space-y-2 md:space-y-4">
-      {error && (
-        <div className="container absolute ml-[30px]">
-          <div className=" text-red-500 text-center p-4 bg-red-50 rounded-lg">{error}</div>
-        </div>
-      )}
-
+    <div className="space-y-2 md:space-y-4">
       {loading ? (
         <div className="relative">
           <div className="flex items-center justify-between w-full mb-4 absolute top-[42%] left-0">
@@ -368,6 +357,7 @@ export function TileSelection({
           </div>
 
           <div className="container px-10 md:px-10 lg:px-4 flex-grow overflow-hidden">
+            {/* First Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-1 md:gap-2 lg:gap-3 mb-2 md:mb-4">
               {getRowTiles(0).map((tile, index) => {
                 const tileIdStr = String(tile.id)
@@ -375,17 +365,18 @@ export function TileSelection({
                   <div
                     key={tileIdStr}
                     className={cn(
-                      "flex flex-col items-center border border-[#595959]/40 transition-all",
-                      selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
+                      "flex flex-col items-center border border-[#595959]/40 transition-all duration-200",
+                      selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "hover:shadow-md",
                     )}
                   >
                     <button
                       ref={index === 0 ? firstTileRef : undefined}
                       onClick={() => handleTileSelect(tile)}
                       className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-0  ",
-                        selectedTile?.id === tile.id ? "scale-[0.98]" : "",
+                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                        selectedTile?.id === tile.id ? "scale-[0.98]" : "hover:scale-[1.02]",
                       )}
+                      aria-label={`Select ${tile.name} tile`}
                     >
                       <div
                         className="grid gap-[1px]"
@@ -394,16 +385,16 @@ export function TileSelection({
                           gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
                         }}
                       >
-                        {tile.svg.map((svgString: string, index: number) => {
+                        {tile.svg.map((svgString: string, svgIndex: number) => {
                           let rotation = 0
                           if (tile.grid_category === "2x2") {
-                            const defaultRotation = [0, 90, 270, 180][index] || 0
-                            rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation
+                            const defaultRotation = [0, 90, 270, 180][svgIndex] || 0
+                            rotation = tileRotations[tileIdStr]?.[svgIndex] ?? defaultRotation
                           }
 
                           return (
                             <div
-                              key={`${tileIdStr}-${index}`}
+                              key={`${tileIdStr}-${svgIndex}`}
                               className={cn(
                                 "flex items-center justify-center",
                                 tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
@@ -434,6 +425,7 @@ export function TileSelection({
               })}
             </div>
 
+            {/* Second Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-1 md:gap-2 lg:gap-3">
               {getRowTiles(1).map((tile) => {
                 const tileIdStr = `second-${tile.id}`
@@ -441,16 +433,17 @@ export function TileSelection({
                   <div
                     key={tileIdStr}
                     className={cn(
-                      "flex flex-col items-center border border-[#595959]/40",
-                      selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "",
+                      "flex flex-col items-center border border-[#595959]/40 transition-all duration-200",
+                      selectedTile?.id === tile.id ? "scale-[0.98] ring-2 ring-[#595959]" : "hover:shadow-md",
                     )}
                   >
                     <button
                       onClick={() => handleTileSelect(tile)}
                       className={cn(
-                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-0",
-                        selectedTile?.id === tile.id ? "scale-[0.98] " : "",
+                        "relative w-full aspect-square overflow-hidden transition-all bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                        selectedTile?.id === tile.id ? "scale-[0.98]" : "hover:scale-[1.02]",
                       )}
+                      aria-label={`Select ${tile.name} tile`}
                     >
                       <div
                         className="grid gap-[1px]"
@@ -459,16 +452,16 @@ export function TileSelection({
                           gridTemplateRows: `repeat(${tile.grid_category === "2x2" ? 2 : 1}, 1fr)`,
                         }}
                       >
-                        {tile.svg.map((svgString: string, index: number) => {
+                        {tile.svg.map((svgString: string, svgIndex: number) => {
                           let rotation = 0
                           if (tile.grid_category === "2x2") {
-                            const defaultRotation = [0, 90, 270, 180][index] || 0
-                            rotation = tileRotations[tileIdStr]?.[index] ?? defaultRotation
+                            const defaultRotation = [0, 90, 270, 180][svgIndex] || 0
+                            rotation = tileRotations[tileIdStr]?.[svgIndex] ?? defaultRotation
                           }
 
                           return (
                             <div
-                              key={`${tileIdStr}-${index}`}
+                              key={`${tileIdStr}-${svgIndex}`}
                               className={cn(
                                 "flex items-center justify-center",
                                 tile.grid_category === "2x2" ? "w-full h-full" : "w-full h-[110px]",
@@ -499,6 +492,15 @@ export function TileSelection({
               })}
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {totalPages > 1 && (
+            <div className="text-center mt-4">
+              <p className="text-sm text-gray-500">
+                Page {currentPage} of {totalPages} ({tiles.length} tiles total)
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

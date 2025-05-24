@@ -30,7 +30,9 @@ export default function RootLayout({
             {children}
             <ToastContainer position="top-right" autoClose={3000} />
             <Toaster position="top-right" />
+
             <Footer/>
+
           </AppProvider>
         </AuthProvider>
       </body>

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -11,131 +11,154 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 const ViewPanel = dynamic(() => import("@/components/view-panel"), {
   ssr: false,
-});
+})
 const ColorEditor = dynamic(() => import("@/components/svg-editor/color-editor"), {
   ssr: false,
-});
+})
 
 export default function Tiles() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
-  const [currentSvg, setCurrentSvg] = useState<SvgData[] | null>(null);
-  const [showBorders, setShowBorders] = useState<boolean>(false);
-  const [pathColors, setPathColors] = useState<Record<string, string>>({});
-  const [tileRotations, setTileRotations] = useState<Record<string, number[]>>({});
-  const [groutColor, setGroutColor] = useState<"orange" | "green" | "turquoise" | "blue">("orange");
-  const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true)
+  const [progress, setProgress] = useState(0)
+  const [selectedTile, setSelectedTile] = useState<Tile | null>(null)
+  const [currentSvg, setCurrentSvg] = useState<SvgData[] | null>(null)
+  const [showBorders, setShowBorders] = useState<boolean>(false)
+  const [pathColors, setPathColors] = useState<Record<string, string>>({})
+  const [tileRotations, setTileRotations] = useState<Record<string, number[]>>({})
+  const [groutColor, setGroutColor] = useState<"orange" | "green" | "turquoise" | "blue">("orange")
+  const [groutThickness, setGroutThickness] = useState<"none" | "thin" | "thick">("thin")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [svgLoading, setSvgLoading] = useState(false)
+  const [svgProcessingComplete, setSvgProcessingComplete] = useState(false)
 
   // Derived state based on selectedTile
-  const currentTileRotations = selectedTile ? tileRotations[selectedTile.id] : undefined;
-  const tileId = selectedTile?.id.toString() ?? "";
+  const currentTileRotations = selectedTile ? tileRotations[selectedTile.id] : undefined
+  const tileId = selectedTile?.id.toString() ?? ""
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(timer);
-          setIsLoading(false);
-          return 100;
+          clearInterval(timer)
+          setIsLoading(false)
+          return 100
         }
-        return prev + (prev < 80 ? 10 : 2); // Slow down near completion
-      });
-    }, 150);
-    
-    return () => clearInterval(timer);
-  }, []);
+        return prev + (prev < 80 ? 10 : 2) // Slow down near completion
+      })
+    }, 150)
+
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (selectedTile) {
-      setIsLoading(true);
-      if (selectedTile.svg.length > 0) {
-        const parsedSvgs = selectedTile.svg.map((svgString, index) =>
-          parseSvgString(svgString, `${selectedTile.id}-${index}`)
-        );
-        setCurrentSvg(parsedSvgs);
-        
-        if (!tileRotations[selectedTile.id]) {
-          const initialRotations = selectedTile.svg.map((_, index) => {
-            switch (index) {
-              case 0: return 0;
-              case 1: return 90;
-              case 2: return 270;
-              case 3: return 180;
-              default: return 0;
+      setSvgProcessingComplete(false)
+
+      const processSvg = async () => {
+        try {
+          if (selectedTile.svg.length > 0) {
+            // Add a small delay to ensure loading state is visible
+            await new Promise((resolve) => setTimeout(resolve, 100))
+
+            const parsedSvgs = selectedTile.svg.map((svgString, index) =>
+              parseSvgString(svgString, `${selectedTile.id}-${index}`),
+            )
+            setCurrentSvg(parsedSvgs)
+
+            if (!tileRotations[selectedTile.id]) {
+              const initialRotations = selectedTile.svg.map((_, index) => {
+                switch (index) {
+                  case 0:
+                    return 0
+                  case 1:
+                    return 90
+                  case 2:
+                    return 270
+                  case 3:
+                    return 180
+                  default:
+                    return 0
+                }
+              })
+              setTileRotations((prev) => ({
+                ...prev,
+                [selectedTile.id]: initialRotations,
+              }))
             }
-          });
-          setTileRotations(prev => ({
-            ...prev,
-            [selectedTile.id]: initialRotations,
-          }));
+
+            // Add another delay to simulate SVG processing time
+            await new Promise((resolve) => setTimeout(resolve, 300))
+          } else {
+            setCurrentSvg(null)
+          }
+        } catch (error) {
+          console.error("Error processing SVG:", error)
+          setCurrentSvg(null)
+        } finally {
+          setSvgLoading(false)
+          setSvgProcessingComplete(true)
         }
-      } else {
-        setCurrentSvg(null);
       }
-      setIsLoading(false);
+
+      processSvg()
     } else {
-      setCurrentSvg(null);
+      setCurrentSvg(null)
+      setSvgLoading(false)
+      setSvgProcessingComplete(false)
     }
-  }, [selectedTile, tileRotations]);
+  }, [selectedTile, tileRotations])
 
   const setGroutColorWrapper = (color: string) => {
     if (["orange", "green", "turquoise", "blue"].includes(color)) {
-      setGroutColor(color as "orange" | "green" | "turquoise" | "blue");
+      setGroutColor(color as "orange" | "green" | "turquoise" | "blue")
     }
-  };
+  }
 
   const setGroutThicknessWrapper = (thickness: string) => {
     if (["none", "thin", "thick"].includes(thickness)) {
-      setGroutThickness(thickness as "none" | "thin" | "thick");
+      setGroutThickness(thickness as "none" | "thin" | "thick")
     }
-  };
+  }
 
   const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-  };
+    setSelectedCategory(categoryId)
+  }
 
   const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-  };
+    setSearchQuery(query)
+  }
 
   const handleAddBorder = () => {
-    setShowBorders(!showBorders);
-  };
+    setShowBorders(!showBorders)
+  }
 
   const handleTileSelect = (tile: Tile) => {
-    if (selectedTile?.id === tile.id) return;
-    setSelectedTile(tile);
-  };
+    if (selectedTile?.id === tile.id) return
 
-  const handleColorSelect = (
-    pathId: string,
-    color: { id: string; color: string; name: string }
-  ) => {
-    setPathColors(prev => ({
+    if (tile) {
+      setSvgLoading(true)
+      setSvgProcessingComplete(false)
+      setSelectedTile(tile)
+    }
+  }
+
+  const handleColorSelect = (pathId: string, color: { id: string; color: string; name: string }) => {
+    setPathColors((prev) => ({
       ...prev,
       [pathId]: color.color,
-    }));
-  };
+    }))
+  }
 
-  const handleRotation = (
-    tileId: string,
-    index: number,
-    newRotation: number
-  ) => {
-    setTileRotations(prev => {
-      const currentRotations = [
-        ...(prev[tileId] || Array(selectedTile?.svg.length || 0).fill(0)),
-      ];
-      currentRotations[index] = newRotation % 360;
+  const handleRotation = (tileId: string, index: number, newRotation: number) => {
+    setTileRotations((prev) => {
+      const currentRotations = [...(prev[tileId] || Array(selectedTile?.svg.length || 0).fill(0))]
+      currentRotations[index] = newRotation % 360
       return {
         ...prev,
         [tileId]: currentRotations,
-      };
-    });
-  };
+      }
+    })
+  }
 
   return (
     <div className="relative">
@@ -149,7 +172,7 @@ export default function Tiles() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
-          
+
           {/* Loading content */}
           <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6">
             <motion.div
@@ -159,7 +182,7 @@ export default function Tiles() {
               className="flex flex-col items-center"
             >
               <div className="relative w-32 h-32">
-                <Image 
+                <Image
                   src="/assets/logo.png" // Replace with your logo path
                   alt="Loading"
                   fill
@@ -167,10 +190,8 @@ export default function Tiles() {
                   priority
                 />
               </div>
-              
-              <h2 className="mt-4 text-xl font-semibold text-gray-800">
-                Loading Your Tiles
-              </h2>
+
+              <h2 className="mt-4 text-xl font-semibold text-gray-800">Loading Your Tiles</h2>
             </motion.div>
 
             <motion.div
@@ -187,9 +208,7 @@ export default function Tiles() {
                   transition={{ duration: 0.3 }}
                 />
               </div>
-              <p className="text-center text-gray-600 mt-2 text-sm">
-                {progress}% loaded
-              </p>
+              <p className="text-center text-gray-600 mt-2 text-sm">{progress}% loaded</p>
             </motion.div>
 
             <motion.p
@@ -230,7 +249,7 @@ export default function Tiles() {
             <>
               <div className="container py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
                 <ColorEditor
-                  svgArray={currentSvg}
+                  svgArray={currentSvg || []}
                   showBorders={showBorders}
                   setShowBorders={setShowBorders}
                   onColorSelect={handleColorSelect}
@@ -241,34 +260,34 @@ export default function Tiles() {
                   setGroutThickness={setGroutThicknessWrapper}
                   groutColor={groutColor}
                   setGroutColor={setGroutColorWrapper}
+                  svgLoading={svgLoading}
+                  svgProcessingComplete={svgProcessingComplete}
                 />
-              </div>
 
-              <div className="container">
-                <ViewPanel
-                  currentSvg={currentSvg}
-                  pathColors={pathColors}
-                  showBorders={showBorders}
-                  rotations={currentTileRotations}
-                  selectedTile={selectedTile}
-                  groutThickness={groutThickness}
-                  setGroutThickness={setGroutThicknessWrapper}
-                  groutColor={groutColor}
-                  setGroutColor={setGroutColorWrapper}
-                />
-              </div>
+                <div className="container">
+                  <ViewPanel
+                    currentSvg={currentSvg}
+                    pathColors={pathColors}
+                    showBorders={showBorders}
+                    rotations={currentTileRotations}
+                    selectedTile={selectedTile}
+                    groutThickness={groutThickness}
+                    setGroutThickness={setGroutThicknessWrapper}
+                    groutColor={groutColor}
+                    setGroutColor={setGroutColorWrapper}
+                  />
+                </div>
+
             </>
           )}
 
           {!selectedTile && (
             <div className="flex items-center justify-center h-64">
-              <p className="text-lg text-gray-500">
-                Please select a tile to begin editing
-              </p>
+              <p className="text-lg text-gray-500">Please select a tile to begin editing</p>
             </div>
           )}
         </>
       )}
     </div>
-  );
+  )
 }

@@ -102,7 +102,7 @@ export default function ViewPanel({
 
 
   // Calculate grid dimensions based on selected size
-  const gridDimensions = 75; 
+  const gridDimensions = 75;
 
 
 
@@ -661,11 +661,38 @@ export default function ViewPanel({
 
       <div className="pt-[32px] md:pt-[38px] lg:pt-[44px] xl:pt-[50px] 2xl:pt-[56px] pb-[40px] mb:pb-[60px] lg:pb-[80px] xl:pb-[100px] 2xl:pb-[120px] flex items-center justify-center">
         <Button
-          className="w-[288px] h-[51px] text-base font-medium leading-[120%] text-white"
+          className={`w-[288px] h-[51px] text-base font-medium leading-[120%] text-white flex items-center justify-center ${isLoading ? "opacity-75 cursor-not-allowed" : ""
+            }`}
           onClick={handleSaveAndShare}
           disabled={isLoading || !currentSvg || currentSvg.length === 0}
         >
-          {isLoading ? "Saving..." : "Save & Share"}
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Saving...
+            </>
+          ) : (
+            "Save & Share"
+          )}
         </Button>
       </div>
 

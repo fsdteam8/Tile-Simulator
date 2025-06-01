@@ -247,7 +247,7 @@ export default function Tiles() {
 
           {selectedTile && currentSvg && (
             <>
-              <div className="container py-[30px] md:py-[40px] lg:py-[50px] xl:py-[40px] 2xl:py-[100px]">
+              <div className="container pt-[30px] md:pt-[40px] lg:pt-[50px] xl:pt-[40px] 2xl:pt-[100px]">
                 <ColorEditor
                   svgArray={currentSvg || []}
                   showBorders={showBorders}

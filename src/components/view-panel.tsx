@@ -659,7 +659,7 @@ export default function ViewPanel({
         </TabsContent>
       </Tabs>
 
-      <div className="pt-[32px] md:pt-[38px] lg:pt-[44px] xl:pt-[50px] 2xl:pt-[56px] pb-[40px] mb:pb-[60px] lg:pb-[80px] xl:pb-[100px] 2xl:pb-[120px] flex items-center justify-center">
+      <div className="pt-[32px] md:pt-[38px] lg:pt-[44px] xl:pt-[50px] 2xl:pt-[56px]  flex items-center justify-center">
         <Button
           className={`w-[288px] h-[51px] text-base font-medium leading-[120%] text-white flex items-center justify-center ${isLoading ? "opacity-75 cursor-not-allowed" : ""
             }`}
